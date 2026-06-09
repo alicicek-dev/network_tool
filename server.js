@@ -20,10 +20,21 @@ const io = new Server(server, {
 app.get('/api/interfaces', (req, res) => {
   const nets = os.networkInterfaces();
   const results = [];
+  
+  let gateway = "Unknown";
+  try {
+    if (process.platform === 'win32') {
+      const out = require('child_process').execSync('powershell.exe -Command "(Get-NetRoute -DestinationPrefix 0.0.0.0/0 -ErrorAction SilentlyContinue | Sort-Object RouteMetric | Select-Object -First 1).NextHop"', {encoding: 'utf8'});
+      gateway = out.trim() || "Unknown";
+    }
+  } catch (e) {
+    // Ignore error
+  }
+
   for (const name of Object.keys(nets)) {
     for (const net of nets[name]) {
       if (net.family === 'IPv4' && !net.internal) {
-        results.push({ name, ip: net.address, mac: net.mac });
+        results.push({ name, ip: net.address, mac: net.mac, gateway });
       }
     }
   }

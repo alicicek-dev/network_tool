@@ -12,7 +12,7 @@ function App() {
   const [pingMode, setPingMode] = useState('ping');
 
   // Interfaces State
-  const [interfaces, setInterfaces] = useState<{name: string, ip: string, mac: string}[]>([]);
+  const [interfaces, setInterfaces] = useState<{name: string, ip: string, mac: string, gateway?: string}[]>([]);
   const [selectedIfIdx, setSelectedIfIdx] = useState(0);
 
   // Terminal State
@@ -197,7 +197,7 @@ function App() {
                 </div>
                 <div className="stat-card glass-panel">
                   <div className="stat-label">Gateway</div>
-                  <div className="stat-value">Determined by OS</div>
+                  <div className="stat-value">{interfaces[selectedIfIdx]?.gateway || 'Unknown'}</div>
                 </div>
                 <div className="stat-card glass-panel">
                   <div className="stat-label">Internet Status</div>
