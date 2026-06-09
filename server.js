@@ -11,6 +11,7 @@ const { spawn } = require('child_process');
 const net = require('net');
 const dns = require('dns');
 const whois = require('whois-json');
+const speedTest = require('speedtest-net');
 
 const app = express();
 app.use(cors());
@@ -241,29 +242,27 @@ io.on('connection', (socket) => {
   // --- SPEED TEST ---
   socket.on('start-speedtest', async () => {
     try {
-      socket.emit('speedtest-update', { phase: 'ping', progress: 0 });
-      const startPing = Date.now();
-      await fetch('https://speed.cloudflare.com/__down?bytes=0');
-      const pingTime = Date.now() - startPing;
-      socket.emit('speedtest-update', { phase: 'ping', result: pingTime, progress: 100 });
-
-      socket.emit('speedtest-update', { phase: 'download', progress: 0 });
-      const startDl = Date.now();
-      const dlRes = await fetch('https://speed.cloudflare.com/__down?bytes=25000000'); // 25MB
-      await dlRes.arrayBuffer();
-      const dlTime = (Date.now() - startDl) / 1000;
-      const dlSpeedMbps = ((25 * 8) / dlTime).toFixed(2);
-      socket.emit('speedtest-update', { phase: 'download', result: dlSpeedMbps, progress: 100 });
-
-      socket.emit('speedtest-update', { phase: 'upload', progress: 0 });
-      const upData = new Uint8Array(10000000); // 10MB
-      const startUp = Date.now();
-      await fetch('https://speed.cloudflare.com/__up', { method: 'POST', body: upData });
-      const upTime = (Date.now() - startUp) / 1000;
-      const upSpeedMbps = ((10 * 8) / upTime).toFixed(2);
-      socket.emit('speedtest-update', { phase: 'upload', result: upSpeedMbps, progress: 100 });
+      const result = await speedTest({
+        acceptLicense: true,
+        acceptGdpr: true,
+        progress: (event) => {
+          if (event.type === 'ping' && event.ping && event.ping.latency) {
+            socket.emit('speedtest-update', { phase: 'ping', progress: event.ping.progress * 100, result: event.ping.latency.toFixed(1) });
+          } else if (event.type === 'download' && event.download && event.download.bandwidth) {
+            const mbps = (event.download.bandwidth * 8 / 1000000).toFixed(2);
+            socket.emit('speedtest-update', { phase: 'download', progress: event.download.progress * 100, result: mbps });
+          } else if (event.type === 'upload' && event.upload && event.upload.bandwidth) {
+            const mbps = (event.upload.bandwidth * 8 / 1000000).toFixed(2);
+            socket.emit('speedtest-update', { phase: 'upload', progress: event.upload.progress * 100, result: mbps });
+          }
+        }
+      });
       
-      socket.emit('speedtest-complete', { ping: pingTime, download: dlSpeedMbps, upload: upSpeedMbps });
+      socket.emit('speedtest-complete', { 
+        ping: result.ping.latency.toFixed(1), 
+        download: (result.download.bandwidth * 8 / 1000000).toFixed(2), 
+        upload: (result.upload.bandwidth * 8 / 1000000).toFixed(2) 
+      });
     } catch (err) {
       socket.emit('speedtest-error', { error: err.message });
     }
