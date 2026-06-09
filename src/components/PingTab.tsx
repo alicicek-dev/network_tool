@@ -83,7 +83,7 @@ export default function PingTab({ socket }: Props) {
     if (pingTarget.trim()) {
       setStats([]);
       setSummary({ sent: 0, received: 0, lost: 0, min: 0, max: 0, avg: 0, jitter: 0 });
-      setPingMode('trace');
+      setPingMode('traceroute');
       setActivePing(pingTarget.trim());
     }
   };
@@ -126,13 +126,13 @@ export default function PingTab({ socket }: Props) {
           onKeyDown={(e) => e.key === 'Enter' && handleStartPing()}
           disabled={!!activePing}
         />
-        {!activePing ? (
-          <>
+        {activePing ? (
+          <button onClick={handleStopPing} style={{background: 'var(--danger)'}}>Stop</button>
+        ) : (
+          <div style={{display: 'flex', gap: '10px'}}>
             <button onClick={handleStartPing}>Ping</button>
             <button onClick={handleStartTrace} style={{background: 'var(--panel-border)', color: 'var(--text-primary)'}}>Traceroute</button>
-          </>
-        ) : (
-          <button onClick={handleStopPing} style={{background: 'var(--danger)'}}>Stop</button>
+          </div>
         )}
       </div>
 

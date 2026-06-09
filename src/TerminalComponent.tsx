@@ -47,6 +47,8 @@ export default function TerminalComponent({ action, target, socket: externalSock
       
       if (action === 'ping' && target) {
         socket.emit('start-ping', target);
+      } else if (action === 'traceroute' && target) {
+        socket.emit('start-trace', target);
       } else if (action === 'ssh' && target) {
         // target is a JSON string with SSH details
         try {
@@ -91,6 +93,8 @@ export default function TerminalComponent({ action, target, socket: externalSock
       window.removeEventListener('resize', handleResize);
       if (action === 'ping') {
         socket.emit('stop-ping');
+      } else if (action === 'traceroute') {
+        socket.emit('stop-trace');
       } else if (action === 'ssh') {
         socket.emit('disconnect-ssh');
       } else if (action === 'serial') {
