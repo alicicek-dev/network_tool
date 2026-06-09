@@ -8,6 +8,9 @@ const { Client } = require('ssh2');
 const wol = require('wake_on_lan');
 const os = require('os');
 const { spawn } = require('child_process');
+const net = require('net');
+const dns = require('dns');
+const whois = require('whois-json');
 
 const app = express();
 app.use(cors());
@@ -65,6 +68,43 @@ app.get('/api/mac/:mac', async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ error: 'Sorgu hatası' });
+  }
+});
+
+app.get('/api/dns/:domain', (req, res) => {
+  dns.resolveAny(req.params.domain, (err, records) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(records);
+  });
+});
+
+app.get('/api/whois/:domain', async (req, res) => {
+  try {
+    const results = await whois(req.params.domain);
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/arp', (req, res) => {
+  try {
+    const isWin = process.platform === 'win32';
+    const cmd = isWin ? 'arp -a' : 'arp -a';
+    require('child_process').exec(cmd, (err, stdout) => {
+      if (err) return res.status(500).json({ error: err.message });
+      const lines = stdout.split('\n');
+      const results = [];
+      lines.forEach(line => {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length >= 3 && parts[0].match(/^\d+\.\d+\.\d+\.\d+$/)) {
+          results.push({ ip: parts[0], mac: parts[1], type: parts[2] });
+        }
+      });
+      res.json(results);
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
@@ -169,6 +209,58 @@ io.on('connection', (socket) => {
           socket.emit('sweep-result', { ip: res.host, time: res.time });
         }
       }).catch(() => {});
+    }
+  });
+
+  // --- PORT SCANNER ---
+  socket.on('start-port-scan', ({ host, ports }) => {
+    ports.forEach(port => {
+      const s = new net.Socket();
+      s.setTimeout(2000);
+      s.on('connect', () => {
+        socket.emit('port-scan-result', { port, status: 'open' });
+        s.destroy();
+      });
+      s.on('timeout', () => {
+        socket.emit('port-scan-result', { port, status: 'filtered' });
+        s.destroy();
+      });
+      s.on('error', (e) => {
+        socket.emit('port-scan-result', { port, status: 'closed' });
+        s.destroy();
+      });
+      s.connect(port, host);
+    });
+  });
+
+  // --- SPEED TEST ---
+  socket.on('start-speedtest', async () => {
+    try {
+      socket.emit('speedtest-update', { phase: 'ping', progress: 0 });
+      const startPing = Date.now();
+      await fetch('https://speed.cloudflare.com/__down?bytes=0');
+      const pingTime = Date.now() - startPing;
+      socket.emit('speedtest-update', { phase: 'ping', result: pingTime, progress: 100 });
+
+      socket.emit('speedtest-update', { phase: 'download', progress: 0 });
+      const startDl = Date.now();
+      const dlRes = await fetch('https://speed.cloudflare.com/__down?bytes=25000000'); // 25MB
+      await dlRes.arrayBuffer();
+      const dlTime = (Date.now() - startDl) / 1000;
+      const dlSpeedMbps = ((25 * 8) / dlTime).toFixed(2);
+      socket.emit('speedtest-update', { phase: 'download', result: dlSpeedMbps, progress: 100 });
+
+      socket.emit('speedtest-update', { phase: 'upload', progress: 0 });
+      const upData = new Uint8Array(10000000); // 10MB
+      const startUp = Date.now();
+      await fetch('https://speed.cloudflare.com/__up', { method: 'POST', body: upData });
+      const upTime = (Date.now() - startUp) / 1000;
+      const upSpeedMbps = ((10 * 8) / upTime).toFixed(2);
+      socket.emit('speedtest-update', { phase: 'upload', result: upSpeedMbps, progress: 100 });
+      
+      socket.emit('speedtest-complete', { ping: pingTime, download: dlSpeedMbps, upload: upSpeedMbps });
+    } catch (err) {
+      socket.emit('speedtest-error', { error: err.message });
     }
   });
 

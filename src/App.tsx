@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import './index.css';
 import TerminalComponent from './TerminalComponent';
+import DiscoveryTab from './components/DiscoveryTab';
+import UtilitiesTab from './components/UtilitiesTab';
+import SpeedTestTab from './components/SpeedTestTab';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3001');
@@ -27,28 +30,6 @@ function App() {
   const [serialPorts, setSerialPorts] = useState<{path: string}[]>([]);
 
   const [activeTerminalTarget, setActiveTerminalTarget] = useState('');
-
-  const [wolMac, setWolMac] = useState('');
-  const [wolStatus, setWolStatus] = useState('');
-
-  const [vendorMac, setVendorMac] = useState('');
-  const [vendorResult, setVendorResult] = useState('');
-
-  const [sweepSubnet, setSweepSubnet] = useState('192.168.1');
-  const [sweepResults, setSweepResults] = useState<{ip: string, time: number}[]>([]);
-  const [isSweeping, setIsSweeping] = useState(false);
-
-  useEffect(() => {
-    socket.on('sweep-result', (data) => {
-      setSweepResults(prev => {
-        if (!prev.find(p => p.ip === data.ip)) return [...prev, data];
-        return prev;
-      });
-    });
-    return () => {
-      socket.off('sweep-result');
-    }
-  }, []);
 
   useEffect(() => {
     fetch('http://localhost:3001/api/interfaces')
@@ -99,47 +80,6 @@ function App() {
     setActiveTerminalTarget('');
   };
 
-  const handleWakeOnLan = async () => {
-    if (!wolMac) return;
-    try {
-      const res = await fetch('http://localhost:3001/api/wol', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mac: wolMac })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setWolStatus(`✅ ${data.message}`);
-      } else {
-        setWolStatus(`❌ Hata: ${data.error}`);
-      }
-    } catch (e) {
-      setWolStatus(`❌ Bağlantı hatası`);
-    }
-  };
-
-  const handleVendorLookup = async () => {
-    if (!vendorMac) return;
-    try {
-      const res = await fetch(`http://localhost:3001/api/mac/${vendorMac}`);
-      const data = await res.json();
-      if (res.ok) {
-        setVendorResult(`🏢 ${data.vendor}`);
-      } else {
-        setVendorResult(`❌ ${data.error}`);
-      }
-    } catch (e) {
-      setVendorResult(`❌ Bağlantı hatası`);
-    }
-  };
-
-  const handleStartSweep = () => {
-    setSweepResults([]);
-    setIsSweeping(true);
-    socket.emit('start-sweep', sweepSubnet);
-    setTimeout(() => setIsSweeping(false), 5000);
-  };
-
   return (
     <>
       <div className="titlebar">
@@ -166,10 +106,22 @@ function App() {
             💻 Web Terminal
           </div>
           <div 
-            className={`nav-item ${activeTab === 'tools' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tools')}
+            className={`nav-item ${activeTab === 'discovery' ? 'active' : ''}`}
+            onClick={() => setActiveTab('discovery')}
           >
-            🛠️ Net Tools
+            🔍 Discovery
+          </div>
+          <div 
+            className={`nav-item ${activeTab === 'utilities' ? 'active' : ''}`}
+            onClick={() => setActiveTab('utilities')}
+          >
+            🛠️ Utilities
+          </div>
+          <div 
+            className={`nav-item ${activeTab === 'speedtest' ? 'active' : ''}`}
+            onClick={() => setActiveTab('speedtest')}
+          >
+            🚀 Speed Test
           </div>
         </aside>
 
@@ -209,8 +161,8 @@ function App() {
                 <h2>Quick Actions</h2>
                 <div style={{display: 'flex', gap: '15px', marginTop: '15px'}}>
                   <button onClick={() => setActiveTab('terminal')}>Open SSH</button>
-                  <button onClick={() => setActiveTab('ping')}>Start Ping Sweep</button>
-                  <button onClick={() => setActiveTab('tools')}>Wake on LAN</button>
+                  <button onClick={() => setActiveTab('discovery')}>Start Ping Sweep</button>
+                  <button onClick={() => setActiveTab('utilities')}>Wake on LAN</button>
                 </div>
               </div>
             </div>
@@ -326,68 +278,9 @@ function App() {
             </div>
           )}
 
-          {activeTab === 'tools' && (
-            <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-              <h1>Network Tools</h1>
-              <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
-                
-                <div className="glass-panel stat-card">
-                  <h3>Wake on LAN (WoL)</h3>
-                  <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '10px', marginBottom: '15px'}}>Uyandırmak istediğiniz cihazın MAC adresini girin.</p>
-                  <input 
-                    type="text" 
-                    placeholder="Örn: 00:11:22:33:44:55" 
-                    value={wolMac}
-                    onChange={(e) => setWolMac(e.target.value)}
-                    style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)', marginBottom: '10px', boxSizing: 'border-box'}}
-                  />
-                  <button onClick={handleWakeOnLan} style={{width: '100%'}}>Uyandır</button>
-                  {wolStatus && <div style={{marginTop: '10px', fontSize: '0.9rem', color: wolStatus.includes('✅') ? 'var(--success)' : 'var(--danger)'}}>{wolStatus}</div>}
-                </div>
-
-                <div className="glass-panel stat-card">
-                  <h3>MAC Vendor Lookup</h3>
-                  <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '10px', marginBottom: '15px'}}>Cihazın MAC adresinden üretici firmayı bulun.</p>
-                  <input 
-                    type="text" 
-                    placeholder="Örn: B8:27:EB:..." 
-                    value={vendorMac}
-                    onChange={(e) => setVendorMac(e.target.value)}
-                    style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)', marginBottom: '10px', boxSizing: 'border-box'}}
-                  />
-                  <button onClick={handleVendorLookup} style={{width: '100%', background: 'var(--panel-border)', color: 'white'}}>Sorgula</button>
-                  {vendorResult && <div style={{marginTop: '10px', fontSize: '0.9rem', color: vendorResult.includes('❌') ? 'var(--danger)' : 'var(--success)'}}>{vendorResult}</div>}
-                </div>
-                
-                <div className="glass-panel stat-card" style={{display: 'flex', flexDirection: 'column'}}>
-                  <h3>Local IP Scanner (Ping Sweep)</h3>
-                  <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '10px', marginBottom: '15px'}}>Ağınızdaki aktif cihazları tespit edin (/24).</p>
-                  <div style={{display: 'flex', gap: '5px', marginBottom: '10px'}}>
-                    <input 
-                      type="text" 
-                      placeholder="Subnet (Örn: 192.168.1)" 
-                      value={sweepSubnet}
-                      onChange={(e) => setSweepSubnet(e.target.value)}
-                      style={{flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)', boxSizing: 'border-box'}}
-                    />
-                    <button onClick={handleStartSweep} disabled={isSweeping}>{isSweeping ? '...' : 'Tara'}</button>
-                  </div>
-                  <div style={{flex: 1, background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '10px', overflowY: 'auto', maxHeight: '100px'}}>
-                    {sweepResults.length === 0 ? (
-                      <span style={{color: 'var(--text-secondary)', fontSize: '0.8rem'}}>Sonuçlar burada listelenecek...</span>
-                    ) : (
-                      sweepResults.map((res, i) => (
-                        <div key={i} style={{fontSize: '0.85rem', padding: '2px 0', display: 'flex', justifyContent: 'space-between'}}>
-                          <span style={{color: 'var(--primary)'}}>{res.ip}</span>
-                          <span style={{color: 'var(--success)'}}>{res.time}ms</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'discovery' && <DiscoveryTab socket={socket} />}
+          {activeTab === 'utilities' && <UtilitiesTab />}
+          {activeTab === 'speedtest' && <SpeedTestTab socket={socket} />}
         </main>
       </div>
     </>
