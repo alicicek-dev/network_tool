@@ -4,15 +4,13 @@ import TerminalComponent from './TerminalComponent';
 import DiscoveryTab from './components/DiscoveryTab';
 import UtilitiesTab from './components/UtilitiesTab';
 import SpeedTestTab from './components/SpeedTestTab';
+import PingTab from './components/PingTab';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3001');
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [pingTarget, setPingTarget] = useState('');
-  const [activePing, setActivePing] = useState('');
-  const [pingMode, setPingMode] = useState('ping');
 
   // Interfaces State
   const [interfaces, setInterfaces] = useState<{name: string, ip: string, mac: string, gateway?: string}[]>([]);
@@ -49,24 +47,6 @@ function App() {
         .catch(err => console.error(err));
     }
   }, [activeTab]);
-
-  const handleStartPing = () => {
-    if (pingTarget.trim()) {
-      setPingMode('ping');
-      setActivePing(pingTarget.trim());
-    }
-  };
-
-  const handleStartTrace = () => {
-    if (pingTarget.trim()) {
-      setPingMode('trace');
-      setActivePing(pingTarget.trim());
-    }
-  };
-
-  const handleStopPing = () => {
-    setActivePing('');
-  };
 
   const handleConnectTerminal = () => {
     if (terminalMode === 'ssh') {
@@ -168,38 +148,7 @@ function App() {
             </div>
           )}
 
-          {activeTab === 'ping' && (
-            <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-              <h1>Ping & Traceroute</h1>
-              <div className="glass-panel" style={{padding: '20px', display: 'flex', gap: '10px'}}>
-                <input 
-                  type="text" 
-                  placeholder="Enter IP or Domain (e.g. 8.8.8.8)" 
-                  style={{flex: 1}} 
-                  value={pingTarget}
-                  onChange={(e) => setPingTarget(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleStartPing()}
-                />
-                {!activePing ? (
-                  <>
-                    <button onClick={handleStartPing}>Ping</button>
-                    <button onClick={handleStartTrace} style={{background: 'var(--panel-border)', color: 'var(--text-primary)'}}>Traceroute</button>
-                  </>
-                ) : (
-                  <button onClick={handleStopPing} style={{background: 'var(--danger)'}}>Stop</button>
-                )}
-              </div>
-              <div className="terminal-container">
-                {activePing ? (
-                  <TerminalComponent action={pingMode} target={activePing} />
-                ) : (
-                  <div style={{fontFamily: 'monospace', color: 'gray', padding: '15px'}}>
-                    Ready. Enter a target and click Ping...
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {activeTab === 'ping' && <PingTab socket={socket} />}
 
           {activeTab === 'terminal' && (
             <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>

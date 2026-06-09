@@ -125,16 +125,21 @@ io.on('connection', (socket) => {
   socket.on('start-ping', (target) => {
     if (pingInterval) clearInterval(pingInterval);
     socket.emit('terminal-data', `\r\nStarting ping to ${target}...\r\n`);
+    let seq = 0;
     pingInterval = setInterval(async () => {
+      seq++;
       try {
         let res = await ping.promise.probe(target, { timeout: 2 });
         if (res.alive) {
           socket.emit('terminal-data', `Reply from ${res.numeric_host}: time=${res.time}ms TTL=${res.ttl || 'N/A'}\r\n`);
+          socket.emit('ping-stat', { seq, alive: true, time: res.time, host: res.numeric_host });
         } else {
           socket.emit('terminal-data', `Request timed out.\r\n`);
+          socket.emit('ping-stat', { seq, alive: false, time: null });
         }
       } catch (err) {
         socket.emit('terminal-data', `Ping error: ${err.message}\r\n`);
+        socket.emit('ping-stat', { seq, alive: false, time: null });
       }
     }, 1000);
   });
