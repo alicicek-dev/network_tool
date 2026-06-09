@@ -7,9 +7,10 @@ import { io, Socket } from 'socket.io-client';
 interface TerminalProps {
   action: string;
   target: string;
+  socket?: Socket;
 }
 
-export default function TerminalComponent({ action, target }: TerminalProps) {
+export default function TerminalComponent({ action, target, socket: externalSocket }: TerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -37,10 +38,11 @@ export default function TerminalComponent({ action, target }: TerminalProps) {
     xtermRef.current = term;
 
     // Connect to backend
-    const socket = io('http://localhost:3001');
+    const socket = externalSocket || io('http://localhost:3001');
+    const isLocalSocket = !externalSocket;
     socketRef.current = socket;
 
-    socket.on('connect', () => {
+    const onConnect = () => {
       term.writeln('\x1b[32m[System] Connected to backend service.\x1b[0m');
       
       if (action === 'ping' && target) {
@@ -56,15 +58,23 @@ export default function TerminalComponent({ action, target }: TerminalProps) {
           socket.emit('connect-serial', JSON.parse(target));
         } catch(e) {}
       }
-    });
+    };
+    
+    if (socket.connected) {
+      onConnect();
+    } else {
+      socket.on('connect', onConnect);
+    }
 
-    socket.on('terminal-data', (data: string) => {
+    const handleTerminalData = (data: string) => {
       term.write(data);
-    });
+    };
+    socket.on('terminal-data', handleTerminalData);
 
-    socket.on('disconnect', () => {
+    const handleDisconnect = () => {
       term.writeln('\r\n\x1b[31m[System] Disconnected from backend service.\x1b[0m');
-    });
+    };
+    socket.on('disconnect', handleDisconnect);
 
     // Handle user input in terminal
     term.onData((data) => {
@@ -86,7 +96,14 @@ export default function TerminalComponent({ action, target }: TerminalProps) {
       } else if (action === 'serial') {
         socket.emit('disconnect-serial');
       }
-      socket.disconnect();
+      
+      socket.off('terminal-data', handleTerminalData);
+      socket.off('connect', onConnect);
+      socket.off('disconnect', handleDisconnect);
+      
+      if (isLocalSocket) {
+        socket.disconnect();
+      }
       term.dispose();
     };
   }, [action, target]);

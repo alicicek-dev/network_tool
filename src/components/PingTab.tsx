@@ -192,7 +192,7 @@ export default function PingTab({ socket }: Props) {
       {/* Terminal */}
       <div className="terminal-container" style={{flex: 1, minHeight: '200px'}}>
         {activePing ? (
-          <TerminalComponent action={pingMode} target={activePing} />
+          <TerminalComponent action={pingMode} target={activePing} socket={socket} />
         ) : (
           <div className="placeholder-text" style={{padding: '15px', fontFamily: 'monospace'}}>
             Ready. Enter a target and click Ping...
