@@ -273,12 +273,13 @@ io.on('connection', (socket) => {
               }
               
               const progress = Math.min(99, (elapsed / 10) * 100);
-              const displayMbps = dlFinalMbps > 0 ? dlFinalMbps : instantMbps;
-              socket.emit('speedtest-update', { phase: 'download', result: displayMbps.toFixed(2), progress });
+              // Test sirasinda anlik hizi goster
+              socket.emit('speedtest-update', { phase: 'download', result: instantMbps.toFixed(2), progress });
             }
             if (elapsed >= 10 && isDownloading) {
               isDownloading = false;
               dlReqs.forEach(req => req.destroy());
+              // Test bitince elde edilen en yuksek hizi gonder
               socket.emit('speedtest-update', { phase: 'download', result: dlFinalMbps.toFixed(2), progress: 100 });
               startUploadTest();
             }
@@ -287,7 +288,7 @@ io.on('connection', (socket) => {
           function spawnDlStream() {
             if (!isDownloading) return;
             activeDlStreams++;
-            const req = https.get('https://speed.cloudflare.com/__down?bytes=25000000', (resDl) => {
+            const req = https.get('https://fsn1-speed.hetzner.com/1GB.bin', (resDl) => {
               resDl.on('data', (chunk) => {
                 if (!isDownloading) return;
                 dlBytes += chunk.length;
@@ -342,8 +343,8 @@ io.on('connection', (socket) => {
                 }
                 
                 const progress = Math.min(99, (elapsed / 10) * 100);
-                const displayMbps = upFinalMbps > 0 ? upFinalMbps : instantMbps;
-                socket.emit('speedtest-update', { phase: 'upload', result: displayMbps.toFixed(2), progress });
+                // Test sirasinda anlik hizi goster
+                socket.emit('speedtest-update', { phase: 'upload', result: instantMbps.toFixed(2), progress });
               }
               
               if (elapsed >= 10) {
