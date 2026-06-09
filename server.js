@@ -252,6 +252,7 @@ io.on('connection', (socket) => {
           socket.emit('speedtest-update', { phase: 'download', progress: 0 });
           const dlStart = Date.now();
           let dlBytes = 0;
+          let dlLastBytes = 0;
           let dlLastUpdate = dlStart;
           let dlFinalMbps = 0;
           let isDownloading = true;
@@ -261,12 +262,19 @@ io.on('connection', (socket) => {
           function updateDl() {
             const now = Date.now();
             const elapsed = (now - dlStart) / 1000;
-            if (now - dlLastUpdate > 250) {
+            const deltaT = (now - dlLastUpdate) / 1000;
+            if (deltaT >= 0.25) {
+              const instantMbps = (((dlBytes - dlLastBytes) * 8) / deltaT) / 1000000;
+              dlLastBytes = dlBytes;
               dlLastUpdate = now;
-              const mbps = ((dlBytes * 8) / elapsed) / 1000000;
-              dlFinalMbps = mbps;
+              
+              if (elapsed > 1) { // Ignore first second for stabilization
+                dlFinalMbps = Math.max(dlFinalMbps, instantMbps);
+              }
+              
               const progress = Math.min(99, (elapsed / 10) * 100);
-              socket.emit('speedtest-update', { phase: 'download', result: mbps.toFixed(2), progress });
+              const displayMbps = dlFinalMbps > 0 ? dlFinalMbps : instantMbps;
+              socket.emit('speedtest-update', { phase: 'download', result: displayMbps.toFixed(2), progress });
             }
             if (elapsed >= 10 && isDownloading) {
               isDownloading = false;
@@ -304,6 +312,7 @@ io.on('connection', (socket) => {
             socket.emit('speedtest-update', { phase: 'upload', progress: 0 });
             const upStart = Date.now();
             let upBytes = 0;
+            let upLastBytes = 0;
             let upLastUpdate = upStart;
             let upFinalMbps = 0;
             
@@ -321,13 +330,20 @@ io.on('connection', (socket) => {
               if (!isUploading) return;
               const now = Date.now();
               const elapsed = (now - upStart) / 1000;
+              const deltaT = (now - upLastUpdate) / 1000;
               
-              if (now - upLastUpdate > 250) {
+              if (deltaT >= 0.25) {
+                const instantMbps = (((upBytes - upLastBytes) * 8) / deltaT) / 1000000;
+                upLastBytes = upBytes;
                 upLastUpdate = now;
-                const mbps = ((upBytes * 8) / Math.max(0.1, elapsed)) / 1000000;
-                upFinalMbps = mbps;
+                
+                if (elapsed > 1) { // Ignore first second
+                  upFinalMbps = Math.max(upFinalMbps, instantMbps);
+                }
+                
                 const progress = Math.min(99, (elapsed / 10) * 100);
-                socket.emit('speedtest-update', { phase: 'upload', result: mbps.toFixed(2), progress });
+                const displayMbps = upFinalMbps > 0 ? upFinalMbps : instantMbps;
+                socket.emit('speedtest-update', { phase: 'upload', result: displayMbps.toFixed(2), progress });
               }
               
               if (elapsed >= 10) {

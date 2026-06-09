@@ -5,6 +5,13 @@ interface Props {
   socket: Socket;
 }
 
+interface SpeedTestHistory {
+  timestamp: string;
+  ping: number;
+  download: number;
+  upload: number;
+}
+
 export default function SpeedTestTab({ socket }: Props) {
   const [status, setStatus] = useState('Hazır');
   const [ping, setPing] = useState(0);
@@ -12,6 +19,7 @@ export default function SpeedTestTab({ socket }: Props) {
   const [upload, setUpload] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isTesting, setIsTesting] = useState(false);
+  const [history, setHistory] = useState<SpeedTestHistory[]>([]);
 
   useEffect(() => {
     socket.on('speedtest-update', (data) => {
@@ -29,6 +37,14 @@ export default function SpeedTestTab({ socket }: Props) {
       setDownload(data.download);
       setUpload(data.upload);
       setProgress(100);
+      
+      const now = new Date();
+      setHistory(prev => [{
+        timestamp: now.toLocaleDateString() + ' ' + now.toLocaleTimeString(),
+        ping: data.ping,
+        download: data.download,
+        upload: data.upload
+      }, ...prev]);
     });
 
     socket.on('speedtest-error', (data) => {
@@ -54,9 +70,9 @@ export default function SpeedTestTab({ socket }: Props) {
   };
 
   return (
-    <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%', alignItems: 'center', justifyContent: 'center'}}>
-      <h1>Speed Test</h1>
-      <div className="glass-panel" style={{padding: '40px', width: '500px', textAlign: 'center', borderRadius: '15px'}}>
+    <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', paddingTop: '40px', paddingBottom: '40px'}}>
+      <h1 style={{marginBottom: '20px'}}>Speed Test</h1>
+      <div className="glass-panel" style={{padding: '40px', width: '600px', textAlign: 'center', borderRadius: '15px', marginBottom: '30px'}}>
         
         <div style={{fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '30px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid var(--primary)', textAlign: 'left'}}>
           <strong>Cloudflare Edge Ağı</strong> üzerinden test yapılmaktadır. Cihazınız ile size en yakın Cloudflare veri merkezi arasında (çoklu bağlantıyla) kesintisiz 20 saniyelik stres testi uygulanarak gerçek kapasiteniz ölçülür.
@@ -93,6 +109,34 @@ export default function SpeedTestTab({ socket }: Props) {
           {isTesting ? 'Test Ediliyor...' : 'Testi Başlat'}
         </button>
       </div>
+
+      {history.length > 0 && (
+        <div className="glass-panel" style={{padding: '20px', width: '600px', borderRadius: '15px'}}>
+          <h3 style={{marginBottom: '15px', color: 'var(--text-primary)', textAlign: 'left'}}>Geçmiş Testler</h3>
+          <div style={{background: 'rgba(0,0,0,0.2)', borderRadius: '10px', overflow: 'hidden'}}>
+            <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem'}}>
+              <thead>
+                <tr style={{background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)'}}>
+                  <th style={{padding: '12px', textAlign: 'left'}}>Tarih & Saat</th>
+                  <th style={{padding: '12px', textAlign: 'center'}}>Ping</th>
+                  <th style={{padding: '12px', textAlign: 'center'}}>Download</th>
+                  <th style={{padding: '12px', textAlign: 'center'}}>Upload</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((h, i) => (
+                  <tr key={i} style={{borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                    <td style={{padding: '12px'}}>{h.timestamp}</td>
+                    <td style={{padding: '12px', textAlign: 'center'}}>{h.ping} ms</td>
+                    <td style={{padding: '12px', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold'}}>{h.download} Mbps</td>
+                    <td style={{padding: '12px', textAlign: 'center', color: 'var(--success)', fontWeight: 'bold'}}>{h.upload} Mbps</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
