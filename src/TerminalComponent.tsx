@@ -1,0 +1,117 @@
+import { useEffect, useRef } from 'react';
+import { Terminal } from 'xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import 'xterm/css/xterm.css';
+import { io, Socket } from 'socket.io-client';
+
+interface TerminalProps {
+  action: string;
+  target: string;
+}
+
+export default function TerminalComponent({ action, target }: TerminalProps) {
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const xtermRef = useRef<Terminal | null>(null);
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    // Initialize xterm.js
+    const term = new Terminal({
+      theme: {
+        background: '#000000',
+        foreground: '#a6e3a1',
+        cursor: '#a6e3a1'
+      },
+      fontFamily: 'monospace',
+      fontSize: 14,
+      cursorBlink: true,
+    });
+    
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    
+    if (terminalRef.current) {
+      term.open(terminalRef.current);
+      fitAddon.fit();
+    }
+    xtermRef.current = term;
+
+    // Connect to backend
+    const socket = io('http://localhost:3001');
+    socketRef.current = socket;
+
+    socket.on('connect', () => {
+      term.writeln('\x1b[32m[System] Connected to backend service.\x1b[0m');
+      
+      if (action === 'ping' && target) {
+        socket.emit('start-ping', target);
+      } else if (action === 'ssh' && target) {
+        // target is a JSON string with SSH details
+        try {
+          socket.emit('connect-ssh', JSON.parse(target));
+        } catch(e) {}
+      } else if (action === 'serial' && target) {
+        // target is a JSON string with Serial details
+        try {
+          socket.emit('connect-serial', JSON.parse(target));
+        } catch(e) {}
+      }
+    });
+
+    socket.on('terminal-data', (data: string) => {
+      term.write(data);
+    });
+
+    socket.on('disconnect', () => {
+      term.writeln('\r\n\x1b[31m[System] Disconnected from backend service.\x1b[0m');
+    });
+
+    // Handle user input in terminal
+    term.onData((data) => {
+      socket.emit('terminal-input', data);
+    });
+
+    // Resize handling
+    const handleResize = () => {
+      fitAddon.fit();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (action === 'ping') {
+        socket.emit('stop-ping');
+      } else if (action === 'ssh') {
+        socket.emit('disconnect-ssh');
+      } else if (action === 'serial') {
+        socket.emit('disconnect-serial');
+      }
+      socket.disconnect();
+      term.dispose();
+    };
+  }, [action, target]);
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <button 
+        onClick={() => xtermRef.current?.clear()}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '25px', // prevent overlapping with scrollbar
+          zIndex: 10,
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid var(--panel-border)',
+          color: 'var(--text-secondary)',
+          padding: '5px 10px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '0.8rem'
+        }}
+      >
+        Clear
+      </button>
+      <div ref={terminalRef} style={{ width: '100%', height: '100%' }} />
+    </div>
+  );
+}
