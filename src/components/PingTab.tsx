@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Cell, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import TerminalComponent from '../TerminalComponent';
 
 interface Props {
@@ -168,20 +168,25 @@ export default function PingTab({ socket }: Props) {
           {stats.length > 0 ? (
             <div style={{flex: 1, minHeight: 0}}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={stats}>
-                  <XAxis dataKey="seq" stroke="var(--text-secondary)" tick={false} />
-                  <YAxis stroke="var(--text-secondary)" width={40} domain={['auto', 'auto']} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="time" 
-                    stroke="#a6e3a1" 
-                    strokeWidth={2}
-                    dot={false}
-                    isAnimationActive={true}
-                    connectNulls={true}
-                  />
-                </LineChart>
+                <BarChart data={stats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="seq" stroke="var(--text-secondary)" tick={false} axisLine={false} tickLine={false} />
+                  <YAxis stroke="var(--text-secondary)" width={60} axisLine={false} tickLine={false} tickFormatter={(value) => `${value} ms`} />
+                  <Tooltip content={<CustomTooltip />} cursor={{fill: 'rgba(255,255,255,0.05)'}} />
+                  {summary.avg > 0 && <ReferenceLine y={summary.avg} stroke="var(--primary)" strokeDasharray="3 3" opacity={0.5} />}
+                  <Bar dataKey="time" radius={[3, 3, 0, 0]} isAnimationActive={true}>
+                    {stats.map((entry, index) => {
+                      let color = '#a6e3a1'; // Green (Good)
+                      if (entry.time !== null) {
+                        if (entry.time > 150) color = '#f9e2af'; // Yellow (Warning)
+                        if (entry.time > 300) color = '#f38ba8'; // Red (High Latency)
+                      } else {
+                        color = '#f38ba8'; // Red (Timeout)
+                      }
+                      return <Cell key={`cell-${index}`} fill={color} />;
+                    })}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
