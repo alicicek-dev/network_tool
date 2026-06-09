@@ -21,7 +21,9 @@ export default function PingTab({ socket }: Props) {
   useEffect(() => {
     socket.on('ping-stat', (data) => {
       setStats(prev => {
-        const newStats = [...prev, data];
+        const timeVal = typeof data.time === 'number' ? data.time : parseFloat(data.time as any);
+        const safeData = { ...data, time: isNaN(timeVal) ? null : timeVal };
+        const newStats = [...prev, safeData];
         if (newStats.length > 50) newStats.shift();
         return newStats;
       });
@@ -173,10 +175,11 @@ export default function PingTab({ socket }: Props) {
                   <Line 
                     type="monotone" 
                     dataKey="time" 
-                    stroke="var(--primary)" 
+                    stroke="#a6e3a1" 
                     strokeWidth={2}
                     dot={false}
-                    isAnimationActive={false}
+                    isAnimationActive={true}
+                    connectNulls={true}
                   />
                 </LineChart>
               </ResponsiveContainer>
