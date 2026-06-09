@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
-import { BarChart, Bar, Cell, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+// Recharts removed
 import TerminalComponent from '../TerminalComponent';
 
 interface Props {
@@ -12,22 +12,12 @@ export default function PingTab({ socket }: Props) {
   const [activePing, setActivePing] = useState('');
   const [pingMode, setPingMode] = useState('ping');
   
-  // Stats state
-  const [stats, setStats] = useState<{seq: number, alive: boolean, time: number | null, host?: string}[]>([]);
   const [summary, setSummary] = useState({
     sent: 0, received: 0, lost: 0, min: 0, max: 0, avg: 0, jitter: 0
   });
 
   useEffect(() => {
     socket.on('ping-stat', (data) => {
-      setStats(prev => {
-        const timeVal = typeof data.time === 'number' ? data.time : parseFloat(data.time as any);
-        const safeData = { ...data, time: isNaN(timeVal) ? null : timeVal };
-        const newStats = [...prev, safeData];
-        if (newStats.length > 50) newStats.shift();
-        return newStats;
-      });
-
       setSummary(prev => {
         const sent = prev.sent + 1;
         const received = data.alive ? prev.received + 1 : prev.received;
@@ -39,25 +29,18 @@ export default function PingTab({ socket }: Props) {
         let jitter = prev.jitter;
 
         if (data.alive && data.time !== null) {
-          if (min === 0 || data.time < min) min = data.time;
-          if (data.time > max) max = data.time;
-          
-          avg = prev.received === 0 ? data.time : ((prev.avg * prev.received) + data.time) / received;
-          
-          if (prev.received > 0) {
-            // Find last alive ping time for jitter
-            let lastTime = data.time;
-            setStats(curr => {
-              for (let i = curr.length - 1; i >= 0; i--) {
-                if (curr[i].alive && curr[i].time !== null) {
-                  lastTime = curr[i].time!;
-                  break;
-                }
-              }
-              return curr;
-            });
-            const diff = Math.abs(data.time - lastTime);
-            jitter = prev.received === 1 ? diff : ((prev.jitter * (prev.received - 1)) + diff) / received;
+          const timeVal = typeof data.time === 'number' ? data.time : parseFloat(data.time as any);
+          const time = isNaN(timeVal) ? null : timeVal;
+          if (time !== null) {
+            if (min === 0 || time < min) min = time;
+            if (time > max) max = time;
+            
+            avg = prev.received === 0 ? time : ((prev.avg * prev.received) + time) / received;
+            
+            if (prev.received > 0) {
+              const diff = Math.abs(time - prev.avg);
+              jitter = prev.received === 1 ? diff : ((prev.jitter * (prev.received - 1)) + diff) / received;
+            }
           }
         }
 
@@ -72,7 +55,6 @@ export default function PingTab({ socket }: Props) {
 
   const handleStartPing = () => {
     if (pingTarget.trim()) {
-      setStats([]);
       setSummary({ sent: 0, received: 0, lost: 0, min: 0, max: 0, avg: 0, jitter: 0 });
       setPingMode('ping');
       setActivePing(pingTarget.trim());
@@ -81,7 +63,6 @@ export default function PingTab({ socket }: Props) {
 
   const handleStartTrace = () => {
     if (pingTarget.trim()) {
-      setStats([]);
       setSummary({ sent: 0, received: 0, lost: 0, min: 0, max: 0, avg: 0, jitter: 0 });
       setPingMode('traceroute');
       setActivePing(pingTarget.trim());
@@ -94,22 +75,6 @@ export default function PingTab({ socket }: Props) {
 
   const packetLossPercent = summary.sent > 0 ? ((summary.lost / summary.sent) * 100).toFixed(1) : 0;
   
-  // Custom tooltip for chart
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div style={{ background: 'rgba(0,0,0,0.8)', padding: '10px', border: '1px solid var(--panel-border)', borderRadius: '5px' }}>
-          <p style={{ margin: 0 }}>Seq: {data.seq}</p>
-          <p style={{ margin: 0, color: data.alive ? 'var(--success)' : 'var(--danger)' }}>
-            {data.alive ? `Time: ${data.time}ms` : 'Timeout'}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%', gap: '15px'}}>
       <h1>Ping & Traceroute</h1>
