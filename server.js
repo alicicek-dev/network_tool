@@ -376,7 +376,9 @@ io.on('connection', (socket) => {
           function spawnDlStream() {
             if (!isDownloading) return;
             activeDlStreams++;
-            const req = https.get('https://fsn1-speed.hetzner.com/1GB.bin', (resDl) => {
+            const req = https.get('https://speed.cloudflare.com/__down?bytes=100000000', {
+              headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+            }, (resDl) => {
               resDl.on('data', (chunk) => {
                 if (!isDownloading) return;
                 dlBytes += chunk.length;
@@ -405,7 +407,10 @@ io.on('connection', (socket) => {
             let upLastUpdate = upStart;
             let upFinalMbps = 0;
             
-            const reqUp = https.request('https://speed.cloudflare.com/__up', { method: 'POST' }, (resUp) => {
+            const reqUp = https.request('https://speed.cloudflare.com/__up', { 
+              method: 'POST',
+              headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+            }, (resUp) => {
               resUp.on('data', ()=>{});
               resUp.on('end', () => {
                 socket.emit('speedtest-update', { phase: 'upload', result: upFinalMbps.toFixed(2), progress: 100 });
