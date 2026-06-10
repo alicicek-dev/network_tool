@@ -9,6 +9,13 @@ const { SerialPort } = require('serialport');
 // on platforms where BoringSSL (bundled in Electron) does not support them natively.
 const crypto = require('crypto');
 
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 class BigIntDiffieHellman {
   constructor(primeBuffer, generatorBuffer) {
     this.primeHex = primeBuffer.toString('hex');
@@ -92,6 +99,7 @@ crypto.getDiffieHellman = function(groupName) {
   }
   return originalGetDiffieHellman.call(crypto, groupName);
 };
+crypto.createDiffieHellmanGroup = crypto.getDiffieHellman;
 
 const { Client } = require('ssh2');
 const wol = require('wake_on_lan');
@@ -490,58 +498,64 @@ io.on('connection', (socket) => {
       });
     }).on('error', (err) => {
       socket.emit('terminal-data', `\r\nSSH Error: ${err.message}\r\n`);
-    }).connect({
-      host,
-      port: parseInt(port) || 22,
-      username,
-      password,
-      readyTimeout: 10000,
-      algorithms: {
-        kex: [
-          'curve25519-sha256',
-          'curve25519-sha256@libssh.org',
-          'ecdh-sha2-nistp256',
-          'ecdh-sha2-nistp384',
-          'ecdh-sha2-nistp521',
-          'diffie-hellman-group14-sha256',
-          'diffie-hellman-group14-sha1',
-          'diffie-hellman-group5-sha1',
-          'diffie-hellman-group1-sha1'
-        ],
-        cipher: [
-          'aes128-ctr',
-          'aes192-ctr',
-          'aes256-ctr',
-          'aes128-gcm',
-          'aes128-gcm@openssh.com',
-          'aes256-gcm',
-          'aes256-gcm@openssh.com',
-          'aes256-cbc',
-          'aes192-cbc',
-          'aes128-cbc',
-          '3des-cbc'
-        ],
-        serverHostKey: [
-          'ssh-rsa',
-          'ssh-dss',
-          'ecdsa-sha2-nistp256',
-          'ecdsa-sha2-nistp384',
-          'ecdsa-sha2-nistp521',
-          'ssh-ed25519'
-        ],
-        hmac: [
-          'hmac-sha2-256',
-          'hmac-sha2-512',
-          'hmac-sha1',
-          'hmac-md5',
-          'hmac-sha2-256-96',
-          'hmac-sha2-512-96',
-          'hmac-ripemd160',
-          'hmac-sha1-96',
-          'hmac-md5-96'
-        ]
-      }
     });
+
+    try {
+      sshClient.connect({
+        host,
+        port: parseInt(port) || 22,
+        username,
+        password,
+        readyTimeout: 10000,
+        algorithms: {
+          kex: [
+            'curve25519-sha256',
+            'curve25519-sha256@libssh.org',
+            'ecdh-sha2-nistp256',
+            'ecdh-sha2-nistp384',
+            'ecdh-sha2-nistp521',
+            'diffie-hellman-group14-sha256',
+            'diffie-hellman-group14-sha1',
+            'diffie-hellman-group5-sha1',
+            'diffie-hellman-group1-sha1'
+          ],
+          cipher: [
+            'aes128-ctr',
+            'aes192-ctr',
+            'aes256-ctr',
+            'aes128-gcm',
+            'aes128-gcm@openssh.com',
+            'aes256-gcm',
+            'aes256-gcm@openssh.com',
+            'aes256-cbc',
+            'aes192-cbc',
+            'aes128-cbc',
+            '3des-cbc'
+          ],
+          serverHostKey: [
+            'ssh-rsa',
+            'ssh-dss',
+            'ecdsa-sha2-nistp256',
+            'ecdsa-sha2-nistp384',
+            'ecdsa-sha2-nistp521',
+            'ssh-ed25519'
+          ],
+          hmac: [
+            'hmac-sha2-256',
+            'hmac-sha2-512',
+            'hmac-sha1',
+            'hmac-md5',
+            'hmac-sha2-256-96',
+            'hmac-sha2-512-96',
+            'hmac-ripemd160',
+            'hmac-sha1-96',
+            'hmac-md5-96'
+          ]
+        }
+      });
+    } catch (connectErr) {
+      socket.emit('terminal-data', `\r\nSSH Connection Init Error: ${connectErr.message}\r\n`);
+    }
   });
 
   socket.on('disconnect-ssh', () => {
