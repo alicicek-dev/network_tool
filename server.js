@@ -516,7 +516,6 @@ io.on('connection', (socket) => {
             'ecdh-sha2-nistp521',
             'diffie-hellman-group14-sha256',
             'diffie-hellman-group14-sha1',
-            'diffie-hellman-group5-sha1',
             'diffie-hellman-group1-sha1'
           ],
           cipher: [

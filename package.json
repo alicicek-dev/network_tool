@@ -1,7 +1,7 @@
 {
   "name": "network_tool",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.0",
   "author": "Ali Cicek",
   "description": "Network Engineer Toolkit",
   "main": "dist-electron/main.js",
