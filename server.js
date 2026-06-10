@@ -8,25 +8,88 @@ const { SerialPort } = require('serialport');
 // Monkeypatch crypto.getDiffieHellman to support legacy DH groups (modp1, modp2, modp5)
 // on platforms where BoringSSL (bundled in Electron) does not support them natively.
 const crypto = require('crypto');
+
+class BigIntDiffieHellman {
+  constructor(primeBuffer, generatorBuffer) {
+    this.primeHex = primeBuffer.toString('hex');
+    this.prime = BigInt('0x' + this.primeHex);
+    this.generator = BigInt(generatorBuffer[0]);
+    this.pubKey = null;
+    this.privKey = null;
+  }
+
+  generateKeys() {
+    const byteLength = Buffer.from(this.primeHex, 'hex').length;
+    let priv;
+    do {
+      priv = BigInt('0x' + crypto.randomBytes(byteLength).toString('hex'));
+    } while (priv >= this.prime || priv <= 1n);
+
+    this.privKey = priv;
+    this.pubKey = this._modPow(this.generator, this.privKey, this.prime);
+    return this.getPublicKey();
+  }
+
+  getPublicKey() {
+    return this._toBuffer(this.pubKey);
+  }
+
+  getPrivateKey() {
+    return this._toBuffer(this.privKey);
+  }
+
+  computeSecret(otherPublicKeyBuffer) {
+    const B = BigInt('0x' + otherPublicKeyBuffer.toString('hex'));
+    const secret = this._modPow(B, this.privKey, this.prime);
+    return this._toBuffer(secret);
+  }
+
+  getPrime() {
+    return Buffer.from(this.primeHex, 'hex');
+  }
+
+  getGenerator() {
+    return Buffer.from([Number(this.generator)]);
+  }
+
+  _modPow(b, e, m) {
+    let result = 1n;
+    b = b % m;
+    while (e > 0n) {
+      if (e & 1n) {
+        result = (result * b) % m;
+      }
+      e = e >> 1n;
+      b = (b * b) % m;
+    }
+    return result;
+  }
+
+  _toBuffer(bigint) {
+    let hex = bigint.toString(16);
+    if (hex.length % 2 !== 0) hex = '0' + hex;
+    const targetLen = Buffer.from(this.primeHex, 'hex').length;
+    let buf = Buffer.from(hex, 'hex');
+    if (buf.length < targetLen) {
+      const padded = Buffer.alloc(targetLen);
+      buf.copy(padded, targetLen - buf.length);
+      return padded;
+    }
+    return buf;
+  }
+}
+
 const originalGetDiffieHellman = crypto.getDiffieHellman;
 crypto.getDiffieHellman = function(groupName) {
-  try {
-    return originalGetDiffieHellman.call(crypto, groupName);
-  } catch (err) {
-    const primes = {
-      modp1: 'ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a63a3620ffffffffffffffff',
-      modp2: 'ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece65381ffffffffffffffff',
-      modp5: 'ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca237327ffffffffffffffff'
-    };
-    if (primes[groupName]) {
-      try {
-        return crypto.createDiffieHellman(Buffer.from(primes[groupName], 'hex'), Buffer.from([2]));
-      } catch (innerErr) {
-        // Fallback failed, throw original error
-      }
-    }
-    throw err;
+  const primes = {
+    modp1: 'ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a63a3620ffffffffffffffff',
+    modp2: 'ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece65381ffffffffffffffff',
+    modp5: 'ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca237327ffffffffffffffff'
+  };
+  if (primes[groupName]) {
+    return new BigIntDiffieHellman(Buffer.from(primes[groupName], 'hex'), Buffer.from([2]));
   }
+  return originalGetDiffieHellman.call(crypto, groupName);
 };
 
 const { Client } = require('ssh2');
