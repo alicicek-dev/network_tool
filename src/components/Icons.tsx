@@ -1,4 +1,4 @@
-import { SVGProps } from 'react';
+import type { SVGProps } from 'react';
 
 // AppLogo (Customized Atom/Network Orbit Vector Icon)
 export function AppIcon(props: SVGProps<SVGSVGElement>) {
