@@ -385,7 +385,7 @@ io.on('connection', (socket) => {
           function spawnDlStream() {
             if (!isDownloading) return;
             activeDlStreams++;
-            const req = https.get('https://speed.cloudflare.com/__down?bytes=100000000', {
+            const req = https.get('https://speed.cloudflare.com/__down?bytes=50000000', {
               headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
             }, (resDl) => {
               resDl.on('data', (chunk) => {
