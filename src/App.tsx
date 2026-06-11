@@ -211,7 +211,7 @@ function App() {
                   <>
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '270px'}}>
                       <CustomSelect 
-                        options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: sp.path }))}
+                        options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: sp.friendlyName || sp.path }))}
                         value={comPort}
                         onChange={(val) => setComPort(val)}
                         disabled={!!activeTerminalTarget}
