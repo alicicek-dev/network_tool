@@ -34,6 +34,10 @@ export default function TerminalComponent({ action, target, socket: externalSock
     if (terminalRef.current) {
       term.open(terminalRef.current);
       fitAddon.fit();
+      // Focus the terminal container immediately
+      setTimeout(() => {
+        term.focus();
+      }, 50);
     }
     xtermRef.current = term;
 
@@ -46,6 +50,7 @@ export default function TerminalComponent({ action, target, socket: externalSock
 
     const onConnect = () => {
       term.writeln('\x1b[32m[System] Connected to backend service.\x1b[0m');
+      term.focus();
       
       if (action === 'ping' && target) {
         socket.emit('start-ping', target);
