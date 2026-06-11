@@ -7,6 +7,7 @@ import SpeedTestTab from './components/SpeedTestTab';
 import PingTab from './components/PingTab';
 import { io } from 'socket.io-client';
 import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon } from './components/Icons';
+import CustomSelect from './components/CustomSelect';
 
 const socket = io('http://localhost:3001', {
   transports: ['websocket']
@@ -126,29 +127,12 @@ function App() {
                 <div className="glass-panel stat-card" style={{position: 'relative'}}>
                   <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px'}}>
                     <div className="stat-label">Interface</div>
-                    <select 
-                      style={{
-                        background: 'rgba(0,0,0,0.3)', 
-                        color: 'var(--text-primary)', 
-                        border: '1px solid var(--panel-border)', 
-                        borderRadius: '4px', 
-                        fontSize: '0.8rem', 
-                        padding: '2px 6px',
-                        maxWidth: '130px',
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        outline: 'none',
-                        cursor: 'pointer'
-                      }}
+                    <CustomSelect 
+                      options={interfaces.length === 0 ? [{ value: 0, label: 'Unknown' }] : interfaces.map((intf, idx) => ({ value: idx, label: intf.name }))}
                       value={selectedIfIdx}
-                      onChange={e => setSelectedIfIdx(parseInt(e.target.value))}
-                    >
-                      {interfaces.length === 0 && <option>Unknown</option>}
-                      {interfaces.map((intf, idx) => (
-                        <option key={idx} value={idx}>{intf.name}</option>
-                      ))}
-                    </select>
+                      onChange={(val) => setSelectedIfIdx(val)}
+                      maxWidth="130px"
+                    />
                   </div>
                   <div className="stat-value">{interfaces[selectedIfIdx]?.ip || 'Unknown'}</div>
                   <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '5px'}}>MAC: {interfaces[selectedIfIdx]?.mac || 'Unknown'}</div>
@@ -180,15 +164,16 @@ function App() {
             <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
               <h1>Connection Manager</h1>
               <div className="glass-panel" style={{padding: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center'}}>
-                <select 
-                  style={{padding: '10px', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)', border: '1px solid var(--panel-border)'}}
+                <CustomSelect 
+                  options={[
+                    { value: 'ssh', label: 'SSH' },
+                    { value: 'serial', label: 'COM Port (Serial)' }
+                  ]}
                   value={terminalMode}
-                  onChange={(e) => setTerminalMode(e.target.value)}
+                  onChange={(val) => setTerminalMode(val)}
                   disabled={!!activeTerminalTarget}
-                >
-                  <option value="ssh">SSH</option>
-                  <option value="serial">COM Port (Serial)</option>
-                </select>
+                  maxWidth="180px"
+                />
                 
                 {terminalMode === 'ssh' ? (
                   <>
@@ -199,17 +184,13 @@ function App() {
                   </>
                 ) : (
                   <>
-                    <select 
-                      style={{flex: 1, padding: '10px', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)', border: '1px solid var(--panel-border)'}}
+                    <CustomSelect 
+                      options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: sp.path }))}
                       value={comPort}
-                      onChange={e => setComPort(e.target.value)}
+                      onChange={(val) => setComPort(val)}
                       disabled={!!activeTerminalTarget}
-                    >
-                      {serialPorts.length === 0 ? <option value="">No COM ports found</option> : null}
-                      {serialPorts.map(sp => (
-                        <option key={sp.path} value={sp.path}>{sp.path}</option>
-                      ))}
-                    </select>
+                      maxWidth="220px"
+                    />
                     <div style={{position: 'relative', width: '120px'}}>
                       <input 
                         type="text" 
