@@ -17,8 +17,15 @@
     "win": {
       "target": [
         "nsis",
-        "portable"
+        "portable",
+        "appx"
       ]
+    },
+    "appx": {
+      "identityName": "AliEK.NetTool-NetworkEngineerToolkit",
+      "publisher": "CN=677A4992-D291-47EE-91C0-263033D625D1",
+      "publisherDisplayName": "Ali ÇİÇEK",
+      "applicationId": "NetTool"
     },
     "directories": {
       "output": "release"
