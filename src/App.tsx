@@ -127,7 +127,20 @@ function App() {
                   <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px'}}>
                     <div className="stat-label">Interface</div>
                     <select 
-                      style={{background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)', border: '1px solid var(--panel-border)', borderRadius: '4px', fontSize: '0.8rem', padding: '2px'}}
+                      style={{
+                        background: 'rgba(0,0,0,0.3)', 
+                        color: 'var(--text-primary)', 
+                        border: '1px solid var(--panel-border)', 
+                        borderRadius: '4px', 
+                        fontSize: '0.8rem', 
+                        padding: '2px 6px',
+                        maxWidth: '130px',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        outline: 'none',
+                        cursor: 'pointer'
+                      }}
                       value={selectedIfIdx}
                       onChange={e => setSelectedIfIdx(parseInt(e.target.value))}
                     >
