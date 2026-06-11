@@ -113,6 +113,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const server = http.createServer(app);
+server.on('connection', (socket) => {
+  socket.setNoDelay(true);
+});
 const io = new Server(server, {
   cors: { origin: '*' }
 });
@@ -479,8 +482,13 @@ io.on('connection', (socket) => {
     sshClient = new Client();
     
     sshClient.on('ready', () => {
+      sshClient.setNoDelay(true);
       socket.emit('terminal-data', `\r\nSSH Connected. Starting shell...\r\n`);
-      sshClient.shell((err, stream) => {
+      sshClient.shell({
+        term: 'xterm-256color',
+        cols: 100,
+        rows: 30
+      }, (err, stream) => {
         if (err) {
           socket.emit('terminal-data', `\r\nShell error: ${err.message}\r\n`);
           return;
