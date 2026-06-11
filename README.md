@@ -1,73 +1,84 @@
-# React + TypeScript + Vite
+# NetTool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+NetTool is a desktop utility application designed for network engineers and administrators. Built with React, TypeScript, and Electron, it provides a unified glassmorphic interface to run diagnostic tools, manage remote terminal sessions, scan local subnets, query network data, and verify internet speeds.
 
-Currently, two official plugins are available:
+[![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-8.0-blue?style=flat-square&logo=vite)](https://vite.dev)
+[![Electron](https://img.shields.io/badge/Electron-42-blue?style=flat-square&logo=electron)](https://www.electronjs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://opensource.org/licenses/MIT)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Web Terminal
+A tabbed connection manager with integrated Xterm.js terminal emulation:
+* **SSH Client**: Secure Shell connections with support for customizable ports, credentials, and legacy Diffie-Hellman algorithms.
+* **Telnet Client**: Raw TCP socket sessions with integrated IAC (Interpret As Command) option filtering to filter control sequences and keep terminal output clean.
+* **Serial Port Manager**: Connection capability for serial interfaces (COM ports) with a natural-sorting port list, custom baud rates, and automatic port refresh.
 
-## Expanding the ESLint configuration
+### Ping and Traceroute
+* **Live Analytics**: Real-time stats calculation displaying packet loss percentages, minimum, maximum, and average latency.
+* **Jitter Calculation**: Tracks ping variation metrics crucial for diagnostic validation of VoIP and high-stability connections.
+* **Traceroute**: Live path discovery mapping for packet routing jumps.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Network Discovery
+* **Ping Sweep**: Subnet scanning tool to discover active IP addresses and responsive devices across local networks.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Network Utilities
+* **Wake-on-LAN**: Broadcasts Magic Packets to remote MAC addresses for system wake-up.
+* **MAC Vendor Search**: Identifies hardware manufacturers using MAC address queries.
+* **DNS Resolver**: Queries and lists DNS records (A, MX, TXT, etc.) for specified hostnames.
+* **WHOIS Lookup**: Queries domain registration information.
+* **ARP Table Diagnostics**: Views local Address Resolution Protocol table mappings.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Speed Test
+* **Measurement Engine**: Diagnostic speed check measuring round-trip ping latency, download rate, and upload rate using a parallel HTTP streams architecture.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Technology Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+* **Frontend**: React 19, TypeScript, Tailwind CSS, Xterm.js (for terminal emulation).
+* **Backend Shell**: Electron, Node.js `net` core, Express, Socket.IO, `ssh2`, `serialport`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## Installation and Setup
+
+### Prerequisites
+* Node.js (v18 or higher)
+* npm (Node Package Manager)
+
+### Local Development
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/alicicek-dev/network_tool.git
+   cd network_tool
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run the development server and Electron shell:
+   ```bash
+   npm run dev
+   ```
+
+### Production Build
+To package the application into standalone Windows installers (NSIS) and portable executables:
+1. Ensure all active NetTool running instances are closed.
+2. Run the build script:
+   ```bash
+   npm run build
+   ```
+3. Standalone binaries will be compiled and saved to the `release/` directory.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
