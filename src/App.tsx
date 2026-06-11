@@ -6,7 +6,7 @@ import UtilitiesTab from './components/UtilitiesTab';
 import SpeedTestTab from './components/SpeedTestTab';
 import PingTab from './components/PingTab';
 import { io } from 'socket.io-client';
-import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon } from './components/Icons';
+import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, RefreshIcon } from './components/Icons';
 import CustomSelect from './components/CustomSelect';
 
 const socket = io('http://localhost:3001', {
@@ -52,15 +52,30 @@ function App() {
       .catch(console.error);
   }, []);
 
+  const refreshSerialPorts = () => {
+    fetch('http://localhost:3001/api/ports')
+      .then(res => res.json())
+      .then(data => {
+         // Natural sort (e.g. COM2 before COM10)
+         const sorted = [...data].sort((a, b) => {
+           return a.path.localeCompare(b.path, undefined, { numeric: true, sensitivity: 'base' });
+         });
+         setSerialPorts(sorted);
+         if (sorted.length > 0) {
+           const exists = sorted.some(sp => sp.path === comPort);
+           if (!exists || !comPort) {
+             setComPort(sorted[0].path);
+           }
+         } else {
+           setComPort('');
+         }
+      })
+      .catch(err => console.error(err));
+  };
+
   useEffect(() => {
     if (activeTab === 'terminal') {
-      fetch('http://localhost:3001/api/ports')
-        .then(res => res.json())
-        .then(data => {
-           setSerialPorts(data);
-           if (data.length > 0 && !comPort) setComPort(data[0].path);
-        })
-        .catch(err => console.error(err));
+      refreshSerialPorts();
     }
   }, [activeTab]);
 
@@ -194,13 +209,49 @@ function App() {
                   </>
                 ) : (
                   <>
-                    <CustomSelect 
-                      options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: sp.path }))}
-                      value={comPort}
-                      onChange={(val) => setComPort(val)}
-                      disabled={!!activeTerminalTarget}
-                      maxWidth="220px"
-                    />
+                    <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '270px'}}>
+                      <CustomSelect 
+                        options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: sp.path }))}
+                        value={comPort}
+                        onChange={(val) => setComPort(val)}
+                        disabled={!!activeTerminalTarget}
+                        maxWidth="100%"
+                        style={{flex: 1}}
+                      />
+                      <button
+                        onClick={refreshSerialPorts}
+                        disabled={!!activeTerminalTarget}
+                        title="COM Portları Yenile"
+                        style={{
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid var(--panel-border)',
+                          borderRadius: '8px',
+                          color: 'var(--text-primary)',
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          opacity: activeTerminalTarget ? 0.5 : 1,
+                          width: 'auto'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!activeTerminalTarget) {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            e.currentTarget.style.borderColor = 'var(--accent-color)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!activeTerminalTarget) {
+                            e.currentTarget.style.background = 'rgba(0,0,0,0.3)';
+                            e.currentTarget.style.borderColor = 'var(--panel-border)';
+                          }
+                        }}
+                      >
+                        <RefreshIcon width="16" height="16" style={{color: 'var(--accent-color)'}} />
+                      </button>
+                    </div>
                     <div ref={baudrateRef} style={{position: 'relative', width: '120px'}}>
                       <input 
                         type="text" 
