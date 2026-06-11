@@ -48,9 +48,11 @@ export default function CustomSelect({
       ref={containerRef} 
       style={{
         position: 'relative',
-        display: 'inline-block',
+        display: 'block',
         maxWidth: maxWidth,
         width: '100%',
+        margin: '0',
+        padding: '0',
         userSelect: 'none',
         ...style
       }}
