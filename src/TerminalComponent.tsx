@@ -26,6 +26,7 @@ export default function TerminalComponent({ action, target, socket: externalSock
       fontFamily: 'monospace',
       fontSize: 14,
       cursorBlink: true,
+      copyOnSelect: true,
     });
     
     const fitAddon = new FitAddon();
@@ -112,6 +113,18 @@ export default function TerminalComponent({ action, target, socket: externalSock
     };
   }, [action, target]);
 
+  const handleContextMenu = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text && socketRef.current) {
+        socketRef.current.emit('terminal-input', text);
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard:', err);
+    }
+  };
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <button 
@@ -132,7 +145,11 @@ export default function TerminalComponent({ action, target, socket: externalSock
       >
         Clear
       </button>
-      <div ref={terminalRef} style={{ width: '100%', height: '100%' }} />
+      <div 
+        ref={terminalRef} 
+        onContextMenu={handleContextMenu}
+        style={{ width: '100%', height: '100%' }} 
+      />
     </div>
   );
 }
