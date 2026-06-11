@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './index.css';
 import TerminalComponent from './TerminalComponent';
 import DiscoveryTab from './components/DiscoveryTab';
@@ -32,6 +32,18 @@ function App() {
   const [serialPorts, setSerialPorts] = useState<{path: string}[]>([]);
 
   const [activeTerminalTarget, setActiveTerminalTarget] = useState('');
+  const [showBaudratePresets, setShowBaudratePresets] = useState(false);
+  const baudrateRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (baudrateRef.current && !baudrateRef.current.contains(event.target as Node)) {
+        setShowBaudratePresets(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     fetch('http://localhost:3001/api/interfaces')
@@ -189,7 +201,7 @@ function App() {
                       disabled={!!activeTerminalTarget}
                       maxWidth="220px"
                     />
-                    <div style={{position: 'relative', width: '120px'}}>
+                    <div ref={baudrateRef} style={{position: 'relative', width: '120px'}}>
                       <input 
                         type="text" 
                         placeholder="Baudrate"
@@ -198,20 +210,72 @@ function App() {
                         onChange={e => setBaudRate(e.target.value)} 
                         disabled={!!activeTerminalTarget} 
                       />
-                      <select 
-                        style={{position: 'absolute', right: 0, top: 0, width: '30px', height: '100%', opacity: 0, cursor: 'pointer'}}
-                        value={baudRate}
-                        onChange={e => setBaudRate(e.target.value)}
-                        disabled={!!activeTerminalTarget}
-                        title="Sık kullanılan hızlar"
+                      <span 
+                        onClick={() => !activeTerminalTarget && setShowBaudratePresets(!showBaudratePresets)}
+                        style={{
+                          position: 'absolute', 
+                          right: '12px', 
+                          top: '50%', 
+                          transform: 'translateY(-50%)', 
+                          cursor: activeTerminalTarget ? 'not-allowed' : 'pointer', 
+                          fontSize: '10px', 
+                          color: 'var(--text-secondary)',
+                          userSelect: 'none'
+                        }}
                       >
-                        <option value="9600">9600</option>
-                        <option value="19200">19200</option>
-                        <option value="38400">38400</option>
-                        <option value="57600">57600</option>
-                        <option value="115200">115200</option>
-                      </select>
-                      <span style={{position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '10px', color: 'var(--text-secondary)'}}>▼</span>
+                        ▼
+                      </span>
+                      {showBaudratePresets && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 6px)',
+                            left: 0,
+                            right: 0,
+                            background: 'rgba(20, 20, 35, 0.95)',
+                            backdropFilter: 'blur(16px)',
+                            border: '1px solid var(--panel-border)',
+                            borderRadius: '8px',
+                            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.5)',
+                            zIndex: 9999,
+                            padding: '4px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px',
+                          }}
+                        >
+                          {['9600', '19200', '38400', '57600', '115200'].map(val => (
+                            <div
+                              key={val}
+                              onClick={() => {
+                                setBaudRate(val);
+                                setShowBaudratePresets(false);
+                              }}
+                              style={{
+                                padding: '8px 12px',
+                                fontSize: '0.85rem',
+                                borderRadius: '6px',
+                                color: baudRate === val ? 'var(--accent-color)' : 'var(--text-primary)',
+                                background: baudRate === val ? 'rgba(137, 180, 250, 0.15)' : 'transparent',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                if (baudRate !== val) {
+                                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (baudRate !== val) {
+                                  e.currentTarget.style.background = 'transparent';
+                                }
+                              }}
+                            >
+                              {val}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
