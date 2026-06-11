@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const ping = require('ping');
 const { SerialPort } = require('serialport');
+const net = require('net');
 
 // Monkeypatch crypto.getDiffieHellman to support legacy DH groups (modp1, modp2, modp5)
 // on platforms where BoringSSL (bundled in Electron) does not support them natively.
@@ -572,6 +573,72 @@ io.on('connection', (socket) => {
     }
   });
 
+  let telnetSocket = null;
+
+  socket.on('connect-telnet', ({ host, port }) => {
+    if (telnetSocket) telnetSocket.destroy();
+    
+    socket.emit('terminal-data', `\r\nConnecting to Telnet host ${host}:${port}...\r\n`);
+    telnetSocket = new net.Socket();
+    
+    telnetSocket.connect(parseInt(port) || 23, host, () => {
+      socket.emit('terminal-data', `\r\nConnected to ${host}:${port}.\r\n`);
+    });
+    
+    telnetSocket.on('data', (data) => {
+      // Parse/strip telnet command options
+      let buf = [];
+      let i = 0;
+      while (i < data.length) {
+        if (data[i] === 255) { // IAC (255)
+          if (i + 1 < data.length) {
+            const cmd = data[i+1];
+            if (cmd === 251 || cmd === 252 || cmd === 253 || cmd === 254) { // WILL, WONT, DO, DONT
+              if (i + 2 < data.length) {
+                const opt = data[i+2];
+                // Respond WONT to DO, and DONT to WILL to refuse all options
+                let respCmd = (cmd === 253) ? 252 : 254; // DO (253) -> WONT (252); WILL (251) -> DONT (254)
+                telnetSocket.write(Buffer.from([255, respCmd, opt]));
+                i += 3;
+              } else {
+                break;
+              }
+            } else if (cmd === 255) {
+              buf.push(255);
+              i += 2;
+            } else {
+              i += 2;
+            }
+          } else {
+            break;
+          }
+        } else {
+          buf.push(data[i]);
+          i++;
+        }
+      }
+      if (buf.length > 0) {
+        socket.emit('terminal-data', Buffer.from(buf).toString('utf-8'));
+      }
+    });
+
+    telnetSocket.on('close', () => {
+      socket.emit('terminal-data', `\r\nTelnet connection closed.\r\n`);
+      telnetSocket = null;
+    });
+
+    telnetSocket.on('error', (err) => {
+      socket.emit('terminal-data', `\r\nTelnet Error: ${err.message}\r\n`);
+    });
+  });
+
+  socket.on('disconnect-telnet', () => {
+    if (telnetSocket) {
+      telnetSocket.destroy();
+      telnetSocket = null;
+    }
+  });
+
   // Universal terminal input router
   socket.on('terminal-input', (data) => {
     if (currentSerialPort && currentSerialPort.isOpen) {
@@ -580,6 +647,9 @@ io.on('connection', (socket) => {
     if (sshStream) {
       sshStream.write(data);
     }
+    if (telnetSocket) {
+      telnetSocket.write(data);
+    }
   });
 
   socket.on('disconnect', () => {
@@ -587,6 +657,7 @@ io.on('connection', (socket) => {
     if (currentSerialPort) currentSerialPort.close();
     sshStream = null;
     if (sshClient) sshClient.end();
+    if (telnetSocket) telnetSocket.destroy();
     console.log('Client disconnected:', socket.id);
   });
 });

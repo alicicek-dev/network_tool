@@ -61,6 +61,11 @@ export default function TerminalComponent({ action, target, socket: externalSock
         try {
           socket.emit('connect-ssh', JSON.parse(target));
         } catch(e) {}
+      } else if (action === 'telnet' && target) {
+        // target is a JSON string with Telnet details
+        try {
+          socket.emit('connect-telnet', JSON.parse(target));
+        } catch(e) {}
       } else if (action === 'serial' && target) {
         // target is a JSON string with Serial details
         try {
@@ -114,6 +119,8 @@ export default function TerminalComponent({ action, target, socket: externalSock
         socket.emit('stop-trace');
       } else if (action === 'ssh') {
         socket.emit('disconnect-ssh');
+      } else if (action === 'telnet') {
+        socket.emit('disconnect-telnet');
       } else if (action === 'serial') {
         socket.emit('disconnect-serial');
       }

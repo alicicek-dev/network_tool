@@ -36,6 +36,14 @@ function App() {
   const baudrateRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (terminalMode === 'ssh') {
+      setPort('22');
+    } else if (terminalMode === 'telnet') {
+      setPort('23');
+    }
+  }, [terminalMode]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (baudrateRef.current && !baudrateRef.current.contains(event.target as Node)) {
         setShowBaudratePresets(false);
@@ -97,6 +105,8 @@ function App() {
   const handleConnectTerminal = () => {
     if (terminalMode === 'ssh') {
       setActiveTerminalTarget(JSON.stringify({ host, port, username, password }));
+    } else if (terminalMode === 'telnet') {
+      setActiveTerminalTarget(JSON.stringify({ host, port }));
     } else {
       setActiveTerminalTarget(JSON.stringify({ path: comPort, baudRate }));
     }
@@ -207,6 +217,7 @@ function App() {
                 <CustomSelect 
                   options={[
                     { value: 'ssh', label: 'SSH' },
+                    { value: 'telnet', label: 'Telnet' },
                     { value: 'serial', label: 'COM Port (Serial)' }
                   ]}
                   value={terminalMode}
@@ -215,12 +226,47 @@ function App() {
                   maxWidth="180px"
                 />
                 
-                {terminalMode === 'ssh' ? (
+                {(terminalMode === 'ssh' || terminalMode === 'telnet') ? (
                   <>
-                    <input type="text" placeholder="Host / IP" style={{flex: 1}} value={host} onChange={e => setHost(e.target.value)} disabled={!!activeTerminalTarget} />
-                    <input type="text" placeholder="Port" style={{width: '70px'}} value={port} onChange={e => setPort(e.target.value)} disabled={!!activeTerminalTarget} />
-                    <input type="text" placeholder="User" style={{width: '120px'}} value={username} onChange={e => setUsername(e.target.value)} disabled={!!activeTerminalTarget} />
-                    <input type="password" placeholder="Password" style={{width: '120px'}} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleConnectTerminal()} disabled={!!activeTerminalTarget} />
+                    <input 
+                      type="text" 
+                      placeholder="Host / IP" 
+                      style={{flex: 1}} 
+                      value={host} 
+                      onChange={e => setHost(e.target.value)} 
+                      onKeyDown={(e) => e.key === 'Enter' && handleConnectTerminal()}
+                      disabled={!!activeTerminalTarget} 
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Port" 
+                      style={{width: '70px'}} 
+                      value={port} 
+                      onChange={e => setPort(e.target.value)} 
+                      onKeyDown={(e) => e.key === 'Enter' && handleConnectTerminal()}
+                      disabled={!!activeTerminalTarget} 
+                    />
+                    {terminalMode === 'ssh' && (
+                      <>
+                        <input 
+                          type="text" 
+                          placeholder="User" 
+                          style={{width: '120px'}} 
+                          value={username} 
+                          onChange={e => setUsername(e.target.value)} 
+                          disabled={!!activeTerminalTarget} 
+                        />
+                        <input 
+                          type="password" 
+                          placeholder="Password" 
+                          style={{width: '120px'}} 
+                          value={password} 
+                          onChange={e => setPassword(e.target.value)} 
+                          onKeyDown={(e) => e.key === 'Enter' && handleConnectTerminal()} 
+                          disabled={!!activeTerminalTarget} 
+                        />
+                      </>
+                    )}
                   </>
                 ) : (
                   <>
