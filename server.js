@@ -303,6 +303,7 @@ io.on('connection', (socket) => {
 
   // --- SSH FEATURE ---
   let sshClient = null;
+  let sshStream = null;
   socket.on('start-sweep', (subnet) => {
     for (let i = 1; i <= 254; i++) {
       const ip = `${subnet}.${i}`;
@@ -484,13 +485,11 @@ io.on('connection', (socket) => {
           socket.emit('terminal-data', `\r\nShell error: ${err.message}\r\n`);
           return;
         }
-        
-        socket.on('terminal-input', (data) => {
-          stream.write(data);
-        });
+        sshStream = stream;
 
         stream.on('close', () => {
           socket.emit('terminal-data', `\r\nSSH stream closed.\r\n`);
+          sshStream = null;
           if (sshClient) sshClient.end();
         }).on('data', (data) => {
           socket.emit('terminal-data', data.toString('utf-8'));
@@ -558,6 +557,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect-ssh', () => {
+    sshStream = null;
     if (sshClient) {
       sshClient.end();
       sshClient = null;
@@ -569,13 +569,15 @@ io.on('connection', (socket) => {
     if (currentSerialPort && currentSerialPort.isOpen) {
       currentSerialPort.write(data);
     }
-    // ssh input is handled inside the ssh ready callback because of scope, 
-    // but we can route it here if we want. Currently it's attached inside sshClient.shell
+    if (sshStream) {
+      sshStream.write(data);
+    }
   });
 
   socket.on('disconnect', () => {
     if (pingInterval) clearInterval(pingInterval);
     if (currentSerialPort) currentSerialPort.close();
+    sshStream = null;
     if (sshClient) sshClient.end();
     console.log('Client disconnected:', socket.id);
   });
