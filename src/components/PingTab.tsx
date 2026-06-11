@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function PingTab({ socket }: Props) {
-  const [pingTarget, setPingTarget] = useState('');
+  const [pingTarget, setPingTarget] = useState('8.8.8.8');
   const [activePing, setActivePing] = useState('');
   const [pingMode, setPingMode] = useState('ping');
   
