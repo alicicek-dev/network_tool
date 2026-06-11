@@ -52,6 +52,21 @@ function App() {
       .catch(console.error);
   }, []);
 
+  const getPortLabel = (sp: any) => {
+    if (sp.friendlyName) {
+      const pathUpper = sp.path.toUpperCase();
+      if (sp.friendlyName.toUpperCase().includes(`(${pathUpper})`)) {
+        const cleanedName = sp.friendlyName.replace(new RegExp(`\\s*\\(${sp.path}\\)`, 'i'), '').trim();
+        return `${sp.path} - ${cleanedName}`;
+      }
+      return `${sp.path} - ${sp.friendlyName}`;
+    }
+    if (sp.manufacturer) {
+      return `${sp.path} - ${sp.manufacturer}`;
+    }
+    return sp.path;
+  };
+
   const refreshSerialPorts = () => {
     fetch('http://localhost:3001/api/ports')
       .then(res => res.json())
@@ -211,7 +226,7 @@ function App() {
                   <>
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '270px'}}>
                       <CustomSelect 
-                        options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: sp.friendlyName || sp.path }))}
+                        options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: getPortLabel(sp) }))}
                         value={comPort}
                         onChange={(val) => setComPort(val)}
                         disabled={!!activeTerminalTarget}
