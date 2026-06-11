@@ -25,7 +25,8 @@
       "identityName": "AliEK.NetTool-NetworkEngineerToolkit",
       "publisher": "CN=677A4992-D291-47EE-91C0-263033D625D1",
       "publisherDisplayName": "Ali ÇİÇEK",
-      "applicationId": "NetTool"
+      "applicationId": "NetTool",
+      "displayName": "NetTool - Network Engineer Toolkit"
     },
     "directories": {
       "output": "release"
