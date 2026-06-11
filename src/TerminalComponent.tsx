@@ -26,7 +26,6 @@ export default function TerminalComponent({ action, target, socket: externalSock
       fontFamily: 'monospace',
       fontSize: 14,
       cursorBlink: true,
-      copyOnSelect: true,
     });
     
     const fitAddon = new FitAddon();
@@ -84,6 +83,16 @@ export default function TerminalComponent({ action, target, socket: externalSock
       socket.emit('terminal-input', data);
     });
 
+    // Auto copy on selection (PuTTY style)
+    const selectionDisposable = term.onSelectionChange(() => {
+      if (term.hasSelection()) {
+        const selectedText = term.getSelection();
+        if (selectedText) {
+          navigator.clipboard.writeText(selectedText).catch(console.error);
+        }
+      }
+    });
+
     // Resize handling
     const handleResize = () => {
       fitAddon.fit();
@@ -105,6 +114,7 @@ export default function TerminalComponent({ action, target, socket: externalSock
       socket.off('terminal-data', handleTerminalData);
       socket.off('connect', onConnect);
       socket.off('disconnect', handleDisconnect);
+      selectionDisposable.dispose();
       
       if (isLocalSocket) {
         socket.disconnect();
