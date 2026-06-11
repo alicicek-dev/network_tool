@@ -125,17 +125,15 @@ function App() {
               <h1>Network Overview</h1>
               <div className="dashboard-grid">
                 <div className="glass-panel stat-card" style={{position: 'relative'}}>
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start', marginBottom: '10px'}}>
                     <div className="stat-label">Interface</div>
                     <CustomSelect 
                       options={interfaces.length === 0 ? [{ value: 0, label: 'Unknown' }] : interfaces.map((intf, idx) => ({ value: idx, label: intf.name }))}
                       value={selectedIfIdx}
                       onChange={(val) => setSelectedIfIdx(val)}
-                      maxWidth="180px"
+                      maxWidth="100%"
                     />
-                  </div>
-                  <div className="stat-value">{interfaces[selectedIfIdx]?.ip || 'Unknown'}</div>
-                  <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '5px'}}>MAC: {interfaces[selectedIfIdx]?.mac || 'Unknown'}</div>
+                    <div className="stat-value" style={{marginTop: '4px'}}>{interfaces[selectedIfIdx]?.ip || 'Unknown'}</div>
+                    <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>MAC: {interfaces[selectedIfIdx]?.mac || 'Unknown'}</div>
                 </div>
                 <div className="stat-card glass-panel">
                   <div className="stat-label">Gateway</div>
