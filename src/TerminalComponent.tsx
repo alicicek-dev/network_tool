@@ -38,7 +38,9 @@ export default function TerminalComponent({ action, target, socket: externalSock
     xtermRef.current = term;
 
     // Connect to backend
-    const socket = externalSocket || io('http://localhost:3001');
+    const socket = externalSocket || io('http://localhost:3001', {
+      transports: ['websocket']
+    });
     const isLocalSocket = !externalSocket;
     socketRef.current = socket;
 

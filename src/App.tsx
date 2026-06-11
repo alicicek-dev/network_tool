@@ -8,7 +8,9 @@ import PingTab from './components/PingTab';
 import { io } from 'socket.io-client';
 import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon } from './components/Icons';
 
-const socket = io('http://localhost:3001');
+const socket = io('http://localhost:3001', {
+  transports: ['websocket']
+});
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
