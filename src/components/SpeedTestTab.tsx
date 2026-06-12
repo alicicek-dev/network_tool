@@ -13,7 +13,7 @@ interface SpeedTestHistory {
 }
 
 export default function SpeedTestTab({ socket }: Props) {
-  const [status, setStatus] = useState('Hazır');
+  const [status, setStatus] = useState('Ready');
   const [ping, setPing] = useState(0);
   const [download, setDownload] = useState(0);
   const [upload, setUpload] = useState(0);
@@ -23,7 +23,7 @@ export default function SpeedTestTab({ socket }: Props) {
 
   useEffect(() => {
     socket.on('speedtest-update', (data) => {
-      setStatus(`Test ediliyor: ${data.phase.toUpperCase()}`);
+      setStatus(`Testing: ${data.phase.toUpperCase()}`);
       setProgress(data.progress);
       if (data.phase === 'ping' && data.result) setPing(data.result);
       if (data.phase === 'download' && data.result) setDownload(data.result);
@@ -31,7 +31,7 @@ export default function SpeedTestTab({ socket }: Props) {
     });
 
     socket.on('speedtest-complete', (data) => {
-      setStatus('Tamamlandı');
+      setStatus('Completed');
       setIsTesting(false);
       setPing(data.ping);
       setDownload(data.download);
@@ -48,7 +48,7 @@ export default function SpeedTestTab({ socket }: Props) {
     });
 
     socket.on('speedtest-error', (data) => {
-      setStatus(`Hata: ${data.error}`);
+      setStatus(`Error: ${data.error}`);
       setIsTesting(false);
     });
 
@@ -65,7 +65,7 @@ export default function SpeedTestTab({ socket }: Props) {
     setUpload(0);
     setProgress(0);
     setIsTesting(true);
-    setStatus('Sunucuya bağlanıyor...');
+    setStatus('Connecting to server...');
     socket.emit('start-speedtest');
   };
 
@@ -75,7 +75,7 @@ export default function SpeedTestTab({ socket }: Props) {
       <div className="glass-panel" style={{padding: '40px', width: '600px', textAlign: 'center', borderRadius: '15px', marginBottom: '30px'}}>
         
         <div style={{fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '30px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid var(--primary)', textAlign: 'left'}}>
-          <strong>Cloudflare Edge Ağı</strong> üzerinden test yapılmaktadır. Cihazınız ile en yakın veri merkezleri arasında çoklu bağlantıyla kesintisiz stres testi uygulanarak gerçek kapasiteniz ölçülür.
+          Testing is conducted over the <strong>Cloudflare Edge Network</strong>. Real capacity is measured using multi-threaded stress tests between your device and the closest datacenters.
         </div>
         
         <div style={{fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '20px'}}>
@@ -94,13 +94,13 @@ export default function SpeedTestTab({ socket }: Props) {
           <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'rgba(0,0,0,0.2)'}}>
             <div className="stat-label">Download</div>
             <div className="stat-value" style={{color: 'var(--primary)'}}>
-              {download ? <>{(status === 'Tamamlandı' || status.includes('UPLOAD')) && <span style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Max: </span>}{download} Mbps</> : '-'}
+              {download ? <>{(status === 'Completed' || status.includes('UPLOAD')) && <span style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Max: </span>}{download} Mbps</> : '-'}
             </div>
           </div>
           <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'rgba(0,0,0,0.2)'}}>
             <div className="stat-label">Upload</div>
             <div className="stat-value" style={{color: 'var(--success)'}}>
-              {upload ? <>{status === 'Tamamlandı' && <span style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Max: </span>}{upload} Mbps</> : '-'}
+              {upload ? <>{status === 'Completed' && <span style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Max: </span>}{upload} Mbps</> : '-'}
             </div>
           </div>
         </div>
@@ -110,18 +110,18 @@ export default function SpeedTestTab({ socket }: Props) {
           disabled={isTesting}
           style={{padding: '15px 40px', fontSize: '1.2rem', borderRadius: '30px'}}
         >
-          {isTesting ? 'Test Ediliyor...' : 'Testi Başlat'}
+          {isTesting ? 'Testing...' : 'Start Test'}
         </button>
       </div>
 
       {history.length > 0 && (
         <div className="glass-panel" style={{padding: '20px', width: '600px', borderRadius: '15px'}}>
-          <h3 style={{marginBottom: '15px', color: 'var(--text-primary)', textAlign: 'left'}}>Geçmiş Testler</h3>
+          <h3 style={{marginBottom: '15px', color: 'var(--text-primary)', textAlign: 'left'}}>Test History</h3>
           <div style={{background: 'rgba(0,0,0,0.2)', borderRadius: '10px', overflow: 'hidden'}}>
             <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem'}}>
               <thead>
                 <tr style={{background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)'}}>
-                  <th style={{padding: '12px', textAlign: 'left'}}>Tarih & Saat</th>
+                  <th style={{padding: '12px', textAlign: 'left'}}>Date & Time</th>
                   <th style={{padding: '12px', textAlign: 'center'}}>Ping</th>
                   <th style={{padding: '12px', textAlign: 'center'}}>Download</th>
                   <th style={{padding: '12px', textAlign: 'center'}}>Upload</th>

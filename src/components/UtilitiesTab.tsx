@@ -29,9 +29,9 @@ export default function UtilitiesTab() {
         body: JSON.stringify({ mac: wolMac })
       });
       const data = await res.json();
-      setWolStatus(res.ok ? `✅ ${data.message}` : `❌ Hata: ${data.error}`);
+      setWolStatus(res.ok ? `✅ ${data.message}` : `❌ Error: ${data.error}`);
     } catch (e) {
-      setWolStatus(`❌ Bağlantı hatası`);
+      setWolStatus(`❌ Connection error`);
     }
   };
 
@@ -42,7 +42,7 @@ export default function UtilitiesTab() {
       const data = await res.json();
       setVendorResult(res.ok ? `🏢 ${data.vendor}` : `❌ ${data.error}`);
     } catch (e) {
-      setVendorResult(`❌ Bağlantı hatası`);
+      setVendorResult(`❌ Connection error`);
     }
   };
 
@@ -95,28 +95,28 @@ export default function UtilitiesTab() {
         
         <div className="glass-panel stat-card">
           <h3>Wake on LAN (WoL)</h3>
-          <p className="subtext">Uyandırmak istediğiniz cihazın MAC adresini girin.</p>
-          <input type="text" placeholder="Örn: 00:11:22:33:44:55" value={wolMac} onChange={e => setWolMac(e.target.value)} className="ui-input" style={{marginBottom: '10px'}}/>
-          <button onClick={handleWakeOnLan} style={{width: '100%'}}>Uyandır</button>
+          <p className="subtext">Enter the MAC address of the device you want to wake.</p>
+          <input type="text" placeholder="e.g. 00:11:22:33:44:55" value={wolMac} onChange={e => setWolMac(e.target.value)} className="ui-input" style={{marginBottom: '10px'}}/>
+          <button onClick={handleWakeOnLan} style={{width: '100%'}}>Wake Up</button>
           {wolStatus && <div style={{marginTop: '10px', fontSize: '0.9rem', color: wolStatus.includes('✅') ? 'var(--success)' : 'var(--danger)'}}>{wolStatus}</div>}
         </div>
 
         <div className="glass-panel stat-card">
           <h3>MAC Vendor Lookup</h3>
-          <p className="subtext">Cihazın MAC adresinden üretici firmayı bulun.</p>
-          <input type="text" placeholder="Örn: B8:27:EB:..." value={vendorMac} onChange={e => setVendorMac(e.target.value)} className="ui-input" style={{marginBottom: '10px'}}/>
-          <button onClick={handleVendorLookup} style={{width: '100%', background: 'var(--panel-border)', color: 'white'}}>Sorgula</button>
+          <p className="subtext">Find the manufacturer vendor from the device MAC address.</p>
+          <input type="text" placeholder="e.g. B8:27:EB:..." value={vendorMac} onChange={e => setVendorMac(e.target.value)} className="ui-input" style={{marginBottom: '10px'}}/>
+          <button onClick={handleVendorLookup} style={{width: '100%', background: 'var(--panel-border)', color: 'white'}}>Lookup</button>
           {vendorResult && <div style={{marginTop: '10px', fontSize: '0.9rem', color: vendorResult.includes('❌') ? 'var(--danger)' : 'var(--success)'}}>{vendorResult}</div>}
         </div>
 
         <div className="glass-panel stat-card" style={{gridColumn: '1 / -1'}}>
           <h3>Subnet Calculator</h3>
-          <p className="subtext">IPv4 adresinin alt ağ (subnet) bilgilerini hesaplayın.</p>
+          <p className="subtext">Calculate subnet information for the IPv4 address.</p>
           <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
-            <input type="text" placeholder="IP Adresi" value={subnetIp} onChange={e => setSubnetIp(e.target.value)} className="ui-input" style={{flex: 2}}/>
+            <input type="text" placeholder="IP Address" value={subnetIp} onChange={e => setSubnetIp(e.target.value)} className="ui-input" style={{flex: 2}}/>
             <span style={{alignSelf: 'center', fontSize: '1.5rem'}}>/</span>
             <input type="text" placeholder="CIDR" value={subnetCidr} onChange={e => setSubnetCidr(e.target.value)} className="ui-input" style={{flex: 1}}/>
-            <button onClick={handleSubnetCalc}>Hesapla</button>
+            <button onClick={handleSubnetCalc}>Calculate</button>
           </div>
           {calcResult && (
             <div style={{display: 'flex', gap: '20px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px'}}>
@@ -130,15 +130,15 @@ export default function UtilitiesTab() {
 
         <div className="glass-panel stat-card" style={{gridColumn: '1 / -1'}}>
           <h3>DNS & Whois Lookup</h3>
-          <p className="subtext">Domain veya IP adresinin arkasındaki kayıtları öğrenin.</p>
+          <p className="subtext">Find registration and DNS records for a domain or IP.</p>
           <div style={{display: 'flex', gap: '10px', marginBottom: '10px'}}>
             <input type="text" placeholder="google.com" value={domain} onChange={e => setDomain(e.target.value)} className="ui-input" style={{flex: 1}}/>
-            <button onClick={handleDnsLookup} disabled={isDnsLoading}>{isDnsLoading ? '...' : 'Sorgula'}</button>
+            <button onClick={handleDnsLookup} disabled={isDnsLoading}>{isDnsLoading ? '...' : 'Lookup'}</button>
           </div>
           <div style={{display: 'flex', gap: '10px', height: '200px'}}>
             <div className="scroll-box" style={{flex: 1}}>
               <h4 style={{margin: '0 0 10px 0'}}>DNS Records</h4>
-              {dnsResults.length === 0 ? <span className="placeholder-text">Kayıt bulunamadı...</span> : 
+              {dnsResults.length === 0 ? <span className="placeholder-text">No records found...</span> : 
                 dnsResults.map((rec, i) => (
                   <div key={i} className="list-item" style={{display: 'flex', gap: '10px'}}>
                     <span style={{color: 'var(--primary)', width: '40px'}}>{rec.type}</span>
@@ -150,7 +150,7 @@ export default function UtilitiesTab() {
             <div className="scroll-box" style={{flex: 1}}>
               <h4 style={{margin: '0 0 10px 0'}}>Whois Data</h4>
               <pre style={{fontSize: '0.8rem', whiteSpace: 'pre-wrap'}}>
-                {whoisResult ? JSON.stringify(whoisResult, null, 2) : 'Veri yok...'}
+                {whoisResult ? JSON.stringify(whoisResult, null, 2) : 'No data...'}
               </pre>
             </div>
           </div>

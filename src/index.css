@@ -213,3 +213,26 @@ button:active {
   overflow: hidden;
   border: 1px solid var(--panel-border);
 }
+
+/* Dashboard Interface Table Copyable Cell & Hover Interactions */
+.copyable-cell {
+  position: relative;
+  cursor: pointer;
+}
+.copyable-cell .copy-icon-hover {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.copyable-cell:hover {
+  color: var(--accent-color) !important;
+}
+.copyable-cell:hover .copy-icon-hover {
+  opacity: 0.7 !important;
+  transform: scale(1.1);
+}
+.interface-row:hover {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+.interface-row.selected:hover {
+  background: rgba(137, 180, 250, 0.08) !important;
+}

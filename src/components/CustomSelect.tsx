@@ -74,6 +74,9 @@ export default function CustomSelect({
           gap: '8px',
           transition: 'all 0.2s ease',
           opacity: disabled ? 0.6 : 1,
+          width: '100%',
+          boxSizing: 'border-box',
+          minWidth: 0
         }}
         className="custom-select-btn"
       >
@@ -82,6 +85,7 @@ export default function CustomSelect({
           overflow: 'hidden', 
           whiteSpace: 'nowrap', 
           flex: 1,
+          minWidth: 0,
           textAlign: 'left'
         }}>
           {selectedOption ? selectedOption.label : 'Select...'}

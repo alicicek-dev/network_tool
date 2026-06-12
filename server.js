@@ -165,10 +165,10 @@ app.get('/api/mac/:mac', async (req, res) => {
       const vendor = await response.text();
       res.json({ vendor });
     } else {
-      res.status(404).json({ error: 'Bulunamadı' });
+      res.status(404).json({ error: 'Not Found' });
     }
   } catch (err) {
-    res.status(500).json({ error: 'Sorgu hatası' });
+    res.status(500).json({ error: 'Query error' });
   }
 });
 
@@ -249,6 +249,63 @@ io.on('connection', (socket) => {
     if (pingInterval) clearInterval(pingInterval);
   });
 
+  // --- MULTI-PING FEATURE ---
+  let multiPingInterval = null;
+  socket.on('start-multi-ping', (targets) => {
+    if (multiPingInterval) clearInterval(multiPingInterval);
+    
+    let seqs = {};
+    targets.forEach(t => seqs[t] = 0);
+
+    const runMultiPing = async () => {
+      targets.forEach(async (target) => {
+        seqs[target]++;
+        try {
+          let res = await ping.promise.probe(target, { timeout: 2 });
+          if (res.alive) {
+            socket.emit('multi-ping-stat', {
+              target,
+              seq: seqs[target],
+              alive: true,
+              time: res.time,
+              host: res.numeric_host,
+              ttl: res.ttl || 'N/A'
+            });
+          } else {
+            socket.emit('multi-ping-stat', {
+              target,
+              seq: seqs[target],
+              alive: false,
+              time: null,
+              host: 'N/A',
+              ttl: 'N/A'
+            });
+          }
+        } catch (err) {
+          socket.emit('multi-ping-stat', {
+            target,
+            seq: seqs[target],
+            alive: false,
+            time: null,
+            host: 'N/A',
+            ttl: 'N/A',
+            error: err.message
+          });
+        }
+      });
+    };
+
+    runMultiPing();
+    multiPingInterval = setInterval(runMultiPing, 2000);
+  });
+
+  socket.on('stop-multi-ping', () => {
+    if (multiPingInterval) {
+      clearInterval(multiPingInterval);
+      multiPingInterval = null;
+    }
+  });
+
   // --- TRACEROUTE FEATURE ---
   let traceProcess = null;
   socket.on('start-trace', (target) => {
@@ -308,36 +365,80 @@ io.on('connection', (socket) => {
   // --- SSH FEATURE ---
   let sshClient = null;
   let sshStream = null;
-  socket.on('start-sweep', (subnet) => {
+  let currentSweepId = 0;
+  socket.on('start-sweep', async (subnet) => {
+    currentSweepId++;
+    const mySweepId = currentSweepId;
+    const batchSize = 30;
+    const ips = [];
     for (let i = 1; i <= 254; i++) {
-      const ip = `${subnet}.${i}`;
-      ping.promise.probe(ip, { timeout: 1 }).then(res => {
-        if (res.alive) {
-          socket.emit('sweep-result', { ip: res.host, time: res.time });
-        }
-      }).catch(() => {});
+      ips.push(`${subnet}.${i}`);
+    }
+
+    for (let i = 0; i < ips.length; i += batchSize) {
+      if (!socket.connected || mySweepId !== currentSweepId) break;
+      const batch = ips.slice(i, i + batchSize);
+      await Promise.all(batch.map(ip => {
+        return ping.promise.probe(ip, { timeout: 1 })
+          .then(res => {
+            if (mySweepId !== currentSweepId || !socket.connected) return;
+            if (res.alive) {
+              socket.emit('sweep-result', { ip: res.host, time: res.time });
+            }
+          })
+          .catch(() => {});
+      }));
+    }
+
+    if (socket.connected && mySweepId === currentSweepId) {
+      socket.emit('sweep-complete');
     }
   });
 
+  socket.on('stop-sweep', () => {
+    currentSweepId++;
+  });
+
   // --- PORT SCANNER ---
-  socket.on('start-port-scan', ({ host, ports }) => {
-    ports.forEach(port => {
-      const s = new net.Socket();
-      s.setTimeout(2000);
-      s.on('connect', () => {
-        socket.emit('port-scan-result', { port, status: 'open' });
-        s.destroy();
-      });
-      s.on('timeout', () => {
-        socket.emit('port-scan-result', { port, status: 'filtered' });
-        s.destroy();
-      });
-      s.on('error', (e) => {
-        socket.emit('port-scan-result', { port, status: 'closed' });
-        s.destroy();
-      });
-      s.connect(port, host);
-    });
+  let currentPortScanId = 0;
+  socket.on('start-port-scan', async ({ host, ports }) => {
+    currentPortScanId++;
+    const myPortScanId = currentPortScanId;
+    const chunkSize = 100;
+    for (let i = 0; i < ports.length; i += chunkSize) {
+      if (!socket.connected || myPortScanId !== currentPortScanId) break;
+      const chunk = ports.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(port => {
+        return new Promise((resolve) => {
+          if (myPortScanId !== currentPortScanId || !socket.connected) {
+            resolve();
+            return;
+          }
+          const s = new net.Socket();
+          s.setTimeout(2000);
+          
+          let resolved = false;
+          const done = (status) => {
+            if (resolved) return;
+            resolved = true;
+            if (socket.connected && myPortScanId === currentPortScanId) {
+              socket.emit('port-scan-result', { port, status });
+            }
+            s.destroy();
+            resolve();
+          };
+
+          s.on('connect', () => done('open'));
+          s.on('timeout', () => done('filtered'));
+          s.on('error', () => done('closed'));
+          s.connect(port, host);
+        });
+      }));
+    }
+  });
+
+  socket.on('stop-port-scan', () => {
+    currentPortScanId++;
   });
 
   // --- SPEED TEST ---
@@ -654,6 +755,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     if (pingInterval) clearInterval(pingInterval);
+    if (multiPingInterval) clearInterval(multiPingInterval);
     if (currentSerialPort) currentSerialPort.close();
     sshStream = null;
     if (sshClient) sshClient.end();

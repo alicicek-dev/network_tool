@@ -21,6 +21,14 @@
         "appx"
       ]
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NetTool",
+      "runAfterFinish": true
+    },
     "appx": {
       "identityName": "AliEK.NetTool-NetworkEngineerToolkit",
       "publisher": "CN=677A4992-D291-47EE-91C0-263033D625D1",

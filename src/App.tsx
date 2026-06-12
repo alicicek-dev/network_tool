@@ -6,7 +6,7 @@ import UtilitiesTab from './components/UtilitiesTab';
 import SpeedTestTab from './components/SpeedTestTab';
 import PingTab from './components/PingTab';
 import { io } from 'socket.io-client';
-import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, RefreshIcon } from './components/Icons';
+import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, RefreshIcon, CopyIcon } from './components/Icons';
 import CustomSelect from './components/CustomSelect';
 
 const socket = io('http://localhost:3001', {
@@ -19,6 +19,15 @@ function App() {
   // Interfaces State
   const [interfaces, setInterfaces] = useState<{name: string, ip: string, mac: string, gateway?: string}[]>([]);
   const [selectedIfIdx, setSelectedIfIdx] = useState(0);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+
+  const handleCopyValue = (value: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedText(value);
+      setTimeout(() => setCopiedText(null), 1500);
+    });
+  };
 
   // Terminal State
   const [terminalMode, setTerminalMode] = useState('ssh');
@@ -175,26 +184,217 @@ function App() {
           {activeTab === 'dashboard' && (
             <div className="fade-in">
               <h1>Network Overview</h1>
-              <div className="dashboard-grid">
-                <div className="glass-panel stat-card" style={{position: 'relative'}}>
-                    <div className="stat-label">Interface</div>
-                    <CustomSelect 
-                      options={interfaces.length === 0 ? [{ value: 0, label: 'Unknown' }] : interfaces.map((intf, idx) => ({ value: idx, label: intf.name }))}
-                      value={selectedIfIdx}
-                      onChange={(val) => setSelectedIfIdx(val)}
-                      maxWidth="100%"
-                    />
-                    <div className="stat-value" style={{marginTop: '4px'}}>{interfaces[selectedIfIdx]?.ip || 'Unknown'}</div>
-                    <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>MAC: {interfaces[selectedIfIdx]?.mac || 'Unknown'}</div>
-                </div>
-                <div className="stat-card glass-panel">
-                  <div className="stat-label">Gateway</div>
-                  <div className="stat-value">{interfaces[selectedIfIdx]?.gateway || 'Unknown'}</div>
-                </div>
-                <div className="stat-card glass-panel">
-                  <div className="stat-label">Internet Status</div>
-                  <div className="stat-value" style={{color: 'var(--success)'}}>Connected</div>
-                </div>
+              <div className="glass-panel" style={{ padding: '0px', overflow: 'hidden', border: '1px solid var(--panel-border)' }}>
+                <table className="device-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255, 255, 255, 0.02)', borderBottom: '1px solid var(--panel-border)' }}>
+                      <th style={{ padding: '10px 14px', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase', width: '50px', textAlign: 'center' }}>Select</th>
+                      <th style={{ padding: '10px 14px', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>Interface Name</th>
+                      <th style={{ padding: '10px 14px', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>IP Address</th>
+                      <th style={{ padding: '10px 14px', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>Gateway</th>
+                      <th style={{ padding: '10px 14px', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>MAC Address</th>
+                      <th style={{ padding: '10px 14px', fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase', width: '120px', textAlign: 'right' }}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {interfaces.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                          No interfaces found
+                        </td>
+                      </tr>
+                    ) : (
+                      interfaces.map((intf, idx) => {
+                        const isSelected = selectedIfIdx === idx;
+                        const hasGateway = !!intf.gateway;
+                        return (
+                          <tr
+                            key={idx}
+                            onClick={() => setSelectedIfIdx(idx)}
+                            style={{
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                              cursor: 'pointer',
+                              background: isSelected ? 'rgba(137, 180, 250, 0.06)' : 'transparent',
+                              transition: 'all 0.15s ease'
+                            }}
+                            className="interface-row"
+                          >
+                            {/* 1. Radio Select */}
+                            <td style={{ padding: '8px 14px', verticalAlign: 'middle', textAlign: 'center' }}>
+                              <div style={{
+                                width: '16px',
+                                height: '16px',
+                                borderRadius: '50%',
+                                border: isSelected ? '2px solid var(--accent-color)' : '2px solid var(--text-secondary)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: isSelected ? 'transparent' : 'rgba(0,0,0,0.2)',
+                                verticalAlign: 'middle'
+                              }}>
+                                {isSelected && (
+                                  <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    background: 'var(--accent-color)'
+                                  }} />
+                                )}
+                              </div>
+                            </td>
+
+                            {/* 2. Name */}
+                            <td style={{ 
+                              padding: '8px 14px', 
+                              fontWeight: '600', 
+                              fontSize: '0.9rem', 
+                              color: isSelected ? 'var(--accent-color)' : 'var(--text-primary)',
+                              verticalAlign: 'middle'
+                            }}>
+                              {intf.name}
+                            </td>
+
+                            {/* 3. IP Address (Copyable) */}
+                            <td 
+                              onClick={(e) => handleCopyValue(intf.ip, e)}
+                              title="Click to copy IP Address"
+                              style={{ 
+                                padding: '8px 14px', 
+                                fontFamily: 'monospace',
+                                fontSize: '0.9rem',
+                                color: 'var(--text-primary)',
+                                transition: 'color 0.2s ease',
+                                verticalAlign: 'middle'
+                              }}
+                              className="copyable-cell"
+                            >
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+                                <span style={{ fontWeight: 'bold' }}>{intf.ip}</span>
+                                <CopyIcon width="11" height="11" className="copy-icon-hover" style={{ opacity: 0.4, transition: 'opacity 0.2s' }} />
+                                {copiedText === intf.ip && (
+                                  <span style={{
+                                    position: 'absolute',
+                                    left: '110%',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    fontSize: '0.65rem',
+                                    color: '#11111b',
+                                    background: 'var(--success)',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    fontWeight: '600',
+                                    zIndex: 10,
+                                    whiteSpace: 'nowrap'
+                                  }}>
+                                    Copied
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* 4. Gateway (Copyable) */}
+                            <td 
+                              onClick={(e) => intf.gateway && handleCopyValue(intf.gateway, e)}
+                              title={intf.gateway ? "Click to copy Gateway" : undefined}
+                              style={{ 
+                                padding: '8px 14px', 
+                                fontFamily: 'monospace',
+                                fontSize: '0.9rem',
+                                color: hasGateway ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                transition: 'color 0.2s ease',
+                                cursor: intf.gateway ? 'pointer' : 'default',
+                                verticalAlign: 'middle'
+                              }}
+                              className={intf.gateway ? "copyable-cell" : ""}
+                            >
+                              {intf.gateway ? (
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+                                  <span>{intf.gateway}</span>
+                                  <CopyIcon width="11" height="11" className="copy-icon-hover" style={{ opacity: 0.4, transition: 'opacity 0.2s' }} />
+                                  {copiedText === intf.gateway && (
+                                    <span style={{
+                                      position: 'absolute',
+                                      left: '110%',
+                                      top: '50%',
+                                      transform: 'translateY(-50%)',
+                                      fontSize: '0.65rem',
+                                      color: '#11111b',
+                                      background: 'var(--success)',
+                                      padding: '1px 5px',
+                                      borderRadius: '3px',
+                                      fontWeight: '600',
+                                      zIndex: 10,
+                                      whiteSpace: 'nowrap'
+                                    }}>
+                                      Copied
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                'N/A'
+                              )}
+                            </td>
+
+                            {/* 5. MAC Address (Copyable) */}
+                            <td 
+                              onClick={(e) => handleCopyValue(intf.mac, e)}
+                              title="Click to copy MAC Address"
+                              style={{ 
+                                padding: '8px 14px', 
+                                fontFamily: 'monospace',
+                                fontSize: '0.85rem',
+                                color: 'var(--text-secondary)',
+                                transition: 'color 0.2s ease',
+                                verticalAlign: 'middle'
+                              }}
+                              className="copyable-cell"
+                            >
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+                                <span>{intf.mac}</span>
+                                <CopyIcon width="11" height="11" className="copy-icon-hover" style={{ opacity: 0.4, transition: 'opacity 0.2s' }} />
+                                {copiedText === intf.mac && (
+                                  <span style={{
+                                    position: 'absolute',
+                                    left: '110%',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    fontSize: '0.65rem',
+                                    color: '#11111b',
+                                    background: 'var(--success)',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    fontWeight: '600',
+                                    zIndex: 10,
+                                    whiteSpace: 'nowrap'
+                                  }}>
+                                    Copied
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* 6. Status Badge */}
+                            <td style={{ padding: '8px 14px', textAlign: 'right', verticalAlign: 'middle' }}>
+                              <span style={{
+                                fontSize: '0.7rem',
+                                color: hasGateway ? 'var(--success)' : 'var(--text-secondary)',
+                                background: hasGateway ? 'rgba(166, 227, 161, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                                padding: '3px 8px',
+                                borderRadius: '5px',
+                                fontWeight: '500',
+                                border: hasGateway ? '1px solid rgba(166, 227, 161, 0.15)' : '1px solid rgba(255, 255, 255, 0.06)',
+                                whiteSpace: 'nowrap',
+                                display: 'inline-block'
+                              }}>
+                                {hasGateway ? 'Connected' : 'Local Only'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
               </div>
               
               <div className="glass-panel" style={{padding: '20px', marginTop: '20px'}}>
@@ -270,19 +470,19 @@ function App() {
                   </>
                 ) : (
                   <>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '270px'}}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '270px', minWidth: 0}}>
                       <CustomSelect 
                         options={serialPorts.length === 0 ? [{ value: '', label: 'No COM ports found' }] : serialPorts.map(sp => ({ value: sp.path, label: getPortLabel(sp) }))}
                         value={comPort}
                         onChange={(val) => setComPort(val)}
                         disabled={!!activeTerminalTarget}
                         maxWidth="100%"
-                        style={{flex: 1}}
+                        style={{flex: 1, minWidth: 0}}
                       />
                       <button
                         onClick={refreshSerialPorts}
                         disabled={!!activeTerminalTarget}
-                        title="COM Portları Yenile"
+                        title="Refresh COM Ports"
                         style={{
                           background: 'rgba(0,0,0,0.3)',
                           border: '1px solid var(--panel-border)',
@@ -295,6 +495,7 @@ function App() {
                           cursor: 'pointer',
                           transition: 'all 0.2s',
                           opacity: activeTerminalTarget ? 0.5 : 1,
+                          flexShrink: 0,
                           width: 'auto'
                         }}
                         onMouseEnter={(e) => {
@@ -408,7 +609,12 @@ function App() {
             </div>
           )}
 
-          {activeTab === 'discovery' && <DiscoveryTab socket={socket} />}
+          {activeTab === 'discovery' && (
+            <DiscoveryTab 
+              socket={socket} 
+              defaultSubnet={interfaces[selectedIfIdx]?.ip ? interfaces[selectedIfIdx].ip.split('.').slice(0, 3).join('.') : undefined} 
+            />
+          )}
           {activeTab === 'utilities' && <UtilitiesTab />}
           {activeTab === 'speedtest' && <SpeedTestTab socket={socket} />}
         </main>
