@@ -229,9 +229,8 @@ function App() {
 
         <main className="main-content">
           {activeTab === 'dashboard' && (
-            <div className="main-content-scrollable">
-              <div className="fade-in">
-                <h1>Network Overview</h1>
+            <div className="fade-in">
+              <h1>Network Overview</h1>
               <div className="glass-panel" style={{ padding: '0px', overflow: 'hidden', border: '1px solid var(--panel-border)' }}>
                 <table className="device-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
@@ -453,14 +452,12 @@ function App() {
                   <button onClick={() => setActiveTab('utilities')}>Wake on LAN</button>
                 </div>
               </div>
-              </div>
             </div>
           )}
 
           {activeTab === 'ping' && <PingTab socket={socket} />}
 
           {activeTab === 'terminal' && (
-            <div className="main-content-scrollable">
             <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
               <h1>Connection Manager</h1>
               <div className="glass-panel" style={{padding: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center'}}>
@@ -656,7 +653,6 @@ function App() {
                   <div style={{color: 'gray', padding: '20px'}}>Terminal emulator ready. Enter connection details.</div>
                 )}
               </div>
-            </div>
             </div>
           )}
 
