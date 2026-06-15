@@ -70,16 +70,16 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   margin-top: 30px;
 }
 
-/* Custom Titlebar (draggable area) */
+/* Custom Titlebar (JS-based drag via IPC, CSS -webkit-app-region removed for reliability) */
 .titlebar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 30px;
-  -webkit-app-region: drag;
   -webkit-user-select: none;
   user-select: none;
+  cursor: default;
   display: flex;
   align-items: center;
   padding-left: 15px;

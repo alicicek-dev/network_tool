@@ -16,6 +16,10 @@ declare global {
     electronAPI: {
       ping: (host: string) => Promise<{ success: boolean; host: string }>;
       selectDirectory: () => Promise<string | null>;
+      windowDragStart: (mouseX: number, mouseY: number) => void;
+      windowDragMove: (mouseX: number, mouseY: number) => void;
+      windowDragEnd: () => void;
+      windowToggleMaximize: () => void;
     };
   }
 }

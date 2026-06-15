@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, screen } from 'electron';
 import path from 'path';
 import { spawn } from 'child_process';
 
@@ -80,11 +80,44 @@ ipcMain.handle('select-directory', async () => {
     properties: ['openDirectory']
   });
   
-  // Refocus the main window after native dialog closes to prevent drag-freeze bugs
+  // Refocus the main window after native dialog closes
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.focus();
   }
 
   if (result.canceled) return null;
   return result.filePaths[0];
+});
+
+// --- JavaScript-based window dragging (replaces broken CSS -webkit-app-region) ---
+let dragState: { startMouseX: number; startMouseY: number; startWinX: number; startWinY: number } | null = null;
+
+ipcMain.on('window-drag-start', (event, mouseX: number, mouseY: number) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return;
+  const [winX, winY] = win.getPosition();
+  dragState = { startMouseX: mouseX, startMouseY: mouseY, startWinX: winX, startWinY: winY };
+});
+
+ipcMain.on('window-drag-move', (event, mouseX: number, mouseY: number) => {
+  if (!dragState) return;
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return;
+  const deltaX = mouseX - dragState.startMouseX;
+  const deltaY = mouseY - dragState.startMouseY;
+  win.setPosition(dragState.startWinX + deltaX, dragState.startWinY + deltaY);
+});
+
+ipcMain.on('window-drag-end', () => {
+  dragState = null;
+});
+
+ipcMain.on('window-toggle-maximize', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return;
+  if (win.isMaximized()) {
+    win.unmaximize();
+  } else {
+    win.maximize();
+  }
 });

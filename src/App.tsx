@@ -44,24 +44,50 @@ function App() {
   const [activeTerminalTarget, setActiveTerminalTarget] = useState('');
   const [showBaudratePresets, setShowBaudratePresets] = useState(false);
   const baudrateRef = useRef<HTMLDivElement>(null);
+  const titlebarRef = useRef<HTMLDivElement>(null);
 
-  // Universal workaround for Electron drag-freeze bug on focus changes/dialog closures
+  // JavaScript-based window drag via IPC (replaces broken CSS -webkit-app-region: drag)
   useEffect(() => {
-    const handleFocus = () => {
-      const titlebar = document.querySelector('.titlebar') as HTMLElement;
-      if (titlebar) {
-        titlebar.style.webkitAppRegion = 'none';
-        // Force layout reflow
-        void titlebar.offsetHeight;
-        setTimeout(() => {
-          titlebar.style.webkitAppRegion = 'drag';
-        }, 50);
-      }
+    const titlebar = titlebarRef.current;
+    if (!titlebar) return;
+    const api = (window as any).electronAPI;
+    if (!api?.windowDragStart) return;
+
+    let isDragging = false;
+
+    const onMouseDown = (e: MouseEvent) => {
+      // Only left button, and not on interactive children
+      if (e.button !== 0) return;
+      isDragging = true;
+      api.windowDragStart(e.screenX, e.screenY);
     };
-    window.addEventListener('focus', handleFocus);
-    // Trigger once on component mount to be sure
-    handleFocus();
-    return () => window.removeEventListener('focus', handleFocus);
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      api.windowDragMove(e.screenX, e.screenY);
+    };
+
+    const onMouseUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      api.windowDragEnd();
+    };
+
+    const onDoubleClick = () => {
+      api.windowToggleMaximize();
+    };
+
+    titlebar.addEventListener('mousedown', onMouseDown);
+    titlebar.addEventListener('dblclick', onDoubleClick);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    return () => {
+      titlebar.removeEventListener('mousedown', onMouseDown);
+      titlebar.removeEventListener('dblclick', onDoubleClick);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
   }, []);
 
   useEffect(() => {
@@ -163,7 +189,7 @@ function App() {
 
   return (
     <>
-      <div className="titlebar">
+      <div className="titlebar" ref={titlebarRef}>
         NetTool - Network Engineer Toolkit
       </div>
       <div className="app-container">
