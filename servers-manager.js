@@ -207,7 +207,20 @@ class ServersManager {
 
         if (config.useSelfSigned) {
           this.log('https', 'Generating dynamic self-signed certificate...');
-          const pems = selfsigned.generate([{ name: 'commonName', value: '127.0.0.1' }], { days: 365 });
+          const pems = selfsigned.generate([
+            { name: 'commonName', value: 'localhost' }
+          ], {
+            days: 365,
+            keySize: 2048,
+            algorithm: 'sha256',
+            extensions: [{
+              name: 'subjectAltName',
+              altNames: [
+                { type: 2, value: 'localhost' },
+                { type: 7, ip: '127.0.0.1' }
+              ]
+            }]
+          });
           options = {
             key: pems.private,
             cert: pems.cert

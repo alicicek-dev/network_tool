@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetTool Server Test Page</title>
+  <!-- Google Fonts: Orbitron & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0b0b14;
+      --primary-color: #7289da;
+      --accent-cyan: #00f2fe;
+      --accent-pink: #f38baf;
+      --text-main: #f8f9fc;
+      --text-muted: #959ba9;
+      --card-bg: rgba(20, 20, 35, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --success: #a6e3a1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Background Glows */
+    .glow-1 {
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(114, 137, 218, 0.15) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(80px);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .glow-2 {
+      position: absolute;
+      bottom: -10%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(80px);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 40px 20px;
+      z-index: 2;
+      position: relative;
+    }
+
+    /* Glassmorphic Card */
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 40px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.03) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: skewX(-25deg);
+      pointer-events: none;
+      animation: shine 8s infinite linear;
+    }
+
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* Status Circle Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(166, 227, 161, 0.12);
+      color: var(--success);
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(166, 227, 161, 0.25);
+      box-shadow: 0 0 15px rgba(166, 227, 161, 0.1);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px var(--success); }
+      100% { transform: scale(0.9); opacity: 0.5; }
+    }
+
+    /* Typography */
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(0, 242, 254, 0.15);
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 35px auto;
+      line-height: 1.6;
+    }
+
+    /* Grid statistics */
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 40px;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 20px;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-box:hover {
+      border-color: rgba(0, 242, 254, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 242, 254, 0.05);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Interactive Latency Simulator */
+    .simulator-container {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      padding: 25px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .simulator-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .simulator-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      background: #05050a;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      margin-bottom: 15px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .sim-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .btn-ping {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #5b73c7 100%);
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(114, 137, 218, 0.3);
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-ping:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(114, 137, 218, 0.4);
+    }
+
+    .btn-ping:active {
+      transform: translateY(1px);
+    }
+
+    .sim-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .sim-info span {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Footer logo */
+    .footer {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .footer span {
+      color: var(--accent-cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <div class="container">
+    <div class="glass-card">
+      
+      <!-- Status Badge -->
+      <div class="status-badge">
+        <span class="pulse-dot"></span>
+        Server Connection Online
+      </div>
+
+      <!-- Heading -->
+      <h1>NetTool Web Server</h1>
+      <p class="subtitle">Your HTTP/HTTPS server started successfully. This test page proves the local network socket is active, routing traffic, and serving data correctly.</p>
+
+      <!-- Connection Statistics Grid -->
+      <div class="grid-stats">
+        <div class="stat-box">
+          <div class="stat-label">Connection Protocol</div>
+          <div class="stat-value" id="protocol-val">HTTP/1.1</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Host Port</div>
+          <div class="stat-value" id="port-val">3001</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Page Load Time</div>
+          <div class="stat-value" id="load-val">0 ms</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Server Uptime</div>
+          <div class="stat-value" id="uptime-val">00:00:00</div>
+        </div>
+      </div>
+
+      <!-- Real-Time Interactive Network Latency Simulator -->
+      <div class="simulator-container">
+        <div class="simulator-header">
+          <div class="simulator-title">Live Latency Graph (Simulated Loopback)</div>
+          <button class="btn-ping" onclick="triggerPing()">Send Ping</button>
+        </div>
+        <div class="canvas-container">
+          <canvas id="latencyCanvas"></canvas>
+        </div>
+        <div class="sim-controls">
+          <div class="sim-info">
+            Min: <span id="ping-min">0 ms</span> | Max: <span id="ping-max">0 ms</span> | Avg: <span id="ping-avg">0 ms</span>
+          </div>
+          <div class="sim-info" style="font-size: 0.8rem;">
+            Total Requests: <span id="ping-count">0</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer branding -->
+    <div class="footer" style="text-align: center;">
+      Powered by <span>NetTool</span> Toolkit v1.0.1
+    </div>
+  </div>
+
+  <script>
+    // 1. Initialize stats dynamically
+    window.addEventListener('DOMContentLoaded', () => {
+      // Get current host and protocol
+      document.getElementById('protocol-val').innerText = window.location.protocol.toUpperCase().replace(':', '');
+      document.getElementById('port-val').innerText = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
+      
+      // Calculate page load speed
+      if (window.performance && window.performance.timing) {
+        const navStart = window.performance.timing.navigationStart;
+        const loadEnd = window.performance.timing.loadEventEnd;
+        // Wait a tick for loadEventEnd to populate
+        setTimeout(() => {
+          const loadTime = window.performance.timing.loadEventEnd - navStart;
+          document.getElementById('load-val').innerText = loadTime > 0 ? loadTime + ' ms' : '2 ms';
+        }, 50);
+      }
+    });
+
+    // 2. Server Uptime timer simulation
+    let uptimeSeconds = 0;
+    setInterval(() => {
+      uptimeSeconds++;
+      const hrs = String(Math.floor(uptimeSeconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((uptimeSeconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(uptimeSeconds % 60).padStart(2, '0');
+      document.getElementById('uptime-val').innerText = `${hrs}:${mins}:${secs}`;
+    }, 1000);
+
+    // 3. Canvas Latency Graph Simulation
+    const canvas = document.getElementById('latencyCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set proper resolutions for canvas
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+      drawGraph();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    
+    let pings = Array(30).fill(15); // Seed initial pings
+    let pingHistory = [];
+    
+    function drawGraph() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      const stepY = canvas.height / 4;
+      for (let i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * stepY);
+        ctx.lineTo(canvas.width, i * stepY);
+        ctx.stroke();
+      }
+      
+      // Draw values line
+      ctx.beginPath();
+      const stepX = canvas.width / (pings.length - 1);
+      
+      for (let i = 0; i < pings.length; i++) {
+        // Map ping range 0 - 150 ms to canvas height (inverted)
+        const val = pings[i];
+        const y = canvas.height - (val / 120) * (canvas.height - 20) - 10;
+        const x = i * stepX;
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      
+      // Line style
+      ctx.strokeStyle = '#00f2fe';
+      ctx.lineWidth = 2.5;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(0, 242, 254, 0.5)';
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset shadow
+      
+      // Draw gradient under the line
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.lineTo(0, canvas.height);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(0, 242, 254, 0.15)');
+      grad.addColorStop(1, 'rgba(0, 242, 254, 0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    // Initial resize to set bounds
+    setTimeout(resizeCanvas, 100);
+
+    // Trigger Ping Simulation
+    function triggerPing() {
+      // Simulate loopback ping latency
+      const randomLatency = Math.floor(Math.random() * 25) + 3; // base latency 3-28ms
+      
+      // Occasional spikes to simulate minor traffic congestion
+      const isSpike = Math.random() < 0.15;
+      const finalLatency = isSpike ? randomLatency + Math.floor(Math.random() * 50) + 15 : randomLatency;
+      
+      pings.shift();
+      pings.push(finalLatency);
+      
+      pingHistory.push(finalLatency);
+      
+      // Update statistics
+      const min = Math.min(...pingHistory);
+      const max = Math.max(...pingHistory);
+      const avg = Math.round(pingHistory.reduce((a, b) => a + b, 0) / pingHistory.length);
+      
+      document.getElementById('ping-min').innerText = `${min} ms`;
+      document.getElementById('ping-max').innerText = `${max} ms`;
+      document.getElementById('ping-avg').innerText = `${avg} ms`;
+      document.getElementById('ping-count').innerText = pingHistory.length;
+      
+      drawGraph();
+    }
+    
+    // Auto-ping simulation every 2 seconds
+    setInterval(triggerPing, 2000);
+  </script>
+</body>
+</html>
