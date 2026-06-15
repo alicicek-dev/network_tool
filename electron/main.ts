@@ -34,11 +34,9 @@ function createWindow() {
     backgroundColor: '#1e1e2e'
   });
 
-  // Vite dev server URL
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
-    // Production
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
@@ -64,9 +62,8 @@ app.on('activate', () => {
   }
 });
 
-// Basic IPC handlers
+// IPC handlers
 ipcMain.handle('ping', async (event, host) => {
-  // TODO: implement ping logic
   return { success: true, host };
 });
 
@@ -82,30 +79,7 @@ ipcMain.handle('select-directory', async () => {
   return result.filePaths[0];
 });
 
-// --- Window drag via IPC ---
-let dragState: { startMouseX: number; startMouseY: number; startWinX: number; startWinY: number } | null = null;
-
-ipcMain.on('window-drag-start', (event, mouseX: number, mouseY: number) => {
-  const win = BrowserWindow.fromWebContents(event.sender);
-  if (!win) return;
-  const [winX, winY] = win.getPosition();
-  dragState = { startMouseX: mouseX, startMouseY: mouseY, startWinX: winX, startWinY: winY };
-});
-
-ipcMain.on('window-drag-move', (event, mouseX: number, mouseY: number) => {
-  if (!dragState) return;
-  const win = BrowserWindow.fromWebContents(event.sender);
-  if (!win) return;
-  const deltaX = mouseX - dragState.startMouseX;
-  const deltaY = mouseY - dragState.startMouseY;
-  win.setPosition(dragState.startWinX + deltaX, dragState.startWinY + deltaY);
-});
-
-ipcMain.on('window-drag-end', () => {
-  dragState = null;
-});
-
-// --- Window control buttons via IPC ---
+// Window control IPC
 ipcMain.on('window-minimize', (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (win) win.minimize();

@@ -70,16 +70,16 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   margin-top: 32px;
 }
 
-/* Custom Titlebar (frame:false, fully JS-controlled drag + window controls) */
+/* Custom Titlebar (frame:false — no DWM overlay, so CSS drag is reliable) */
 .titlebar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 32px;
+  -webkit-app-region: drag;
   -webkit-user-select: none;
   user-select: none;
-  cursor: default;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -96,8 +96,10 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
 .titlebar-controls {
   display: flex;
   height: 100%;
+  -webkit-app-region: no-drag;
 }
 .titlebar-btn {
+  -webkit-app-region: no-drag;
   width: 46px;
   height: 100%;
   display: flex;
@@ -105,15 +107,16 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: #cdd6f4;
   cursor: pointer;
   padding: 0;
   border-radius: 0;
   transition: background 0.15s;
+  font-size: 0;
 }
 .titlebar-btn:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+  color: #fff;
   transform: none;
 }
 .titlebar-btn:active {

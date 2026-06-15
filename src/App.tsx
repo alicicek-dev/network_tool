@@ -44,54 +44,6 @@ function App() {
   const [activeTerminalTarget, setActiveTerminalTarget] = useState('');
   const [showBaudratePresets, setShowBaudratePresets] = useState(false);
   const baudrateRef = useRef<HTMLDivElement>(null);
-  const titlebarRef = useRef<HTMLDivElement>(null);
-
-  // JavaScript-based window drag via IPC (replaces broken CSS -webkit-app-region: drag)
-  useEffect(() => {
-    const titlebar = titlebarRef.current;
-    if (!titlebar) return;
-    const api = (window as any).electronAPI;
-    if (!api?.windowDragStart) return;
-
-    let isDragging = false;
-
-    const onMouseDown = (e: MouseEvent) => {
-      // Only left button
-      if (e.button !== 0) return;
-      // Don't drag when clicking window control buttons
-      const target = e.target as HTMLElement;
-      if (target.closest('.titlebar-controls')) return;
-      isDragging = true;
-      api.windowDragStart(e.screenX, e.screenY);
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      api.windowDragMove(e.screenX, e.screenY);
-    };
-
-    const onMouseUp = () => {
-      if (!isDragging) return;
-      isDragging = false;
-      api.windowDragEnd();
-    };
-
-    const onDoubleClick = () => {
-      api.windowToggleMaximize();
-    };
-
-    titlebar.addEventListener('mousedown', onMouseDown);
-    titlebar.addEventListener('dblclick', onDoubleClick);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-
-    return () => {
-      titlebar.removeEventListener('mousedown', onMouseDown);
-      titlebar.removeEventListener('dblclick', onDoubleClick);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-  }, []);
 
   useEffect(() => {
     if (terminalMode === 'ssh') {
@@ -192,7 +144,7 @@ function App() {
 
   return (
     <>
-      <div className="titlebar" ref={titlebarRef}>
+      <div className="titlebar">
         <span className="titlebar-title">NetTool - Network Engineer Toolkit</span>
         <div className="titlebar-controls">
           <button
