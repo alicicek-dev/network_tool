@@ -23,7 +23,7 @@ export default function UtilitiesTab() {
   const handleWakeOnLan = async () => {
     if (!wolMac) return;
     try {
-      const res = await fetch('http://localhost:3001/api/wol', {
+      const res = await fetch('http://127.0.0.1:3001/api/wol', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mac: wolMac })
@@ -38,7 +38,7 @@ export default function UtilitiesTab() {
   const handleVendorLookup = async () => {
     if (!vendorMac) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/mac/${vendorMac}`);
+      const res = await fetch(`http://127.0.0.1:3001/api/mac/${vendorMac}`);
       const data = await res.json();
       setVendorResult(res.ok ? `🏢 ${data.vendor}` : `❌ ${data.error}`);
     } catch (e) {
@@ -52,9 +52,9 @@ export default function UtilitiesTab() {
     setDnsResults([]);
     setWhoisResult(null);
     try {
-      const dnsRes = await fetch(`http://localhost:3001/api/dns/${domain}`);
+      const dnsRes = await fetch(`http://127.0.0.1:3001/api/dns/${domain}`);
       if(dnsRes.ok) setDnsResults(await dnsRes.json());
-      const whoisRes = await fetch(`http://localhost:3001/api/whois/${domain}`);
+      const whoisRes = await fetch(`http://127.0.0.1:3001/api/whois/${domain}`);
       if(whoisRes.ok) setWhoisResult(await whoisRes.json());
     } catch (e) {
       console.error(e);

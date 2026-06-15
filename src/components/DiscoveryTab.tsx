@@ -174,7 +174,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
   const handleFetchArp = async () => {
     setIsLoadingArp(true);
     try {
-      const res = await fetch('http://localhost:3001/api/arp');
+      const res = await fetch('http://127.0.0.1:3001/api/arp');
       const data = await res.json();
       // Sort data by IP address numerically (ascending)
       const sorted = data.sort((a: any, b: any) => ipToInt(a.ip) - ipToInt(b.ip));

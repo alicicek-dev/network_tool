@@ -9,7 +9,7 @@ import { io } from 'socket.io-client';
 import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, RefreshIcon, CopyIcon } from './components/Icons';
 import CustomSelect from './components/CustomSelect';
 
-const socket = io('http://localhost:3001', {
+const socket = io('http://127.0.0.1:3001', {
   transports: ['websocket']
 });
 
@@ -63,10 +63,26 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/interfaces')
-      .then(res => res.json())
-      .then(data => setInterfaces(data))
-      .catch(console.error);
+    let retries = 0;
+    const maxRetries = 10;
+    
+    function fetchInterfaces() {
+      fetch('http://127.0.0.1:3001/api/interfaces')
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => setInterfaces(data))
+        .catch(err => {
+          console.warn('Failed to fetch interfaces, retrying...', err);
+          if (retries < maxRetries) {
+            retries++;
+            setTimeout(fetchInterfaces, 1000);
+          }
+        });
+    }
+    
+    fetchInterfaces();
   }, []);
 
   const getPortLabel = (sp: any) => {
@@ -85,7 +101,7 @@ function App() {
   };
 
   const refreshSerialPorts = () => {
-    fetch('http://localhost:3001/api/ports')
+    fetch('http://127.0.0.1:3001/api/ports')
       .then(res => res.json())
       .then(data => {
          // Natural sort (e.g. COM2 before COM10)
