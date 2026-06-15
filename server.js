@@ -1,4 +1,5 @@
 const express = require('express');
+const { checkIsAdmin, serversManager } = require('./servers-manager');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
@@ -218,8 +219,46 @@ app.get('/api/ports', async (req, res) => {
   }
 });
 
+app.get('/api/is-admin', async (req, res) => {
+  try {
+    const isAdmin = await checkIsAdmin();
+    res.json({ isAdmin });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
+
+  // --- QUICK FILE SERVERS FEATURE ---
+  // Expose current status immediately
+  socket.emit('quick-server-status-all', serversManager.getStatus());
+
+  // Set the socket for logs dispatch
+  serversManager.setSocket(socket);
+
+  socket.on('quick-server-start', async ({ type, config }) => {
+    try {
+      await serversManager.startServer(type, config);
+      socket.emit('quick-server-start-success', { type });
+    } catch (err) {
+      socket.emit('quick-server-start-error', { type, error: err.message });
+    }
+  });
+
+  socket.on('quick-server-stop', (type) => {
+    try {
+      serversManager.stopServer(type);
+      socket.emit('quick-server-stop-success', { type });
+    } catch (err) {
+      socket.emit('quick-server-stop-error', { type, error: err.message });
+    }
+  });
+
+  socket.on('quick-server-get-status', () => {
+    socket.emit('quick-server-status-all', serversManager.getStatus());
+  });
 
   // --- PING FEATURE ---
   let pingInterval;
@@ -767,4 +806,13 @@ io.on('connection', (socket) => {
 const PORT = 3001;
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`Backend server running on http://127.0.0.1:${PORT}`);
+});
+
+process.on('SIGTERM', () => {
+  serversManager.stopAll();
+  process.exit(0);
+});
+process.on('SIGINT', () => {
+  serversManager.stopAll();
+  process.exit(0);
 });

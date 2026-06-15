@@ -5,8 +5,9 @@ import DiscoveryTab from './components/DiscoveryTab';
 import UtilitiesTab from './components/UtilitiesTab';
 import SpeedTestTab from './components/SpeedTestTab';
 import PingTab from './components/PingTab';
+import QuickServerTab from './components/QuickServerTab';
 import { io } from 'socket.io-client';
-import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, RefreshIcon, CopyIcon } from './components/Icons';
+import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, RefreshIcon, CopyIcon, ServerIcon } from './components/Icons';
 import CustomSelect from './components/CustomSelect';
 
 const socket = io('http://127.0.0.1:3001', {
@@ -179,6 +180,13 @@ function App() {
           >
             <DiscoveryIcon width="18" height="18" />
             Discovery
+          </div>
+          <div 
+            className={`nav-item ${activeTab === 'quick-server' ? 'active' : ''}`}
+            onClick={() => setActiveTab('quick-server')}
+          >
+            <ServerIcon width="18" height="18" />
+            Quick Server
           </div>
           <div 
             className={`nav-item ${activeTab === 'utilities' ? 'active' : ''}`}
@@ -631,6 +639,7 @@ function App() {
               defaultSubnet={interfaces[selectedIfIdx]?.ip ? interfaces[selectedIfIdx].ip.split('.').slice(0, 3).join('.') : undefined} 
             />
           )}
+          {activeTab === 'quick-server' && <QuickServerTab socket={socket} />}
           {activeTab === 'utilities' && <UtilitiesTab />}
           {activeTab === 'speedtest' && <SpeedTestTab socket={socket} />}
         </main>

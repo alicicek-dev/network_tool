@@ -15,6 +15,7 @@
     "appId": "com.networktool.app",
     "productName": "NetTool",
     "win": {
+      "requestedExecutionLevel": "highestAvailable",
       "target": [
         "nsis",
         "portable",
@@ -50,14 +51,17 @@
     "@xterm/addon-fit": "^0.11.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "ftp-srv": "^4.6.3",
     "ping": "^1.0.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "recharts": "^3.8.1",
+    "selfsigned": "^5.5.0",
     "serialport": "^13.0.0",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "ssh2": "^1.17.0",
+    "tftp2": "^0.0.1",
     "wake_on_lan": "^1.0.0",
     "whois-json": "^2.0.4",
     "xterm": "^5.3.0"

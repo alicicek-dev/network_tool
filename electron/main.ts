@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import { spawn } from 'child_process';
 
@@ -72,4 +72,13 @@ app.on('activate', () => {
 ipcMain.handle('ping', async (event, host) => {
   // TODO: implement ping logic
   return { success: true, host };
+});
+
+ipcMain.handle('select-directory', async () => {
+  if (!mainWindow) return null;
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  });
+  if (result.canceled) return null;
+  return result.filePaths[0];
 });
