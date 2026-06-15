@@ -1,15 +1,9 @@
-import type { SVGProps } from 'react';
+import type { SVGProps, ImgHTMLAttributes } from 'react';
 
 // AppLogo (Customized Atom/Network Orbit Vector Icon)
-export function AppIcon(props: SVGProps<SVGSVGElement>) {
+export function AppIcon(props: ImgHTMLAttributes<HTMLImageElement>) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
-      <circle cx="12" cy="12" r="10" />
-      <ellipse cx="12" cy="12" rx="3" ry="8" transform="rotate(30 12 12)" />
-      <ellipse cx="12" cy="12" rx="3" ry="8" transform="rotate(90 12 12)" />
-      <ellipse cx="12" cy="12" rx="3" ry="8" transform="rotate(150 12 12)" />
-      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    </svg>
+    <img src="/app-icon.png" alt="NetTool" {...props} />
   );
 }
 

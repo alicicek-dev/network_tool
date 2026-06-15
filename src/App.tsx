@@ -146,7 +146,7 @@ function App() {
     <div className="app-root">
       <div className="titlebar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'none' }}>
-          <AppIcon width="16" height="15" style={{ color: 'var(--accent-color)' }} />
+          <AppIcon width="16" height="16" />
           <span className="titlebar-title">NetTool - Network Engineer Toolkit</span>
         </div>
         <div className="titlebar-controls">
@@ -176,7 +176,7 @@ function App() {
       <div className="app-container">
         <aside className="sidebar">
           <div style={{display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', marginBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
-            <AppIcon style={{color: 'var(--accent-color)'}} width="28" height="28" />
+            <AppIcon width="28" height="28" />
             <span style={{fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-primary)'}}>NetTool</span>
           </div>
           <div 
