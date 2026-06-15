@@ -84,12 +84,17 @@ export default function QuickServerTab({ socket }: Props) {
       .then((res) => res.json())
       .then((data) => {
         setIsAdmin(data.isAdmin);
-        // If administrator, update default ports to privileged ports (only if not customized/saved before)
+        // Set default ports based on administrator privilege level, unless customized by user
         if (data.isAdmin) {
-          if (!localStorage.getItem('nettool_httpPort')) setHttpPort('80');
-          if (!localStorage.getItem('nettool_httpsPort')) setHttpsPort('443');
-          if (!localStorage.getItem('nettool_ftpPort')) setFtpPort('21');
-          if (!localStorage.getItem('nettool_tftpPort')) setTftpPort('69');
+          if (localStorage.getItem('nettool_httpPort_isCustomized') !== 'true') setHttpPort('80');
+          if (localStorage.getItem('nettool_httpsPort_isCustomized') !== 'true') setHttpsPort('443');
+          if (localStorage.getItem('nettool_ftpPort_isCustomized') !== 'true') setFtpPort('21');
+          if (localStorage.getItem('nettool_tftpPort_isCustomized') !== 'true') setTftpPort('69');
+        } else {
+          if (localStorage.getItem('nettool_httpPort_isCustomized') !== 'true') setHttpPort('8080');
+          if (localStorage.getItem('nettool_httpsPort_isCustomized') !== 'true') setHttpsPort('8443');
+          if (localStorage.getItem('nettool_ftpPort_isCustomized') !== 'true') setFtpPort('2121');
+          if (localStorage.getItem('nettool_tftpPort_isCustomized') !== 'true') setTftpPort('6969');
         }
       })
       .catch((err) => {
@@ -346,6 +351,7 @@ export default function QuickServerTab({ socket }: Props) {
                   onChange={(e) => {
                     setHttpPort(e.target.value);
                     localStorage.setItem('nettool_httpPort', e.target.value);
+                    localStorage.setItem('nettool_httpPort_isCustomized', 'true');
                   }}
                   className="ui-input"
                   style={{ width: '100%' }}
@@ -391,6 +397,7 @@ export default function QuickServerTab({ socket }: Props) {
                   onChange={(e) => {
                     setHttpsPort(e.target.value);
                     localStorage.setItem('nettool_httpsPort', e.target.value);
+                    localStorage.setItem('nettool_httpsPort_isCustomized', 'true');
                   }}
                   className="ui-input"
                   style={{ width: '100%' }}
@@ -487,6 +494,7 @@ export default function QuickServerTab({ socket }: Props) {
                   onChange={(e) => {
                     setFtpPort(e.target.value);
                     localStorage.setItem('nettool_ftpPort', e.target.value);
+                    localStorage.setItem('nettool_ftpPort_isCustomized', 'true');
                   }}
                   className="ui-input"
                   style={{ width: '100%' }}
@@ -564,6 +572,7 @@ export default function QuickServerTab({ socket }: Props) {
                   onChange={(e) => {
                     setTftpPort(e.target.value);
                     localStorage.setItem('nettool_tftpPort', e.target.value);
+                    localStorage.setItem('nettool_tftpPort_isCustomized', 'true');
                   }}
                   className="ui-input"
                   style={{ width: '100%' }}
