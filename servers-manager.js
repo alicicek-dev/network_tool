@@ -201,13 +201,13 @@ class ServersManager {
   }
 
   _startHttps(port, rootDir, config) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         let options = {};
 
         if (config.useSelfSigned) {
           this.log('https', 'Generating dynamic self-signed certificate...');
-          const pems = selfsigned.generate([
+          const pems = await selfsigned.generate([
             { name: 'commonName', value: 'localhost' }
           ], {
             days: 365,
