@@ -44,6 +44,7 @@
       "dist/**/*",
       "dist-electron/**/*",
       "server.js",
+      "servers-manager.js",
       "package.json"
     ]
   },

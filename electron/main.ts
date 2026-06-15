@@ -1,23 +1,16 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
-import { spawn } from 'child_process';
-
-let backendProcess = null;
-
 const startBackend = () => {
-  const serverPath = app.isPackaged 
-    ? path.join(process.resourcesPath, 'app.asar', 'server.js')
-    : path.join(__dirname, '../server.js');
-
-  backendProcess = spawn(process.execPath, [serverPath], {
-    stdio: 'inherit',
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
-  });
+  try {
+    if (app.isPackaged) {
+      require(path.join(process.resourcesPath, 'app.asar', 'server.js'));
+    } else {
+      require(path.join(__dirname, '../server.js'));
+    }
+  } catch (error) {
+    console.error('Failed to start backend server:', error);
+  }
 };
-
-app.on('quit', () => {
-  if (backendProcess) backendProcess.kill();
-});
 
 let mainWindow: BrowserWindow | null = null;
 
