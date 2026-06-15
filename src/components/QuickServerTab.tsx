@@ -61,58 +61,7 @@ export default function QuickServerTab({ socket }: Props) {
   const [tftpPort, setTftpPort] = useState(() => localStorage.getItem('nettool_tftpPort') || '6969');
   const [tftpRootDir, setTftpRootDir] = useState(() => localStorage.getItem('nettool_tftpRootDir') || '');
 
-  // Save config states to localStorage when they change
-  useEffect(() => {
-    localStorage.setItem('nettool_httpPort', httpPort);
-  }, [httpPort]);
 
-  useEffect(() => {
-    localStorage.setItem('nettool_httpRootDir', httpRootDir);
-  }, [httpRootDir]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_httpsPort', httpsPort);
-  }, [httpsPort]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_httpsRootDir', httpsRootDir);
-  }, [httpsRootDir]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_useSelfSigned', String(useSelfSigned));
-  }, [useSelfSigned]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_sslKeyPath', sslKeyPath);
-  }, [sslKeyPath]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_sslCertPath', sslCertPath);
-  }, [sslCertPath]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_ftpPort', ftpPort);
-  }, [ftpPort]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_ftpRootDir', ftpRootDir);
-  }, [ftpRootDir]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_ftpUser', ftpUser);
-  }, [ftpUser]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_ftpPass', ftpPass);
-  }, [ftpPass]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_tftpPort', tftpPort);
-  }, [tftpPort]);
-
-  useEffect(() => {
-    localStorage.setItem('nettool_tftpRootDir', tftpRootDir);
-  }, [tftpRootDir]);
 
   // Logs state
   const [logs, setLogs] = useState<{
@@ -224,10 +173,22 @@ export default function QuickServerTab({ socket }: Props) {
     try {
       const selectedPath = await window.electronAPI.selectDirectory();
       if (selectedPath) {
-        if (serverType === 'http') setHttpRootDir(selectedPath);
-        if (serverType === 'https') setHttpsRootDir(selectedPath);
-        if (serverType === 'ftp') setFtpRootDir(selectedPath);
-        if (serverType === 'tftp') setTftpRootDir(selectedPath);
+        if (serverType === 'http') {
+          setHttpRootDir(selectedPath);
+          localStorage.setItem('nettool_httpRootDir', selectedPath);
+        }
+        if (serverType === 'https') {
+          setHttpsRootDir(selectedPath);
+          localStorage.setItem('nettool_httpsRootDir', selectedPath);
+        }
+        if (serverType === 'ftp') {
+          setFtpRootDir(selectedPath);
+          localStorage.setItem('nettool_ftpRootDir', selectedPath);
+        }
+        if (serverType === 'tftp') {
+          setTftpRootDir(selectedPath);
+          localStorage.setItem('nettool_tftpRootDir', selectedPath);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -382,7 +343,10 @@ export default function QuickServerTab({ socket }: Props) {
                   type="number"
                   disabled={servers.http.running}
                   value={httpPort}
-                  onChange={(e) => setHttpPort(e.target.value)}
+                  onChange={(e) => {
+                    setHttpPort(e.target.value);
+                    localStorage.setItem('nettool_httpPort', e.target.value);
+                  }}
                   className="ui-input"
                   style={{ width: '100%' }}
                 />
@@ -395,7 +359,10 @@ export default function QuickServerTab({ socket }: Props) {
                     disabled={servers.http.running}
                     placeholder="Select folder to serve..."
                     value={httpRootDir}
-                    onChange={(e) => setHttpRootDir(e.target.value)}
+                    onChange={(e) => {
+                      setHttpRootDir(e.target.value);
+                      localStorage.setItem('nettool_httpRootDir', e.target.value);
+                    }}
                     className="ui-input"
                     style={{ flex: 1, minWidth: 0 }}
                   />
@@ -421,7 +388,10 @@ export default function QuickServerTab({ socket }: Props) {
                   type="number"
                   disabled={servers.https.running}
                   value={httpsPort}
-                  onChange={(e) => setHttpsPort(e.target.value)}
+                  onChange={(e) => {
+                    setHttpsPort(e.target.value);
+                    localStorage.setItem('nettool_httpsPort', e.target.value);
+                  }}
                   className="ui-input"
                   style={{ width: '100%' }}
                 />
@@ -434,7 +404,10 @@ export default function QuickServerTab({ socket }: Props) {
                     disabled={servers.https.running}
                     placeholder="Select folder to serve..."
                     value={httpsRootDir}
-                    onChange={(e) => setHttpsRootDir(e.target.value)}
+                    onChange={(e) => {
+                      setHttpsRootDir(e.target.value);
+                      localStorage.setItem('nettool_httpsRootDir', e.target.value);
+                    }}
                     className="ui-input"
                     style={{ flex: 1, minWidth: 0 }}
                   />
@@ -454,7 +427,10 @@ export default function QuickServerTab({ socket }: Props) {
                   id="selfsigned"
                   disabled={servers.https.running}
                   checked={useSelfSigned}
-                  onChange={(e) => setUseSelfSigned(e.target.checked)}
+                  onChange={(e) => {
+                    setUseSelfSigned(e.target.checked);
+                    localStorage.setItem('nettool_useSelfSigned', String(e.target.checked));
+                  }}
                   style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                 />
                 <label htmlFor="selfsigned" style={{ fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
@@ -471,7 +447,10 @@ export default function QuickServerTab({ socket }: Props) {
                       disabled={servers.https.running}
                       placeholder="C:\path\to\server.key"
                       value={sslKeyPath}
-                      onChange={(e) => setSslKeyPath(e.target.value)}
+                      onChange={(e) => {
+                        setSslKeyPath(e.target.value);
+                        localStorage.setItem('nettool_sslKeyPath', e.target.value);
+                      }}
                       className="ui-input"
                       style={{ width: '100%', fontSize: '0.85rem' }}
                     />
@@ -483,7 +462,10 @@ export default function QuickServerTab({ socket }: Props) {
                       disabled={servers.https.running}
                       placeholder="C:\path\to\server.crt"
                       value={sslCertPath}
-                      onChange={(e) => setSslCertPath(e.target.value)}
+                      onChange={(e) => {
+                        setSslCertPath(e.target.value);
+                        localStorage.setItem('nettool_sslCertPath', e.target.value);
+                      }}
                       className="ui-input"
                       style={{ width: '100%', fontSize: '0.85rem' }}
                     />
@@ -502,7 +484,10 @@ export default function QuickServerTab({ socket }: Props) {
                   type="number"
                   disabled={servers.ftp.running}
                   value={ftpPort}
-                  onChange={(e) => setFtpPort(e.target.value)}
+                  onChange={(e) => {
+                    setFtpPort(e.target.value);
+                    localStorage.setItem('nettool_ftpPort', e.target.value);
+                  }}
                   className="ui-input"
                   style={{ width: '100%' }}
                 />
@@ -515,7 +500,10 @@ export default function QuickServerTab({ socket }: Props) {
                     disabled={servers.ftp.running}
                     placeholder="Select FTP storage folder..."
                     value={ftpRootDir}
-                    onChange={(e) => setFtpRootDir(e.target.value)}
+                    onChange={(e) => {
+                      setFtpRootDir(e.target.value);
+                      localStorage.setItem('nettool_ftpRootDir', e.target.value);
+                    }}
                     className="ui-input"
                     style={{ flex: 1, minWidth: 0 }}
                   />
@@ -540,7 +528,10 @@ export default function QuickServerTab({ socket }: Props) {
                     disabled={servers.ftp.running}
                     placeholder="Username"
                     value={ftpUser}
-                    onChange={(e) => setFtpUser(e.target.value)}
+                    onChange={(e) => {
+                      setFtpUser(e.target.value);
+                      localStorage.setItem('nettool_ftpUser', e.target.value);
+                    }}
                     className="ui-input"
                     style={{ flex: 1, minWidth: 0, fontSize: '0.85rem' }}
                   />
@@ -549,7 +540,10 @@ export default function QuickServerTab({ socket }: Props) {
                     disabled={servers.ftp.running}
                     placeholder="Password"
                     value={ftpPass}
-                    onChange={(e) => setFtpPass(e.target.value)}
+                    onChange={(e) => {
+                      setFtpPass(e.target.value);
+                      localStorage.setItem('nettool_ftpPass', e.target.value);
+                    }}
                     className="ui-input"
                     style={{ flex: 1, minWidth: 0, fontSize: '0.85rem' }}
                   />
@@ -567,7 +561,10 @@ export default function QuickServerTab({ socket }: Props) {
                   type="number"
                   disabled={servers.tftp.running}
                   value={tftpPort}
-                  onChange={(e) => setTftpPort(e.target.value)}
+                  onChange={(e) => {
+                    setTftpPort(e.target.value);
+                    localStorage.setItem('nettool_tftpPort', e.target.value);
+                  }}
                   className="ui-input"
                   style={{ width: '100%' }}
                 />
@@ -580,7 +577,10 @@ export default function QuickServerTab({ socket }: Props) {
                     disabled={servers.tftp.running}
                     placeholder="Select TFTP folder (config/images)..."
                     value={tftpRootDir}
-                    onChange={(e) => setTftpRootDir(e.target.value)}
+                    onChange={(e) => {
+                      setTftpRootDir(e.target.value);
+                      localStorage.setItem('nettool_tftpRootDir', e.target.value);
+                    }}
                     className="ui-input"
                     style={{ flex: 1, minWidth: 0 }}
                   />
