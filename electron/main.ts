@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, screen } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import { spawn } from 'child_process';
 
@@ -30,11 +30,7 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: true,
     },
-    titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#1e1e2e',
-      symbolColor: '#cdd6f4',
-    },
+    frame: false,
     backgroundColor: '#1e1e2e'
   });
 
@@ -79,17 +75,14 @@ ipcMain.handle('select-directory', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
   });
-  
-  // Refocus the main window after native dialog closes
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.focus();
   }
-
   if (result.canceled) return null;
   return result.filePaths[0];
 });
 
-// --- JavaScript-based window dragging (replaces broken CSS -webkit-app-region) ---
+// --- Window drag via IPC ---
 let dragState: { startMouseX: number; startMouseY: number; startWinX: number; startWinY: number } | null = null;
 
 ipcMain.on('window-drag-start', (event, mouseX: number, mouseY: number) => {
@@ -112,6 +105,12 @@ ipcMain.on('window-drag-end', () => {
   dragState = null;
 });
 
+// --- Window control buttons via IPC ---
+ipcMain.on('window-minimize', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) win.minimize();
+});
+
 ipcMain.on('window-toggle-maximize', (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return;
@@ -120,4 +119,9 @@ ipcMain.on('window-toggle-maximize', (event) => {
   } else {
     win.maximize();
   }
+});
+
+ipcMain.on('window-close', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) win.close();
 });

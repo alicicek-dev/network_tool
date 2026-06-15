@@ -66,28 +66,62 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
 /* App Layout */
 .app-container {
   display: flex;
-  height: calc(100vh - 30px); /* Leave room for custom titlebar */
-  margin-top: 30px;
+  height: calc(100vh - 32px);
+  margin-top: 32px;
 }
 
-/* Custom Titlebar (JS-based drag via IPC, CSS -webkit-app-region removed for reliability) */
+/* Custom Titlebar (frame:false, fully JS-controlled drag + window controls) */
 .titlebar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 30px;
+  height: 32px;
   -webkit-user-select: none;
   user-select: none;
   cursor: default;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding-left: 15px;
   font-size: 0.8rem;
   color: var(--text-secondary);
   font-weight: 500;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 1000;
+}
+.titlebar-title {
+  pointer-events: none;
+}
+.titlebar-controls {
+  display: flex;
+  height: 100%;
+}
+.titlebar-btn {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0;
+  transition: background 0.15s;
+}
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transform: none;
+}
+.titlebar-btn:active {
+  transform: none;
+}
+.titlebar-btn-close:hover {
+  background: #e81123;
+  color: #fff;
 }
 
 /* Sidebar */

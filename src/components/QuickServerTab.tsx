@@ -19,7 +19,9 @@ declare global {
       windowDragStart: (mouseX: number, mouseY: number) => void;
       windowDragMove: (mouseX: number, mouseY: number) => void;
       windowDragEnd: () => void;
+      windowMinimize: () => void;
       windowToggleMaximize: () => void;
+      windowClose: () => void;
     };
   }
 }

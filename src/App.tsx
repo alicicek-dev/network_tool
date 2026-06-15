@@ -56,8 +56,11 @@ function App() {
     let isDragging = false;
 
     const onMouseDown = (e: MouseEvent) => {
-      // Only left button, and not on interactive children
+      // Only left button
       if (e.button !== 0) return;
+      // Don't drag when clicking window control buttons
+      const target = e.target as HTMLElement;
+      if (target.closest('.titlebar-controls')) return;
       isDragging = true;
       api.windowDragStart(e.screenX, e.screenY);
     };
@@ -190,7 +193,30 @@ function App() {
   return (
     <>
       <div className="titlebar" ref={titlebarRef}>
-        NetTool - Network Engineer Toolkit
+        <span className="titlebar-title">NetTool - Network Engineer Toolkit</span>
+        <div className="titlebar-controls">
+          <button
+            className="titlebar-btn"
+            onClick={(e) => { e.stopPropagation(); (window as any).electronAPI?.windowMinimize(); }}
+            title="Minimize"
+          >
+            <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor"/></svg>
+          </button>
+          <button
+            className="titlebar-btn"
+            onClick={(e) => { e.stopPropagation(); (window as any).electronAPI?.windowToggleMaximize(); }}
+            title="Maximize"
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="1"/></svg>
+          </button>
+          <button
+            className="titlebar-btn titlebar-btn-close"
+            onClick={(e) => { e.stopPropagation(); (window as any).electronAPI?.windowClose(); }}
+            title="Close"
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" strokeWidth="1.2"/><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" strokeWidth="1.2"/></svg>
+          </button>
+        </div>
       </div>
       <div className="app-container">
         <aside className="sidebar">
