@@ -54,6 +54,10 @@ npm run build
 ```
 This triggers compile commands, types verification (`tsc --noEmit`), and compiles the package into `release/NetTool 1.0.0.appx`.
 
+### Versioning Guidelines
+- **Subsequent Sürüm Kuralı**: `v1.0.0` sürümünden sonraki tüm gelecek test ve beta sürümleri aksi belirtilene kadar `v1.0.1 (Beta)` veya `v1.0.1-beta` olarak adlandırılacaktır.
+
+
 ---
 
 ## 3. Microsoft Partner Center & Payout Registration
