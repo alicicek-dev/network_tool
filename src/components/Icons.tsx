@@ -1,9 +1,10 @@
 import type { SVGProps, ImgHTMLAttributes } from 'react';
+import appIcon from '../assets/app-icon.png';
 
 // AppLogo (Customized Atom/Network Orbit Vector Icon)
 export function AppIcon(props: ImgHTMLAttributes<HTMLImageElement>) {
   return (
-    <img src="/app-icon.png" alt="NetTool" {...props} />
+    <img src={appIcon} alt="NetTool" {...props} />
   );
 }
 
