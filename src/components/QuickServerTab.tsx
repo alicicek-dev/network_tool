@@ -153,7 +153,7 @@ export default function QuickServerTab({ socket }: Props) {
 
   // Auto-scroll logs to bottom
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    logsEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [logs, activeSubTab]);
 
   const selectDirectory = async (serverType: 'http' | 'https' | 'ftp' | 'tftp') => {
