@@ -7,6 +7,41 @@ const express = require('express');
 const FtpSrv = require('ftp-srv');
 const tftp = require('tftp2');
 const selfsigned = require('selfsigned');
+const os = require('os');
+
+function getLocalIpForClient(clientIp) {
+  if (!clientIp) return '127.0.0.1';
+  
+  // Handle IPv6 mapped IPv4 address
+  const cleanClientIp = clientIp.includes('::ffff:') ? clientIp.replace('::ffff:', '') : clientIp;
+  const clientParts = cleanClientIp.split('.');
+  
+  const nets = os.networkInterfaces();
+  let bestMatch = null;
+  let firstIp = null;
+  
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        if (!firstIp) firstIp = net.address;
+        
+        const localParts = net.address.split('.');
+        if (localParts[0] === clientParts[0] && 
+            localParts[1] === clientParts[1] && 
+            localParts[2] === clientParts[2]) {
+          return net.address;
+        }
+        
+        if (localParts[0] === clientParts[0] && 
+            localParts[1] === clientParts[1]) {
+          bestMatch = net.address;
+        }
+      }
+    }
+  }
+  
+  return bestMatch || firstIp || '127.0.0.1';
+}
 
 function checkIsAdmin() {
   return new Promise((resolve) => {
@@ -220,7 +255,11 @@ class ServersManager {
       try {
         const ftpServer = new FtpSrv({
           url: `ftp://0.0.0.0:${port}`,
-          pasv_url: '127.0.0.1',
+          pasv_url: (remoteAddr) => {
+            const resolved = getLocalIpForClient(remoteAddr);
+            console.log(`[FTP] PASV requested by ${remoteAddr}. Resolved pasv_url to: ${resolved}`);
+            return resolved;
+          },
           pasv_min: 10000,
           pasv_max: 10005,
           anonymous: !config.username
