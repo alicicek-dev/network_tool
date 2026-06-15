@@ -64,19 +64,23 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
 }
 
 /* App Layout */
-.app-container {
+.app-root {
   display: flex;
-  height: calc(100vh - 32px);
-  margin-top: 32px;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* Custom Titlebar (frame:false — no DWM overlay, so CSS drag is reliable) */
+.app-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Custom Titlebar (frame:false — normal flow, no position:absolute) */
 .titlebar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
   height: 32px;
+  flex-shrink: 0;
   -webkit-app-region: drag;
   -webkit-user-select: none;
   user-select: none;
@@ -88,7 +92,6 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   color: var(--text-secondary);
   font-weight: 500;
   background: rgba(0, 0, 0, 0.3);
-  z-index: 1000;
 }
 .titlebar-title {
   pointer-events: none;

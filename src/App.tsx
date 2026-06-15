@@ -143,7 +143,7 @@ function App() {
   };
 
   return (
-    <>
+    <div className="app-root">
       <div className="titlebar">
         <span className="titlebar-title">NetTool - Network Engineer Toolkit</span>
         <div className="titlebar-controls">
@@ -671,7 +671,7 @@ function App() {
           {activeTab === 'speedtest' && <SpeedTestTab socket={socket} />}
         </main>
       </div>
-    </>
+    </div>
   );
 }
 
