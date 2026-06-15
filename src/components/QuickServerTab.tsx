@@ -338,7 +338,7 @@ export default function QuickServerTab({ socket }: Props) {
                     value={httpRootDir}
                     onChange={(e) => setHttpRootDir(e.target.value)}
                     className="ui-input"
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: 0 }}
                   />
                   <button
                     disabled={servers.http.running}
@@ -377,7 +377,7 @@ export default function QuickServerTab({ socket }: Props) {
                     value={httpsRootDir}
                     onChange={(e) => setHttpsRootDir(e.target.value)}
                     className="ui-input"
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: 0 }}
                   />
                   <button
                     disabled={servers.https.running}
@@ -458,7 +458,7 @@ export default function QuickServerTab({ socket }: Props) {
                     value={ftpRootDir}
                     onChange={(e) => setFtpRootDir(e.target.value)}
                     className="ui-input"
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: 0 }}
                   />
                   <button
                     disabled={servers.ftp.running}
@@ -483,7 +483,7 @@ export default function QuickServerTab({ socket }: Props) {
                     value={ftpUser}
                     onChange={(e) => setFtpUser(e.target.value)}
                     className="ui-input"
-                    style={{ flex: 1, fontSize: '0.85rem' }}
+                    style={{ flex: 1, minWidth: 0, fontSize: '0.85rem' }}
                   />
                   <input
                     type="password"
@@ -492,7 +492,7 @@ export default function QuickServerTab({ socket }: Props) {
                     value={ftpPass}
                     onChange={(e) => setFtpPass(e.target.value)}
                     className="ui-input"
-                    style={{ flex: 1, fontSize: '0.85rem' }}
+                    style={{ flex: 1, minWidth: 0, fontSize: '0.85rem' }}
                   />
                 </div>
               </div>
@@ -523,7 +523,7 @@ export default function QuickServerTab({ socket }: Props) {
                     value={tftpRootDir}
                     onChange={(e) => setTftpRootDir(e.target.value)}
                     className="ui-input"
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: 0 }}
                   />
                   <button
                     disabled={servers.tftp.running}
