@@ -41,22 +41,78 @@ export default function QuickServerTab({ socket }: Props) {
   });
 
   // Config States for each server
-  const [httpPort, setHttpPort] = useState('8080');
-  const [httpRootDir, setHttpRootDir] = useState('');
+  const [httpPort, setHttpPort] = useState(() => localStorage.getItem('nettool_httpPort') || '8080');
+  const [httpRootDir, setHttpRootDir] = useState(() => localStorage.getItem('nettool_httpRootDir') || '');
 
-  const [httpsPort, setHttpsPort] = useState('8443');
-  const [httpsRootDir, setHttpsRootDir] = useState('');
-  const [useSelfSigned, setUseSelfSigned] = useState(true);
-  const [sslKeyPath, setSslKeyPath] = useState('');
-  const [sslCertPath, setSslCertPath] = useState('');
+  const [httpsPort, setHttpsPort] = useState(() => localStorage.getItem('nettool_httpsPort') || '8443');
+  const [httpsRootDir, setHttpsRootDir] = useState(() => localStorage.getItem('nettool_httpsRootDir') || '');
+  const [useSelfSigned, setUseSelfSigned] = useState(() => {
+    const saved = localStorage.getItem('nettool_useSelfSigned');
+    return saved === null ? true : saved === 'true';
+  });
+  const [sslKeyPath, setSslKeyPath] = useState(() => localStorage.getItem('nettool_sslKeyPath') || '');
+  const [sslCertPath, setSslCertPath] = useState(() => localStorage.getItem('nettool_sslCertPath') || '');
 
-  const [ftpPort, setFtpPort] = useState('2121');
-  const [ftpRootDir, setFtpRootDir] = useState('');
-  const [ftpUser, setFtpUser] = useState('');
-  const [ftpPass, setFtpPass] = useState('');
+  const [ftpPort, setFtpPort] = useState(() => localStorage.getItem('nettool_ftpPort') || '2121');
+  const [ftpRootDir, setFtpRootDir] = useState(() => localStorage.getItem('nettool_ftpRootDir') || '');
+  const [ftpUser, setFtpUser] = useState(() => localStorage.getItem('nettool_ftpUser') || '');
+  const [ftpPass, setFtpPass] = useState(() => localStorage.getItem('nettool_ftpPass') || '');
 
-  const [tftpPort, setTftpPort] = useState('6969');
-  const [tftpRootDir, setTftpRootDir] = useState('');
+  const [tftpPort, setTftpPort] = useState(() => localStorage.getItem('nettool_tftpPort') || '6969');
+  const [tftpRootDir, setTftpRootDir] = useState(() => localStorage.getItem('nettool_tftpRootDir') || '');
+
+  // Save config states to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('nettool_httpPort', httpPort);
+  }, [httpPort]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_httpRootDir', httpRootDir);
+  }, [httpRootDir]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_httpsPort', httpsPort);
+  }, [httpsPort]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_httpsRootDir', httpsRootDir);
+  }, [httpsRootDir]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_useSelfSigned', String(useSelfSigned));
+  }, [useSelfSigned]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_sslKeyPath', sslKeyPath);
+  }, [sslKeyPath]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_sslCertPath', sslCertPath);
+  }, [sslCertPath]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_ftpPort', ftpPort);
+  }, [ftpPort]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_ftpRootDir', ftpRootDir);
+  }, [ftpRootDir]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_ftpUser', ftpUser);
+  }, [ftpUser]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_ftpPass', ftpPass);
+  }, [ftpPass]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_tftpPort', tftpPort);
+  }, [tftpPort]);
+
+  useEffect(() => {
+    localStorage.setItem('nettool_tftpRootDir', tftpRootDir);
+  }, [tftpRootDir]);
 
   // Logs state
   const [logs, setLogs] = useState<{
@@ -79,12 +135,12 @@ export default function QuickServerTab({ socket }: Props) {
       .then((res) => res.json())
       .then((data) => {
         setIsAdmin(data.isAdmin);
-        // If administrator, update default ports to privileged ports
+        // If administrator, update default ports to privileged ports (only if not customized/saved before)
         if (data.isAdmin) {
-          setHttpPort('80');
-          setHttpsPort('443');
-          setFtpPort('21');
-          setTftpPort('69');
+          if (!localStorage.getItem('nettool_httpPort')) setHttpPort('80');
+          if (!localStorage.getItem('nettool_httpsPort')) setHttpsPort('443');
+          if (!localStorage.getItem('nettool_ftpPort')) setFtpPort('21');
+          if (!localStorage.getItem('nettool_tftpPort')) setTftpPort('69');
         }
       })
       .catch((err) => {
