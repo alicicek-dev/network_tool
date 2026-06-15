@@ -45,6 +45,25 @@ function App() {
   const [showBaudratePresets, setShowBaudratePresets] = useState(false);
   const baudrateRef = useRef<HTMLDivElement>(null);
 
+  // Universal workaround for Electron drag-freeze bug on focus changes/dialog closures
+  useEffect(() => {
+    const handleFocus = () => {
+      const titlebar = document.querySelector('.titlebar') as HTMLElement;
+      if (titlebar) {
+        titlebar.style.webkitAppRegion = 'none';
+        // Force layout reflow
+        void titlebar.offsetHeight;
+        setTimeout(() => {
+          titlebar.style.webkitAppRegion = 'drag';
+        }, 50);
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    // Trigger once on component mount to be sure
+    handleFocus();
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   useEffect(() => {
     if (terminalMode === 'ssh') {
       setPort('22');

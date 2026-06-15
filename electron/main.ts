@@ -79,6 +79,12 @@ ipcMain.handle('select-directory', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
   });
+  
+  // Refocus the main window after native dialog closes to prevent drag-freeze bugs
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.focus();
+  }
+
   if (result.canceled) return null;
   return result.filePaths[0];
 });
