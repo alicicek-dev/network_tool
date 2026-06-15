@@ -167,9 +167,17 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
 .main-content {
   flex: 1;
   padding: 24px;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+
+/* Scrollable wrapper for tabs that need their own scroll */
+.main-content-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 /* Dashboard Cards */
