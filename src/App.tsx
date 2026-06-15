@@ -145,7 +145,10 @@ function App() {
   return (
     <div className="app-root">
       <div className="titlebar">
-        <span className="titlebar-title">NetTool - Network Engineer Toolkit</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'none' }}>
+          <AppIcon width="16" height="15" style={{ color: 'var(--accent-color)' }} />
+          <span className="titlebar-title">NetTool - Network Engineer Toolkit</span>
+        </div>
         <div className="titlebar-controls">
           <button
             className="titlebar-btn"
