@@ -40,3 +40,10 @@ Asistanlar kod değişikliklerini doğrulamak için aşağıdaki komutları kull
 ### D. Telnet IAC ve Seri Port Yönetimi
 *   **IAC Filtreleme**: Backend Telnet soketinde (`server.js`), terminal ekranını bozan kontrol karakterlerinin ayıklanması için buffer-filtering IAC mekanizmasının korunduğundan emin olun.
 *   **Doğal Sıralama (Natural Sort)**: Seri portlar listelenirken her zaman doğal sıralama uygulanmalıdır (örn: COM2, COM10'dan önce gelmelidir).
+
+---
+
+## 4. Sürüm Yönetimi ve Dokümantasyon (Version Management & Documentation)
+
+*   **Sürüm Notları Kaydı (Release Changelog)**: Uygulamanın versiyonu her değiştiğinde (örneğin `package.json` içindeki `version` değeri güncellendiğinde veya yeni bir özellik eklendiğinde), gerçekleştirilen tüm yenilikler, yapısal değişiklikler ve iyileştirmeler uygun bir formatta [RELEASE.md](file:///c:/ai_projelerim/network_tool/RELEASE.md) dosyasına işlenmelidir.
+
