@@ -47,3 +47,24 @@ Asistanlar kod değişikliklerini doğrulamak için aşağıdaki komutları kull
 
 *   **Sürüm Notları Kaydı (Release Changelog)**: Uygulamanın versiyonu her değiştiğinde (örneğin `package.json` içindeki `version` değeri güncellendiğinde veya yeni bir özellik eklendiğinde), gerçekleştirilen tüm yenilikler, yapısal değişiklikler ve iyileştirmeler uygun bir formatta [RELEASE.md](file:///c:/ai_projelerim/network_tool/RELEASE.md) dosyasına işlenmelidir.
 
+### A. Doküman Haritası ve Güncelleme Kuralları (Doc Map & Update Rules)
+
+Proje dizinindeki `.md` dosyalarının görevleri ve güncelleme gereksinimleri şu şekildedir:
+
+1.  **[README.md](file:///c:/ai_projelerim/network_tool/README.md)** (Proje Tanıtımı & Kurulum):
+    *   *Görevi*: Proje genel özeti, ana özellikleri, yerel geliştirme adımları ve bağımlılıkların kurulum açıklamaları.
+    *   *Güncelleme Durumu*: Projenin gereksinimlerinde (prerequisites), çalıştırma/derleme komutlarında veya ana yetenek setlerinde yapısal bir değişiklik olduğunda güncellenmelidir.
+2.  **[GEMINI.md](file:///c:/ai_projelerim/network_tool/GEMINI.md)** (Geliştirici & AI Talimatları):
+    *   *Görevi*: AI asistanları ve geliştiriciler için en yüksek öncelikli kod yazma yönergeleri, mimari kurallar ve standartlar.
+    *   *Güncelleme Durumu*: Yeni bir kodlama standardı veya asistanların uyması gereken yeni bir geliştirme kuralı/yönergesi eklendiğinde güncellenmelidir.
+3.  **[RELEASE.md](file:///c:/ai_projelerim/network_tool/RELEASE.md)** (Sürüm Notları):
+    *   *Görevi*: Tüm sürümlerin (v1.0.0, v1.0.1 vb.) yenilikleri, mimari refaktörleri ve hata giderim detayları.
+    *   *Güncelleme Durumu*: **Her versiyon değiştiğinde veya yeni bir özellik eklenip commitlendiğinde mutlaka güncellenmelidir.**
+4.  **[KNOWLEDGE.md](file:///c:/ai_projelerim/network_tool/KNOWLEDGE.md)** (Kalıcı Teknik & Mağaza Bilgileri):
+    *   *Görevi*: Protokollerin teknik arka planları (IAC, SSH, Serial), Enpara payout ayarları, W-8BEN form detayları ve Windows Store yayın kimlikleri.
+    *   *Güncelleme Durumu*: Banka, vergi bilgileri, mağaza yayın sertifikaları veya protokollerin çekirdek yapısı değiştiğinde güncellenmelidir.
+5.  **[PRIVACY.md](file:///c:/ai_projelerim/network_tool/PRIVACY.md)** (Gizlilik Politikası):
+    *   *Görevi*: Windows Mağazası yayını için uygulamanın veri toplamama ve yerel çalışma prensiplerini açıklayan gizlilik beyanı.
+    *   *Güncelleme Durumu*: Uygulamanın veri toplama/işleme politikası değişirse (örneğin harici bir sunucuya veri göndermeye başlarsa) güncellenmelidir.
+
+
