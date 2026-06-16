@@ -26,7 +26,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
       setSweepSubnet(defaultSubnet);
     }
   }, [defaultSubnet]);
-  const [sweepResults, setSweepResults] = useState<{ip: string, time: number}[]>([]);
+  const [sweepResults, setSweepResults] = useState<{ip: string, time: number, mac?: string}[]>([]);
   const [isSweeping, setIsSweeping] = useState(false);
 
   // Port Scan State
@@ -303,6 +303,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                   <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
                     <th style={{ padding: '10px 12px', width: '60px', textAlign: 'center' }}>Status</th>
                     <th style={{ padding: '10px 12px' }}>IP Address</th>
+                    <th style={{ padding: '10px 12px' }}>MAC Address</th>
                     <th style={{ padding: '10px 12px' }}>Response Time</th>
                   </tr>
                 </thead>
@@ -355,12 +356,56 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                           )}
                         </div>
                       </td>
+                      <td 
+                        onClick={() => res.mac && res.mac !== 'N/A' && handleCopyMac(res.mac)}
+                        title={res.mac && res.mac !== 'N/A' ? "Click to copy MAC Address" : undefined}
+                        style={{ 
+                          padding: '8px 12px', 
+                          fontFamily: 'monospace',
+                          cursor: res.mac && res.mac !== 'N/A' ? 'pointer' : 'default',
+                          transition: 'color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (res.mac && res.mac !== 'N/A') {
+                            e.currentTarget.style.color = 'var(--accent-color)';
+                          }
+                        }}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                      >
+                        {res.mac && res.mac !== 'N/A' ? (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', position: 'relative', width: '100%' }}>
+                            <span>{res.mac}</span>
+                            <CopyIcon width="12" height="12" style={{ opacity: 0.5 }} />
+                            {copiedMac === res.mac && (
+                              <span style={{
+                                position: 'absolute',
+                                left: '155px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                fontSize: '0.7rem',
+                                color: '#11111b',
+                                background: 'var(--success)',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                fontWeight: '600',
+                                boxShadow: '0 0 8px var(--success)',
+                                zIndex: 10,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                Copied
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
+                        )}
+                      </td>
                       <td style={{ padding: '8px 12px', color: 'var(--success)' }}>{res.time} ms</td>
                     </tr>
                   ))}
                   {sweepResults.length === 0 && (
                     <tr>
-                      <td colSpan={3} style={{ padding: '20px', textAlign: 'center', color: 'gray' }}>
+                      <td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: 'gray' }}>
                         {isSweeping ? 'Scanning subnet...' : 'No scan results. Enter subnet prefix above and click Scan.'}
                       </td>
                     </tr>

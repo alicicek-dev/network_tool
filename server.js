@@ -210,6 +210,27 @@ app.get('/api/arp', (req, res) => {
   }
 });
 
+function getMacForIp(ip) {
+  return new Promise((resolve) => {
+    const isWin = process.platform === 'win32';
+    const cmd = isWin ? `arp -a ${ip}` : `arp -n ${ip}`;
+    require('child_process').exec(cmd, (err, stdout) => {
+      if (err || !stdout) {
+        return resolve('N/A');
+      }
+      const lines = stdout.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        const macMatch = trimmed.match(/([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})/);
+        if (macMatch) {
+          return resolve(macMatch[0]);
+        }
+      }
+      resolve('N/A');
+    });
+  });
+}
+
 app.get('/api/ports', async (req, res) => {
   try {
     const ports = await SerialPort.list();
@@ -419,10 +440,12 @@ io.on('connection', (socket) => {
       const batch = ips.slice(i, i + batchSize);
       await Promise.all(batch.map(ip => {
         return ping.promise.probe(ip, { timeout: 1 })
-          .then(res => {
+          .then(async (res) => {
             if (mySweepId !== currentSweepId || !socket.connected) return;
             if (res.alive) {
-              socket.emit('sweep-result', { ip: res.host, time: res.time });
+              const mac = await getMacForIp(res.host);
+              if (mySweepId !== currentSweepId || !socket.connected) return;
+              socket.emit('sweep-result', { ip: res.host, time: res.time, mac });
             }
           })
           .catch(() => {});
