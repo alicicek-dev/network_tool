@@ -24,7 +24,7 @@ declare global {
 }
 
 export default function QuickServerTab({ socket }: Props) {
-  const [activeSubTab, setActiveSubTab] = useState<'http' | 'https' | 'ftp' | 'tftp'>('http');
+  const [activeSubTab, setActiveSubTab] = useState<'ftp' | 'tftp' | 'http' | 'https'>('ftp');
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   // Server states (synchronized with backend)
@@ -283,7 +283,7 @@ export default function QuickServerTab({ socket }: Props) {
 
       {/* Sub-tabs selection */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '18px' }}>
-        {(['http', 'https', 'ftp', 'tftp'] as const).map((tab) => {
+        {(['ftp', 'tftp', 'http', 'https'] as const).map((tab) => {
           const isRunning = servers[tab].running;
           return (
             <button

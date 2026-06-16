@@ -8,12 +8,14 @@ interface TerminalProps {
   action: string;
   target: string;
   socket?: Socket;
+  isActive?: boolean;
 }
 
-export default function TerminalComponent({ action, target, socket: externalSocket }: TerminalProps) {
+export default function TerminalComponent({ action, target, socket: externalSocket, isActive = true }: TerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const socketRef = useRef<Socket | null>(null);
+  const fitAddonRef = useRef<FitAddon | null>(null);
 
   useEffect(() => {
     // Initialize xterm.js
@@ -30,6 +32,7 @@ export default function TerminalComponent({ action, target, socket: externalSock
     
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
+    fitAddonRef.current = fitAddon;
     
     if (terminalRef.current) {
       term.open(terminalRef.current);
@@ -133,9 +136,24 @@ export default function TerminalComponent({ action, target, socket: externalSock
       if (isLocalSocket) {
         socket.disconnect();
       }
+      fitAddonRef.current = null;
       term.dispose();
     };
   }, [action, target]);
+
+  useEffect(() => {
+    if (isActive && xtermRef.current && fitAddonRef.current) {
+      const timer = setTimeout(() => {
+        try {
+          fitAddonRef.current?.fit();
+          xtermRef.current?.focus();
+        } catch (e) {
+          console.warn('Failed to fit terminal on tab activation:', e);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive]);
 
   const handleContextMenu = async (e: React.MouseEvent) => {
     e.preventDefault();
