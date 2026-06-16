@@ -15,7 +15,7 @@
     "appId": "com.networktool.app",
     "productName": "NetTool",
     "win": {
-      "requestedExecutionLevel": "highestAvailable",
+      "requestedExecutionLevel": "asInvoker",
       "target": [
         "nsis",
         "portable",
