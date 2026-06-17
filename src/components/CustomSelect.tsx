@@ -109,6 +109,7 @@ export default function CustomSelect({
       {/* Dropdown Options List */}
       {isOpen && (
         <div
+          className="select-dropdown-enter"
           style={{
             position: 'absolute',
             top: 'calc(100% + 6px)',
@@ -146,7 +147,7 @@ export default function CustomSelect({
                     color: isSelected ? 'var(--accent-color)' : 'var(--text-primary)',
                     background: isSelected ? 'rgba(137, 180, 250, 0.15)' : 'transparent',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease',
+                    transition: 'background-color 150ms cubic-bezier(0.23, 1, 0.32, 1), color 150ms cubic-bezier(0.23, 1, 0.32, 1)',
                     textOverflow: 'ellipsis',
                     overflow: 'hidden',
                     whiteSpace: 'nowrap',

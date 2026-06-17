@@ -238,7 +238,7 @@ export default function PingTab({ socket }: Props) {
               padding: '6px 16px',
               fontSize: '0.85rem',
               cursor: (isMultiTesting || !!activePing) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
+              transition: 'background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1)',
               fontWeight: '600'
             }}
           >
@@ -255,7 +255,7 @@ export default function PingTab({ socket }: Props) {
               padding: '6px 16px',
               fontSize: '0.85rem',
               cursor: (isMultiTesting || !!activePing) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
+              transition: 'background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1)',
               fontWeight: '600'
             }}
           >

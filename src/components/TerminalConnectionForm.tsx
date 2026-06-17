@@ -155,7 +155,7 @@ export default function TerminalConnectionForm({
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), border-color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1)',
                 opacity: activeTerminalTarget ? 0.5 : 1,
                 flexShrink: 0,
                 width: 'auto'
@@ -202,6 +202,7 @@ export default function TerminalConnectionForm({
             </span>
             {showBaudratePresets && (
               <div
+                className="select-dropdown-enter"
                 style={{
                   position: 'absolute',
                   top: 'calc(100% + 6px)',
@@ -233,7 +234,7 @@ export default function TerminalConnectionForm({
                       color: baudRate === val ? 'var(--accent-color)' : 'var(--text-primary)',
                       background: baudRate === val ? 'rgba(137, 180, 250, 0.15)' : 'transparent',
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease',
+                      transition: 'background-color 150ms cubic-bezier(0.23, 1, 0.32, 1), color 150ms cubic-bezier(0.23, 1, 0.32, 1)',
                     }}
                     onMouseEnter={(e) => {
                       if (baudRate !== val) {

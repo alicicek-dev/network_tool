@@ -617,7 +617,7 @@ export default function QuickServerTab({ socket }: Props) {
                 fontWeight: 'bold',
                 backgroundColor: servers[activeSubTab].running ? 'var(--danger)' : 'var(--accent-color)',
                 color: servers[activeSubTab].running ? 'white' : '#11111b',
-                transition: 'background-color 0.2s ease',
+                transition: 'background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1)',
                 border: 'none',
                 boxShadow: servers[activeSubTab].running ? '0 0 10px rgba(243, 139, 168, 0.2)' : '0 0 10px rgba(137, 180, 250, 0.2)'
               }}

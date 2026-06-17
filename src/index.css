@@ -147,17 +147,19 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   border-radius: 8px;
   cursor: pointer;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: background-color 200ms cubic-bezier(0.23, 1, 0.32, 1), color 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
   display: flex;
   align-items: center;
   gap: 12px;
   font-weight: 500;
 }
 
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  transform: translateX(4px);
+@media (hover: hover) and (pointer: fine) {
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    transform: translateX(4px);
+  }
 }
 
 .nav-item.active {
@@ -189,12 +191,14 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 200ms cubic-bezier(0.25, 1, 0.5, 1), border-color 200ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.stat-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(137, 180, 250, 0.4);
+@media (hover: hover) and (pointer: fine) {
+  .stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(137, 180, 250, 0.4);
+  }
 }
 
 .stat-label {
@@ -219,7 +223,7 @@ input {
   border-radius: 8px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 input:focus {
@@ -234,17 +238,19 @@ button {
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1);
   font-family: inherit;
 }
 
-button:hover {
-  background: var(--accent-hover);
-  transform: scale(1.02);
+@media (hover: hover) and (pointer: fine) {
+  button:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
 }
 
 button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .terminal-container {
@@ -264,18 +270,56 @@ button:active {
 }
 .copyable-cell .copy-icon-hover {
   opacity: 0 !important;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-.copyable-cell:hover {
-  color: var(--accent-color) !important;
+
+@media (hover: hover) and (pointer: fine) {
+  .copyable-cell:hover {
+    color: var(--accent-color) !important;
+  }
+  .copyable-cell:hover .copy-icon-hover {
+    opacity: 0.7 !important;
+    transform: scale(1.1);
+  }
+  .interface-row:hover {
+    background: rgba(255, 255, 255, 0.02) !important;
+  }
+  .interface-row.selected:hover {
+    background: rgba(137, 180, 250, 0.08) !important;
+  }
 }
-.copyable-cell:hover .copy-icon-hover {
-  opacity: 0.7 !important;
-  transform: scale(1.1);
+
+/* Design Engineering Additions */
+
+/* Smooth Tab Entry Animations */
+.fade-in {
+  animation: fadeIn 220ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
-.interface-row:hover {
-  background: rgba(255, 255, 255, 0.02) !important;
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.interface-row.selected:hover {
-  background: rgba(137, 180, 250, 0.08) !important;
+
+/* Smooth Select Menu Downward Scale Reveal */
+.select-dropdown-enter {
+  animation: selectDropdownEnter 180ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  transform-origin: top;
+}
+
+@keyframes selectDropdownEnter {
+  from {
+    opacity: 0;
+    transform: scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
 }
