@@ -65,26 +65,26 @@ class ServersManager {
       ftp: null,
       tftp: null
     };
-    this.socket = null;
+    this.io = null;
   }
 
-  setSocket(socket) {
-    this.socket = socket;
+  setIo(io) {
+    this.io = io;
   }
 
   log(type, message) {
     const timestamp = new Date().toLocaleTimeString();
     console.log(`[QuickServer - ${type.toUpperCase()}] [${timestamp}] ${message}`);
-    if (this.socket) {
-      this.socket.emit('quick-server-log', { type, message, timestamp });
+    if (this.io) {
+      this.io.emit('quick-server-log', { type, message, timestamp });
     }
   }
 
   emitStatus(type) {
-    if (this.socket) {
+    if (this.io) {
       const isRunning = !!this.instances[type];
       const port = this.configs[type] ? this.configs[type].port : null;
-      this.socket.emit('quick-server-status-update', {
+      this.io.emit('quick-server-status-update', {
         type,
         running: isRunning,
         port

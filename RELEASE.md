@@ -15,6 +15,9 @@ Bu sürüm; uygulamanın modülerliğini artırmak, performans optimizasyonları
 *   **Oturum Koruma (Tab Keep-Alive)**: Uygulamanın ana sekmeleri (Dashboard, Ping, Terminal, Discovery vb.) arasında geçiş yapıldığında, açık olan terminal bağlantılarının kopması ve formlardaki/araçlardaki verilerin kaybolması engellendi. (Conditional rendering yerine CSS display toggle mimarisine geçildi).
 *   **Sekme İçi Dinamik Boyutlandırma**: Saklanan bir terminal sekmesi tekrar etkinleştirildiğinde xterm.js ekranının ve odağının (`focus`) otomatik olarak sığdırılması (`fit()`) sağlandı.
 
+### 🛠️ Hata Gidermeleri (Bug Fixes)
+*   **Quick Server Durum/Log Çakışması Giderildi**: Backend'de (`servers-manager.js`) durum güncellemelerini ve logları tekil istemci soket referansı (`this.socket`) üzerinden gönderme yapısı kaldırıldı. Sunucu olaylarını tüm bağlı istemcilere eş zamanlı iletmek için global Socket.IO (`io`) nesnesi kullanıldı. Çoklu terminal sekmeleri bağımsız soketler açsa bile, ana uygulama ekranı sunucu durum güncellemelerini ve loglarını anında almaktadır.
+
 ### 🛠️ Yapısal ve Performans İyileştirmeleri (Refactoring & Performance)
 *   **Bileşen Ayrıştırma (Decomposition)**: Devasa boyuttaki `App.tsx` bileşeni (678 satır) parçalanarak daha küçük ve modüler alt bileşenlere bölündü:
     *   `src/components/DashboardTab.tsx` (Dashboard ve Arayüz Listesi)

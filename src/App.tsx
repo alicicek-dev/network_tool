@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import './index.css';
-import TerminalComponent from './TerminalComponent';
+import TerminalTab from './components/TerminalTab';
 import DiscoveryTab from './components/DiscoveryTab';
 import UtilitiesTab from './components/UtilitiesTab';
 import SpeedTestTab from './components/SpeedTestTab';
 import PingTab from './components/PingTab';
 import QuickServerTab from './components/QuickServerTab';
 import DashboardTab from './components/DashboardTab';
-import TerminalConnectionForm from './components/TerminalConnectionForm';
 import { io } from 'socket.io-client';
 import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, ServerIcon } from './components/Icons';
-import type { NetworkInterface, SerialPortInfo } from './types';
+import type { NetworkInterface } from './types';
 
 const socket = io('http://127.0.0.1:3001', {
   transports: ['websocket']
@@ -23,26 +22,7 @@ function App() {
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
   const [selectedIfIdx, setSelectedIfIdx] = useState(0);
 
-  // Terminal State
-  const [terminalMode, setTerminalMode] = useState('ssh');
-  const [host, setHost] = useState('');
-  const [port, setPort] = useState('22');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  
-  const [comPort, setComPort] = useState('');
-  const [baudRate, setBaudRate] = useState('9600');
-  const [serialPorts, setSerialPorts] = useState<SerialPortInfo[]>([]);
 
-  const [activeTerminalTarget, setActiveTerminalTarget] = useState('');
-
-  useEffect(() => {
-    if (terminalMode === 'ssh') {
-      setPort('22');
-    } else if (terminalMode === 'telnet') {
-      setPort('23');
-    }
-  }, [terminalMode]);
 
   useEffect(() => {
     let retries = 0;
@@ -67,46 +47,7 @@ function App() {
     fetchInterfaces();
   }, []);
 
-  const refreshSerialPorts = () => {
-    fetch('http://127.0.0.1:3001/api/ports')
-      .then(res => res.json())
-      .then(data => {
-         // Natural sort (e.g. COM2 before COM10)
-         const sorted = [...data].sort((a, b) => {
-           return a.path.localeCompare(b.path, undefined, { numeric: true, sensitivity: 'base' });
-         });
-         setSerialPorts(sorted);
-         if (sorted.length > 0) {
-           const exists = sorted.some(sp => sp.path === comPort);
-           if (!exists || !comPort) {
-             setComPort(sorted[0].path);
-           }
-         } else {
-           setComPort('');
-         }
-      })
-      .catch(err => console.error(err));
-  };
 
-  useEffect(() => {
-    if (activeTab === 'terminal') {
-      refreshSerialPorts();
-    }
-  }, [activeTab]);
-
-  const handleConnectTerminal = () => {
-    if (terminalMode === 'ssh') {
-      setActiveTerminalTarget(JSON.stringify({ host, port, username, password }));
-    } else if (terminalMode === 'telnet') {
-      setActiveTerminalTarget(JSON.stringify({ host, port }));
-    } else {
-      setActiveTerminalTarget(JSON.stringify({ path: comPort, baudRate }));
-    }
-  };
-
-  const handleDisconnectTerminal = () => {
-    setActiveTerminalTarget('');
-  };
 
   return (
     <div className="app-root">
@@ -215,38 +156,7 @@ function App() {
           {/* Terminal Tab */}
           <div style={{ display: activeTab === 'terminal' ? 'flex' : 'none', flexDirection: 'column', height: '100%' }} className="fade-in">
             <h1>Connection Manager</h1>
-            <TerminalConnectionForm
-              terminalMode={terminalMode}
-              setTerminalMode={setTerminalMode}
-              host={host}
-              setHost={setHost}
-              port={port}
-              setPort={setPort}
-              username={username}
-              setUsername={setUsername}
-              password={password}
-              setPassword={setPassword}
-              comPort={comPort}
-              setComPort={setComPort}
-              baudRate={baudRate}
-              setBaudRate={setBaudRate}
-              serialPorts={serialPorts}
-              refreshSerialPorts={refreshSerialPorts}
-              activeTerminalTarget={activeTerminalTarget}
-              handleConnectTerminal={handleConnectTerminal}
-              handleDisconnectTerminal={handleDisconnectTerminal}
-            />
-            <div className="terminal-container">
-              {activeTerminalTarget ? (
-                <TerminalComponent 
-                  action={terminalMode} 
-                  target={activeTerminalTarget} 
-                  isActive={activeTab === 'terminal'} 
-                />
-              ) : (
-                <div style={{ color: 'gray', padding: '20px' }}>Terminal emulator ready. Enter connection details.</div>
-              )}
-            </div>
+            <TerminalTab isActive={activeTab === 'terminal'} />
           </div>
 
           {/* Discovery Tab */}

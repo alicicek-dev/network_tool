@@ -46,6 +46,7 @@ Asistanlar kod değişikliklerini doğrulamak için aşağıdaki komutları kull
 ## 4. Sürüm Yönetimi ve Dokümantasyon (Version Management & Documentation)
 
 *   **Sürüm Notları Kaydı (Release Changelog)**: Uygulamanın versiyonu her değiştiğinde (örneğin `package.json` içindeki `version` değeri güncellendiğinde veya yeni bir özellik eklendiğinde), gerçekleştirilen tüm yenilikler, yapısal değişiklikler ve iyileştirmeler uygun bir formatta [RELEASE.md](file:///c:/ai_projelerim/network_tool/RELEASE.md) dosyasına işlenmelidir.
+*   **Versiyon Numarası Güncelleme Kuralı**: `package.json` içindeki versiyon numarası her hata gideriminde veya geliştirmede otomatik olarak değiştirilmemelidir. Versiyon numarası artırımı **yalnızca kullanıcı bunu açıkça talep ettiğinde** yapılmalıdır. Kullanıcı belirtmediği sürece mevcut sürüm numarası korunur, yapılan iyileştirmeler mevcut aktif sürüm altındaki notlara (veya hata düzeltmeleri listesine) eklenir.
 
 ### A. Doküman Haritası ve Güncelleme Kuralları (Doc Map & Update Rules)
 

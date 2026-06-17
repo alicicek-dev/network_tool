@@ -121,6 +121,7 @@ server.on('connection', (socket) => {
 const io = new Server(server, {
   cors: { origin: '*' }
 });
+serversManager.setIo(io);
 
 app.get('/api/interfaces', (req, res) => {
   const nets = os.networkInterfaces();
@@ -255,9 +256,6 @@ io.on('connection', (socket) => {
   // --- QUICK FILE SERVERS FEATURE ---
   // Expose current status immediately
   socket.emit('quick-server-status-all', serversManager.getStatus());
-
-  // Set the socket for logs dispatch
-  serversManager.setSocket(socket);
 
   socket.on('quick-server-start', async ({ type, config }) => {
     try {

@@ -46,7 +46,8 @@ export default function TerminalComponent({ action, target, socket: externalSock
 
     // Connect to backend
     const socket = externalSocket || io('http://127.0.0.1:3001', {
-      transports: ['websocket']
+      transports: ['websocket'],
+      forceNew: true
     });
     const isLocalSocket = !externalSocket;
     socketRef.current = socket;
