@@ -53,8 +53,8 @@ function App() {
     <div className="app-root">
       <div className="titlebar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'none' }}>
-          <AppIcon width="16" height="16" />
-          <span className="titlebar-title">NetTool - Network Engineer Toolkit</span>
+          <AppIcon width="14" height="14" style={{ color: 'var(--accent-color)' }} />
+          <span className="titlebar-title" style={{ fontSize: '0.75rem', fontWeight: 600 }}>NetTool - Network Engineer Toolkit</span>
         </div>
         <div className="titlebar-controls">
           <button
@@ -82,9 +82,9 @@ function App() {
       </div>
       <div className="app-container">
         <aside className="sidebar">
-          <div style={{display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', marginBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
-            <AppIcon width="28" height="28" />
-            <span style={{fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-primary)'}}>NetTool</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 14px', marginBottom: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.03)' }}>
+            <AppIcon width="24" height="24" style={{ color: 'var(--accent-color)' }} />
+            <span style={{ fontWeight: '700', fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>NetTool</span>
           </div>
           <div 
             className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
@@ -139,7 +139,7 @@ function App() {
 
         <main className="main-content">
           {/* Dashboard Tab */}
-          <div style={{ display: activeTab === 'dashboard' ? 'block' : 'none' }}>
+          <div style={{ display: activeTab === 'dashboard' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             <DashboardTab 
               interfaces={interfaces} 
               selectedIfIdx={selectedIfIdx} 
@@ -149,18 +149,18 @@ function App() {
           </div>
 
           {/* Ping Tab */}
-          <div style={{ display: activeTab === 'ping' ? 'block' : 'none' }}>
+          <div style={{ display: activeTab === 'ping' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             <PingTab socket={socket} />
           </div>
 
           {/* Terminal Tab */}
-          <div style={{ display: activeTab === 'terminal' ? 'flex' : 'none', flexDirection: 'column', height: '100%' }} className="fade-in">
+          <div style={{ display: activeTab === 'terminal' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }} className="fade-in">
             <h1>Connection Manager</h1>
             <TerminalTab isActive={activeTab === 'terminal'} />
           </div>
 
           {/* Discovery Tab */}
-          <div style={{ display: activeTab === 'discovery' ? 'block' : 'none' }}>
+          <div style={{ display: activeTab === 'discovery' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             <DiscoveryTab 
               socket={socket} 
               defaultSubnet={interfaces[selectedIfIdx]?.ip ? interfaces[selectedIfIdx].ip.split('.').slice(0, 3).join('.') : undefined} 
@@ -168,17 +168,17 @@ function App() {
           </div>
 
           {/* Quick Server Tab */}
-          <div style={{ display: activeTab === 'quick-server' ? 'block' : 'none' }}>
+          <div style={{ display: activeTab === 'quick-server' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             <QuickServerTab socket={socket} />
           </div>
 
           {/* Utilities Tab */}
-          <div style={{ display: activeTab === 'utilities' ? 'block' : 'none' }}>
+          <div style={{ display: activeTab === 'utilities' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             <UtilitiesTab />
           </div>
 
           {/* Speed Test Tab */}
-          <div style={{ display: activeTab === 'speedtest' ? 'block' : 'none' }}>
+          <div style={{ display: activeTab === 'speedtest' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             <SpeedTestTab socket={socket} />
           </div>
         </main>

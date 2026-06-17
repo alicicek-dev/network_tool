@@ -1,11 +1,11 @@
 :root {
-  --bg-color: #0f111a;
-  --panel-bg: rgba(30, 30, 46, 0.7);
-  --panel-border: rgba(255, 255, 255, 0.1);
+  --bg-color: #08080d;
+  --panel-bg: rgba(17, 17, 27, 0.55);
+  --panel-border: rgba(255, 255, 255, 0.04);
   --text-primary: #cdd6f4;
   --text-secondary: #a6adc8;
-  --accent-color: #89b4fa;
-  --accent-hover: #b4befe;
+  --accent-color: #74c7ec; /* Catppuccin Sapphire */
+  --accent-hover: #89b4fa; /* Catppuccin Blue */
   --danger: #f38ba8;
   --success: #a6e3a1;
   --warning: #f9e2af;
@@ -21,46 +21,57 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);
-  /* Cool gradient background for the window */
-  background: radial-gradient(circle at 10% 20%, rgb(15, 17, 26) 0%, rgb(25, 25, 45) 90%);
+  /* Premium dark tech radial gradient */
+  background: radial-gradient(circle at 50% 0%, #161624 0%, #08080d 100%);
   height: 100vh;
   overflow: hidden;
-  user-select: none; /* Make it feel like an app */
+  user-select: none; /* Desktop App Vibe */
 }
 
 /* Glassmorphism Panel Utility */
 .glass-panel {
   background: var(--panel-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* Typography */
 h1, h2, h3 {
-  font-weight: 600;
-  letter-spacing: -0.5px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
 }
 
-h1 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent-color); }
-h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+h1 { 
+  font-size: 1.55rem; 
+  margin-bottom: 1.25rem; 
+  background: linear-gradient(135deg, #cdd6f4 0%, #a6adc8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2 { 
+  font-size: 1.1rem; 
+  margin-bottom: 0.85rem; 
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* App Layout */
@@ -77,9 +88,9 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   min-height: 0;
 }
 
-/* Custom Titlebar (frame:false — normal flow, no position:absolute) */
+/* Titlebar */
 .titlebar {
-  height: 32px;
+  height: 36px;
   flex-shrink: 0;
   -webkit-app-region: drag;
   -webkit-user-select: none;
@@ -88,19 +99,23 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   align-items: center;
   justify-content: space-between;
   padding-left: 15px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
   font-weight: 500;
-  background: rgba(0, 0, 0, 0.3);
+  background: #08080d;
+  border-bottom: 1px solid var(--panel-border);
 }
+
 .titlebar-title {
   pointer-events: none;
 }
+
 .titlebar-controls {
   display: flex;
   height: 100%;
   -webkit-app-region: no-drag;
 }
+
 .titlebar-btn {
   -webkit-app-region: no-drag;
   width: 46px;
@@ -110,79 +125,99 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   justify-content: center;
   background: transparent;
   border: none;
-  color: #cdd6f4;
+  color: #a6adc8;
   cursor: pointer;
   padding: 0;
   border-radius: 0;
-  transition: background 0.15s;
+  transition: background-color 150ms ease, color 150ms ease;
   font-size: 0;
 }
-.titlebar-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  transform: none;
-}
-.titlebar-btn:active {
-  transform: none;
-}
-.titlebar-btn-close:hover {
-  background: #e81123;
-  color: #fff;
+
+@media (hover: hover) and (pointer: fine) {
+  .titlebar-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+  }
+  .titlebar-btn-close:hover {
+    background: #e81123;
+    color: #fff;
+  }
 }
 
 /* Sidebar */
 .sidebar {
   width: 250px;
   height: 100%;
-  padding: 20px 10px;
+  padding: 24px 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   border-right: 1px solid var(--panel-border);
-  background: rgba(15, 17, 26, 0.5);
+  background: rgba(10, 10, 15, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .nav-item {
-  padding: 12px 16px;
-  border-radius: 8px;
+  position: relative;
+  padding: 10px 14px;
+  border-radius: 6px;
   cursor: pointer;
   color: var(--text-secondary);
-  transition: background-color 200ms cubic-bezier(0.23, 1, 0.32, 1), color 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
   display: flex;
   align-items: center;
   gap: 12px;
   font-weight: 500;
+  font-size: 0.88rem;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .nav-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
     color: var(--text-primary);
-    transform: translateX(4px);
+    transform: translateX(2px);
   }
 }
 
+.nav-item:active {
+  transform: scale(0.97) translateX(2px);
+}
+
 .nav-item.active {
-  background: rgba(137, 180, 250, 0.15);
+  background: rgba(116, 199, 236, 0.08); /* Sapphire accent bg */
   color: var(--accent-color);
-  border-left: 3px solid var(--accent-color);
+  font-weight: 600;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 3px;
+  background: var(--accent-color);
+  border-radius: 99px;
+  box-shadow: 0 0 8px var(--accent-color);
 }
 
 /* Main Content Area */
 .main-content {
   flex: 1;
   padding: 24px;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  background: rgba(8, 8, 13, 0.2);
 }
 
 /* Dashboard Cards */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -191,52 +226,62 @@ h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: transform 200ms cubic-bezier(0.25, 1, 0.5, 1), border-color 200ms cubic-bezier(0.25, 1, 0.5, 1);
+  background: rgba(17, 17, 27, 0.35);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  transition: transform 200ms cubic-bezier(0.25, 1, 0.5, 1), border-color 200ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 200ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .stat-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(137, 180, 250, 0.4);
+    transform: translateY(-3px);
+    border-color: rgba(116, 199, 236, 0.25);
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.3);
   }
 }
 
 .stat-label {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
 }
 
 .stat-value {
-  font-size: 1.8rem;
+  font-family: monospace;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 /* Input & Buttons */
 input {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--panel-border);
   color: var(--text-primary);
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 8px 14px;
+  border-radius: 6px;
   font-family: inherit;
+  font-size: 0.88rem;
   outline: none;
-  transition: border-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: border-color 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 input:focus {
-  border-color: var(--accent-color);
+  border-color: rgba(116, 199, 236, 0.5);
+  box-shadow: 0 0 8px rgba(116, 199, 236, 0.15);
 }
 
 button {
   background: var(--accent-color);
   color: #11111b;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
   font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1);
   font-family: inherit;
@@ -281,17 +326,54 @@ button:active {
     opacity: 0.7 !important;
     transform: scale(1.1);
   }
-  .interface-row:hover {
-    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Technical Telemetry Table Styles */
+.telemetry-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.telemetry-table th {
+  padding: 12px 14px;
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.telemetry-table td {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+.telemetry-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  background: transparent;
+  transition: background-color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.telemetry-row.selected {
+  background: rgba(116, 199, 236, 0.05) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .telemetry-row:hover {
+    background: rgba(255, 255, 255, 0.015);
   }
-  .interface-row.selected:hover {
-    background: rgba(137, 180, 250, 0.08) !important;
+  .telemetry-row.selected:hover {
+    background: rgba(116, 199, 236, 0.07) !important;
   }
 }
 
-/* Design Engineering Additions */
-
-/* Smooth Tab Entry Animations */
+/* Design Engineering Animations */
 .fade-in {
   animation: fadeIn 220ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
@@ -307,7 +389,6 @@ button:active {
   }
 }
 
-/* Smooth Select Menu Downward Scale Reveal */
 .select-dropdown-enter {
   animation: selectDropdownEnter 180ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
   transform-origin: top;

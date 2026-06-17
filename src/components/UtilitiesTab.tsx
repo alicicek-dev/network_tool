@@ -89,7 +89,7 @@ export default function UtilitiesTab() {
   };
 
   return (
-    <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+    <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto'}}>
       <h1>Utilities</h1>
       <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr'}}>
         
