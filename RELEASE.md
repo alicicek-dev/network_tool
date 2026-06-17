@@ -25,6 +25,7 @@ Bu sürüm; uygulamanın modülerliğini artırmak, performans optimizasyonları
     *   `src/components/TerminalTab.tsx` (Çoklu Oturum ve Sekme Yöneticisi)
 *   **Merkezi Tip Güvenliği**: Projedeki ortak veri tipleri `src/types.ts` dosyasına taşınarak TypeScript tip denetimi (`tsc --noEmit`) standartlaştırıldı.
 *   **Sunucu Sekme Düzenlemesi**: Hızlı dosya sunucusu sekmeleri soldan sağa **FTP, TFTP, HTTP, HTTPS** şeklinde hizalandı ve FTP varsayılan aktif sekme yapıldı.
+*   **Yapay Zekâ Sürüm Yönetim Politikası (`GEMINI.md`)**: Versiyon numaralarının otomatik artırılmasını engelleyen ve yalnızca kullanıcı onayıyla değişmesini sağlayan kural sisteme dahil edildi.
 
 ### 📝 Mağaza / GitHub Açıklama Şablonu (Store & GitHub Description Snippet)
 ```markdown
@@ -35,6 +36,7 @@ Bu sürüm; uygulamanın modülerliğini artırmak, performans optimizasyonları
 - 💾 **Oturum Koruma (Keep-Alive)**: Sekmeler arası geçişlerde terminal bağlantılarınız arka planda canlı kalır, hiçbir veri veya oturum kaybolmaz.
 - ⚙️ **Modüler Mimari & Stabilite**: Arayüz ve durum yönetimi yenilenerek uygulama performansı ve kararlılığı artırıldı.
 - 📂 **Quick Server Düzenlemesi**: Hızlı FTP, TFTP, HTTP, HTTPS sunucu başlatıcıları yeniden organize edildi.
+- 🤖 **Yapay Zekâ Sürüm Politikası**: Otomatik sürüm artışları kısıtlandı, kontrol kullanıcıya bırakıldı.
 ```
 
 ---
