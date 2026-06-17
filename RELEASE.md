@@ -4,7 +4,7 @@ Bu dosya, NetTool (Network Engineer Toolkit) uygulamasının sürüm geçmişini
 
 ---
 
-## [v1.0.1 (Beta)] - 2026-06-16
+## [v1.0.1] - 2026-06-16
 
 Bu sürüm; uygulamanın modülerliğini artırmak, performans optimizasyonları sağlamak ve çoklu oturum desteği sunmak amacıyla gerçekleştirilen büyük bir refaktör çalışmasını ve hata gidermelerini içerir.
 
@@ -29,7 +29,7 @@ Bu sürüm; uygulamanın modülerliğini artırmak, performans optimizasyonları
 
 ### ▲ Açıklama Şablonu (Description Snippet)
 ```markdown
-# NetTool v1.0.1-beta
+# NetTool v1.0.1
 
 ## Yenilikler (What's New)
 - ◆ **Çoklu Sekmeli Terminal**: Aynı anda birden fazla SSH, Telnet ve Serial console bağlantısı açın ve yönetin.
