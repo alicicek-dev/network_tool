@@ -270,6 +270,7 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
                   activeTerminalTarget={''}
                   handleConnectTerminal={handleConnect}
                   handleDisconnectTerminal={() => handleDisconnect(s.id)}
+                  isParentActive={isActive && isSessionActive}
                 />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>

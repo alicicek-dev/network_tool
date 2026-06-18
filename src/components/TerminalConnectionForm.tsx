@@ -23,6 +23,7 @@ interface TerminalConnectionFormProps {
   activeTerminalTarget: string;
   handleConnectTerminal: () => void;
   handleDisconnectTerminal: () => void;
+  isParentActive: boolean;
 }
 
 export default function TerminalConnectionForm({
@@ -44,10 +45,12 @@ export default function TerminalConnectionForm({
   refreshSerialPorts,
   activeTerminalTarget,
   handleConnectTerminal,
-  handleDisconnectTerminal
+  handleDisconnectTerminal,
+  isParentActive
 }: TerminalConnectionFormProps) {
   const [showBaudratePresets, setShowBaudratePresets] = useState(false);
   const baudrateRef = useRef<HTMLDivElement>(null);
+  const hostInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -58,6 +61,15 @@ export default function TerminalConnectionForm({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (isParentActive && (terminalMode === 'ssh' || terminalMode === 'telnet')) {
+      const timer = setTimeout(() => {
+        hostInputRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isParentActive, terminalMode]);
 
   const getPortLabel = (sp: SerialPortInfo) => {
     if (sp.friendlyName) {
@@ -91,6 +103,7 @@ export default function TerminalConnectionForm({
       {(terminalMode === 'ssh' || terminalMode === 'telnet') ? (
         <>
           <input 
+            ref={hostInputRef}
             type="text" 
             placeholder="Host / IP" 
             style={{ flex: 1 }} 
