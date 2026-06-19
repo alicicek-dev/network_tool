@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Theme, AccessibilityOptions } from '../types';
+import { generateThemeFromPrimary } from '../utils/themeGenerator';
 
 interface ThemeContextProps {
   theme: Theme;
@@ -151,9 +152,13 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [customPalette, setCustomPaletteState] = useState<Record<string, string>>(() => {
     const saved = store.get('customPalette', null);
     const defaults = savedDefaultPalette || defaultPalette;
-    return saved
+    const base = saved
       ? { ...darkPalette, ...defaults, ...saved }
       : { ...darkPalette, ...defaults };
+    if (!base['--primary-color']) {
+      base['--primary-color'] = '#74c7ec';
+    }
+    return base;
   });
   const [accessibility, setAccessibilityState] = useState<AccessibilityOptions>(
     store.get('accessibility', savedDefaultAccessibility) as AccessibilityOptions
@@ -171,7 +176,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       return darkPalette;
     }
     
-    // Custom theme: derive full palette from user's base selections
+    // Custom theme: derive full palette from user's primary color
+    const primaryColor = customPalette['--primary-color'] || '#74c7ec';
+    const generated = generateThemeFromPrimary(primaryColor);
+    const merged: Record<string, string> = { ...generated, '--primary-color': primaryColor };
+
     const hexToRgb = (hex: string) => {
       let r = 0, g = 0, b = 0;
       if (hex.length === 4) {
@@ -188,52 +197,40 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     const isHex = (str: string) => typeof str === 'string' && str.startsWith('#');
 
-    const bg = customPalette['--bg-color'] || darkPalette['--bg-color'];
-    const panel = customPalette['--panel-bg'] || darkPalette['--panel-bg'];
-    const border = customPalette['--panel-border'] || darkPalette['--panel-border'];
-    const textPri = customPalette['--text-primary'] || darkPalette['--text-primary'];
-    const textSec = customPalette['--text-secondary'] || darkPalette['--text-secondary'];
-    const accent = customPalette['--accent-color'] || darkPalette['--accent-color'];
-    const success = customPalette['--success'] || darkPalette['--success'];
-    const danger = customPalette['--danger'] || darkPalette['--danger'];
-    const warning = customPalette['--warning'] || darkPalette['--warning'];
+    const bg = merged['--bg-color'];
+    const panel = merged['--panel-bg'];
+    const border = merged['--panel-border'];
+    const textPri = merged['--text-primary'];
+    const accent = merged['--accent-color'];
+    const success = merged['--success'];
 
-    const derived = { ...customPalette };
+    const derived = { ...merged };
 
     // 1. Genel Arka Plan
-    derived['--bg-color'] = bg;
     derived['--bg-gradient'] = bg; // No complex gradient for custom hex
     derived['--content-bg'] = bg;
 
     // 2. Paneller ve Yan Menü
-    derived['--panel-bg'] = panel;
     derived['--card-bg'] = panel;
     derived['--sidebar-bg'] = panel;
     derived['--input-bg'] = isHex(bg) ? bg : panel; // Input is usually slightly darker, or same as bg
 
     // 3. Kenarlıklar
-    derived['--panel-border'] = border;
     derived['--border-subtle'] = border;
 
     // 4. Metin Renkleri
-    derived['--text-primary'] = textPri;
-    derived['--text-secondary'] = textSec;
     derived['--button-text'] = bg; // Provide contrast to accent
 
     // 5. Vurgu Rengi
-    derived['--accent-color'] = accent;
     derived['--accent-hover'] = accent;
     if (isHex(accent)) {
       derived['--nav-active-bg'] = `rgba(${hexToRgb(accent)}, 0.15)`;
     }
 
     // 6. Durum Renkleri
-    derived['--success'] = success;
     if (isHex(success)) {
       derived['--success-rgb'] = hexToRgb(success);
     }
-    derived['--danger'] = danger;
-    derived['--warning'] = warning;
 
     // Hover ve Scrollbar efektleri metin renginden türetilir
     if (isHex(textPri)) {
