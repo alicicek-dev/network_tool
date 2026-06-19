@@ -4,6 +4,7 @@
   "version": "1.0.2",
   "author": "Ali Cicek",
   "description": "Network Engineer Toolkit",
+  "license": "MIT",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",

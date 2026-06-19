@@ -8,8 +8,9 @@ import PingTab from './components/PingTab';
 import QuickServerTab from './components/QuickServerTab';
 import DashboardTab from './components/DashboardTab';
 import SettingsTab from './components/SettingsTab';
+import AboutModal from './components/AboutModal';
 import { io } from 'socket.io-client';
-import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, ServerIcon, SettingsIcon } from './components/Icons';
+import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, ServerIcon, SettingsIcon, InfoIcon } from './components/Icons';
 import type { NetworkInterface } from './types';
 
 const socket = io('http://127.0.0.1:3001', {
@@ -18,6 +19,7 @@ const socket = io('http://127.0.0.1:3001', {
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showAbout, setShowAbout] = useState(false);
 
   // Interfaces State
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
@@ -139,10 +141,18 @@ function App() {
           <div 
             className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveTab('settings')}
-            style={{ marginTop: 'auto', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}
+            style={{ marginTop: 'auto', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginBottom: '4px' }}
           >
             <SettingsIcon width="18" height="18" />
             Ayarlar
+          </div>
+          <div 
+            className="nav-item"
+            onClick={() => setShowAbout(true)}
+            style={{ padding: '10px 14px', cursor: 'pointer' }}
+          >
+            <InfoIcon width="18" height="18" />
+            Hakkında
           </div>
         </aside>
 
@@ -197,6 +207,8 @@ function App() {
           </div>
         </main>
       </div>
+
+      <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
     </div>
   );
 }
