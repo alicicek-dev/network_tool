@@ -74,7 +74,7 @@ export default function SpeedTestTab({ socket }: Props) {
       <h1 style={{marginBottom: '20px'}}>Speed Test</h1>
       <div className="glass-panel" style={{padding: '40px', width: '600px', textAlign: 'center', borderRadius: '15px', marginBottom: '30px'}}>
         
-        <div style={{fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '30px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid var(--primary)', textAlign: 'left'}}>
+        <div style={{fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '30px', background: 'var(--input-bg)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid var(--accent-color)', textAlign: 'left'}}>
           Testing is conducted over the <strong>Cloudflare Edge Network</strong>. Real capacity is measured using multi-threaded stress tests between your device and the closest datacenters.
         </div>
         
@@ -82,22 +82,22 @@ export default function SpeedTestTab({ socket }: Props) {
           {status}
         </div>
 
-        <div style={{width: '100%', background: 'rgba(0,0,0,0.3)', height: '10px', borderRadius: '5px', overflow: 'hidden', marginBottom: '30px'}}>
-          <div style={{width: `${progress}%`, background: 'var(--primary)', height: '100%', transition: 'width 0.3s ease'}}></div>
+        <div style={{width: '100%', background: 'var(--input-bg)', height: '10px', borderRadius: '5px', overflow: 'hidden', marginBottom: '30px'}}>
+          <div style={{width: `${progress}%`, background: 'var(--accent-color)', height: '100%', transition: 'width 0.3s ease'}}></div>
         </div>
 
         <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '40px'}}>
-          <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'rgba(0,0,0,0.2)'}}>
+          <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'var(--input-bg)'}}>
             <div className="stat-label">Ping</div>
             <div className="stat-value">{ping ? `${ping} ms` : '-'}</div>
           </div>
-          <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'rgba(0,0,0,0.2)'}}>
+          <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'var(--input-bg)'}}>
             <div className="stat-label">Download</div>
-            <div className="stat-value" style={{color: 'var(--primary)'}}>
+            <div className="stat-value" style={{color: 'var(--accent-color)'}}>
               {download ? <>{(status === 'Completed' || status.includes('UPLOAD')) && <span style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Max: </span>}{download} Mbps</> : '-'}
             </div>
           </div>
-          <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'rgba(0,0,0,0.2)'}}>
+          <div className="stat-card" style={{flex: 1, margin: '0 10px', background: 'var(--input-bg)'}}>
             <div className="stat-label">Upload</div>
             <div className="stat-value" style={{color: 'var(--success)'}}>
               {upload ? <>{status === 'Completed' && <span style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Max: </span>}{upload} Mbps</> : '-'}
@@ -117,10 +117,10 @@ export default function SpeedTestTab({ socket }: Props) {
       {history.length > 0 && (
         <div className="glass-panel" style={{padding: '20px', width: '600px', borderRadius: '15px'}}>
           <h3 style={{marginBottom: '15px', color: 'var(--text-primary)', textAlign: 'left'}}>Test History</h3>
-          <div style={{background: 'rgba(0,0,0,0.2)', borderRadius: '10px', overflow: 'hidden'}}>
+          <div style={{background: 'var(--input-bg)', borderRadius: '10px', overflow: 'hidden'}}>
             <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem'}}>
               <thead>
-                <tr style={{background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)'}}>
+                <tr style={{background: 'var(--hover-overlay)', color: 'var(--text-secondary)'}}>
                   <th style={{padding: '12px', textAlign: 'left'}}>Date & Time</th>
                   <th style={{padding: '12px', textAlign: 'center'}}>Ping</th>
                   <th style={{padding: '12px', textAlign: 'center'}}>Download</th>
@@ -129,10 +129,10 @@ export default function SpeedTestTab({ socket }: Props) {
               </thead>
               <tbody>
                 {history.map((h, i) => (
-                  <tr key={i} style={{borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                  <tr key={i} style={{borderTop: '1px solid var(--border-subtle)'}}>
                     <td style={{padding: '12px'}}>{h.timestamp}</td>
                     <td style={{padding: '12px', textAlign: 'center'}}>{h.ping} ms</td>
-                    <td style={{padding: '12px', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold'}}>{h.download} Mbps</td>
+                    <td style={{padding: '12px', textAlign: 'center', color: 'var(--accent-color)', fontWeight: 'bold'}}>{h.download} Mbps</td>
                     <td style={{padding: '12px', textAlign: 'center', color: 'var(--success)', fontWeight: 'bold'}}>{h.upload} Mbps</td>
                   </tr>
                 ))}

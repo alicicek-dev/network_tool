@@ -300,7 +300,7 @@ export default function QuickServerTab({ socket }: Props) {
                 gap: '8px',
                 fontWeight: activeSubTab === tab ? '600' : 'normal',
                 backgroundColor: activeSubTab === tab ? 'var(--accent-color)' : 'rgba(255, 255, 255, 0.05)',
-                color: activeSubTab === tab ? '#11111b' : 'var(--text-primary)',
+                color: activeSubTab === tab ? 'var(--button-text)' : 'var(--text-primary)',
                 border: activeSubTab === tab ? 'none' : '1px solid var(--panel-border)'
               }}
             >
@@ -310,8 +310,8 @@ export default function QuickServerTab({ socket }: Props) {
                   width: '6px',
                   height: '6px',
                   borderRadius: '50%',
-                  backgroundColor: '#a6e3a1',
-                  boxShadow: '0 0 6px #a6e3a1',
+                  backgroundColor: 'var(--success)',
+                  boxShadow: '0 0 6px var(--success)',
                   display: 'inline-block'
                 }}></span>
               )}
@@ -332,7 +332,7 @@ export default function QuickServerTab({ socket }: Props) {
               padding: '4px 8px',
               borderRadius: '12px',
               fontWeight: 'bold',
-              backgroundColor: servers[activeSubTab].running ? 'rgba(166, 227, 161, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              backgroundColor: servers[activeSubTab].running ? 'rgba(var(--success-rgb), 0.15)' : 'var(--hover-overlay)',
               color: servers[activeSubTab].running ? 'var(--success)' : 'var(--text-secondary)'
             }}>
               {servers[activeSubTab].running ? `RUNNING (Port ${servers[activeSubTab].port})` : 'STOPPED'}
@@ -616,7 +616,7 @@ export default function QuickServerTab({ socket }: Props) {
                 fontSize: '1rem',
                 fontWeight: 'bold',
                 backgroundColor: servers[activeSubTab].running ? 'var(--danger)' : 'var(--accent-color)',
-                color: servers[activeSubTab].running ? 'white' : '#11111b',
+                color: servers[activeSubTab].running ? 'white' : 'var(--button-text)',
                 transition: 'background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1)',
                 border: 'none',
                 boxShadow: servers[activeSubTab].running ? '0 0 10px rgba(243, 139, 168, 0.2)' : '0 0 10px rgba(137, 180, 250, 0.2)'

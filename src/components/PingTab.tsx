@@ -232,7 +232,7 @@ export default function PingTab({ socket }: Props) {
             disabled={isMultiTesting || !!activePing}
             style={{
               background: subTab === 'single' ? 'var(--accent-color)' : 'transparent',
-              color: subTab === 'single' ? '#11111b' : 'var(--text-primary)',
+              color: subTab === 'single' ? 'var(--button-text)' : 'var(--text-primary)',
               border: 'none',
               borderRadius: '16px',
               padding: '6px 16px',
@@ -249,7 +249,7 @@ export default function PingTab({ socket }: Props) {
             disabled={isMultiTesting || !!activePing}
             style={{
               background: subTab === 'multi' ? 'var(--accent-color)' : 'transparent',
-              color: subTab === 'multi' ? '#11111b' : 'var(--text-primary)',
+              color: subTab === 'multi' ? 'var(--button-text)' : 'var(--text-primary)',
               border: 'none',
               borderRadius: '16px',
               padding: '6px 16px',
@@ -305,7 +305,7 @@ export default function PingTab({ socket }: Props) {
               </div>
               <div className="stat-card glass-panel" style={{padding: '15px'}}>
                 <div className="stat-label">Avg Latency</div>
-                <div className="stat-value" style={{color: 'var(--primary)'}}>{summary.avg > 0 ? `${summary.avg.toFixed(1)} ms` : '-'}</div>
+                <div className="stat-value" style={{color: 'var(--accent-color)'}}>{summary.avg > 0 ? `${summary.avg.toFixed(1)} ms` : '-'}</div>
               </div>
               <div className="stat-card glass-panel" style={{padding: '15px'}}>
                 <div className="stat-label">Jitter</div>

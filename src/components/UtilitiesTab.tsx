@@ -105,7 +105,7 @@ export default function UtilitiesTab() {
           <h3>MAC Vendor Lookup</h3>
           <p className="subtext">Find the manufacturer vendor from the device MAC address.</p>
           <input type="text" placeholder="e.g. B8:27:EB:..." value={vendorMac} onChange={e => setVendorMac(e.target.value)} className="ui-input" style={{marginBottom: '10px'}}/>
-          <button onClick={handleVendorLookup} style={{width: '100%', background: 'var(--panel-border)', color: 'white'}}>Lookup</button>
+          <button onClick={handleVendorLookup} style={{width: '100%', background: 'var(--panel-border)', color: 'var(--text-primary)'}}>Lookup</button>
           {vendorResult && <div style={{marginTop: '10px', fontSize: '0.9rem', color: vendorResult.includes('❌') ? 'var(--danger)' : 'var(--success)'}}>{vendorResult}</div>}
         </div>
 
@@ -119,7 +119,7 @@ export default function UtilitiesTab() {
             <button onClick={handleSubnetCalc}>Calculate</button>
           </div>
           {calcResult && (
-            <div style={{display: 'flex', gap: '20px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px'}}>
+            <div style={{display: 'flex', gap: '20px', background: 'var(--input-bg)', padding: '15px', borderRadius: '8px'}}>
               <div><span className="subtext">Network:</span><br/><b>{calcResult.network}</b></div>
               <div><span className="subtext">Netmask:</span><br/><b>{calcResult.mask}</b></div>
               <div><span className="subtext">Broadcast:</span><br/><b>{calcResult.broadcast}</b></div>
@@ -141,7 +141,7 @@ export default function UtilitiesTab() {
               {dnsResults.length === 0 ? <span className="placeholder-text">No records found...</span> : 
                 dnsResults.map((rec, i) => (
                   <div key={i} className="list-item" style={{display: 'flex', gap: '10px'}}>
-                    <span style={{color: 'var(--primary)', width: '40px'}}>{rec.type}</span>
+                    <span style={{color: 'var(--accent-color)', width: '40px'}}>{rec.type}</span>
                     <span>{rec.value || rec.address || rec.exchange || JSON.stringify(rec)}</span>
                   </div>
                 ))

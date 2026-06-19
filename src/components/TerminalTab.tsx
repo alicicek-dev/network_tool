@@ -176,8 +176,7 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      {/* Tab Bar Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '10px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px', flexWrap: 'wrap' }}>
         {sessions.map(s => {
           const isSelected = s.id === activeSessionId;
           return (
@@ -190,8 +189,8 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
                 gap: '8px',
                 padding: '8px 14px',
                 borderRadius: '8px',
-                background: isSelected ? 'rgba(137, 180, 250, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                border: isSelected ? '1px solid var(--accent-color)' : '1px solid var(--panel-border)',
+                background: isSelected ? 'var(--nav-active-bg)' : 'var(--hover-overlay)',
+                border: isSelected ? '1px solid var(--accent-color)' : '1px solid var(--border-subtle)',
                 color: isSelected ? 'var(--accent-color)' : 'var(--text-primary)',
                 cursor: 'pointer',
                 fontSize: '0.85rem',
@@ -224,8 +223,8 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
             borderRadius: '8px',
             fontSize: '1rem',
             lineHeight: '1',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid var(--panel-border)',
+            background: 'var(--hover-overlay)',
+            border: '1px solid var(--border-subtle)',
             color: 'var(--text-primary)',
             cursor: 'pointer'
           }}

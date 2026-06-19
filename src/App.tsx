@@ -7,8 +7,9 @@ import SpeedTestTab from './components/SpeedTestTab';
 import PingTab from './components/PingTab';
 import QuickServerTab from './components/QuickServerTab';
 import DashboardTab from './components/DashboardTab';
+import SettingsTab from './components/SettingsTab';
 import { io } from 'socket.io-client';
-import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, ServerIcon } from './components/Icons';
+import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, ServerIcon, SettingsIcon } from './components/Icons';
 import type { NetworkInterface } from './types';
 
 const socket = io('http://127.0.0.1:3001', {
@@ -82,7 +83,7 @@ function App() {
       </div>
       <div className="app-container">
         <aside className="sidebar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 14px', marginBottom: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.03)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 14px', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)' }}>
             <AppIcon width="24" height="24" style={{ color: 'var(--accent-color)' }} />
             <span style={{ fontWeight: '700', fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>NetTool</span>
           </div>
@@ -135,6 +136,14 @@ function App() {
             <SpeedTestIcon width="18" height="18" />
             Speed Test
           </div>
+          <div 
+            className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('settings')}
+            style={{ marginTop: 'auto', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}
+          >
+            <SettingsIcon width="18" height="18" />
+            Ayarlar
+          </div>
         </aside>
 
         <main className="main-content">
@@ -180,6 +189,11 @@ function App() {
           {/* Speed Test Tab */}
           <div style={{ display: activeTab === 'speedtest' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             <SpeedTestTab socket={socket} />
+          </div>
+
+          {/* Settings Tab */}
+          <div style={{ display: activeTab === 'settings' ? 'flex' : 'none', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+            <SettingsTab />
           </div>
         </main>
       </div>

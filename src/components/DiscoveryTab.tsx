@@ -213,7 +213,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
             disabled={isSweeping || isScanning || isLoadingArp}
             style={{
               background: activeSubTab === 'ip' ? 'var(--accent-color)' : 'transparent',
-              color: activeSubTab === 'ip' ? '#11111b' : 'var(--text-primary)',
+              color: activeSubTab === 'ip' ? 'var(--button-text)' : 'var(--text-primary)',
               border: 'none',
               borderRadius: '16px',
               padding: '6px 16px',
@@ -230,7 +230,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
             disabled={isSweeping || isScanning || isLoadingArp}
             style={{
               background: activeSubTab === 'port' ? 'var(--accent-color)' : 'transparent',
-              color: activeSubTab === 'port' ? '#11111b' : 'var(--text-primary)',
+              color: activeSubTab === 'port' ? 'var(--button-text)' : 'var(--text-primary)',
               border: 'none',
               borderRadius: '16px',
               padding: '6px 16px',
@@ -247,7 +247,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
             disabled={isSweeping || isScanning || isLoadingArp}
             style={{
               background: activeSubTab === 'arp' ? 'var(--accent-color)' : 'transparent',
-              color: activeSubTab === 'arp' ? '#11111b' : 'var(--text-primary)',
+              color: activeSubTab === 'arp' ? 'var(--button-text)' : 'var(--text-primary)',
               border: 'none',
               borderRadius: '16px',
               padding: '6px 16px',
@@ -286,7 +286,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                 style={{ 
                   width: '120px',
                   background: isSweeping ? 'var(--danger)' : 'var(--accent-color)',
-                  color: isSweeping ? '#ffffff' : '#11111b'
+                  color: isSweeping ? '#ffffff' : 'var(--button-text)'
                 }}
               >
                 {isSweeping ? 'Stop' : 'Scan'}
@@ -342,7 +342,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                               top: '50%',
                               transform: 'translateY(-50%)',
                               fontSize: '0.7rem',
-                              color: '#11111b',
+                              color: 'var(--button-text)',
                               background: 'var(--success)',
                               padding: '1px 6px',
                               borderRadius: '4px',
@@ -383,7 +383,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                                 top: '50%',
                                 transform: 'translateY(-50%)',
                                 fontSize: '0.7rem',
-                                color: '#11111b',
+                                color: 'var(--button-text)',
                                 background: 'var(--success)',
                                 padding: '1px 6px',
                                 borderRadius: '4px',
@@ -452,7 +452,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                 style={{ 
                   minWidth: '120px',
                   background: isScanning ? 'var(--danger)' : 'var(--accent-color)',
-                  color: isScanning ? '#ffffff' : '#11111b'
+                  color: isScanning ? '#ffffff' : 'var(--button-text)'
                 }}
               >
                 {isScanning ? `Stop (${portResults.length}/${expectedPortsCount})` : 'Scan'}
@@ -627,7 +627,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                               top: '50%',
                               transform: 'translateY(-50%)',
                               fontSize: '0.7rem',
-                              color: '#11111b',
+                              color: 'var(--button-text)',
                               background: 'var(--success)',
                               padding: '1px 6px',
                               borderRadius: '4px',
@@ -663,7 +663,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                               top: '50%',
                               transform: 'translateY(-50%)',
                               fontSize: '0.7rem',
-                              color: '#11111b',
+                              color: 'var(--button-text)',
                               background: 'var(--success)',
                               padding: '1px 6px',
                               borderRadius: '4px',
