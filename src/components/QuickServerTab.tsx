@@ -299,8 +299,8 @@ export default function QuickServerTab({ socket }: Props) {
                 justifyContent: 'center',
                 gap: '8px',
                 fontWeight: activeSubTab === tab ? '600' : 'normal',
-                backgroundColor: activeSubTab === tab ? 'var(--accent-color)' : 'rgba(255, 255, 255, 0.05)',
-                color: activeSubTab === tab ? 'var(--button-text)' : 'var(--text-primary)',
+                background: activeSubTab === tab ? 'var(--accent-color)' : 'var(--input-bg)',
+                color: activeSubTab === tab ? 'var(--bg-color)' : 'var(--text-secondary)',
                 border: activeSubTab === tab ? 'none' : '1px solid var(--panel-border)'
               }}
             >
@@ -446,7 +446,7 @@ export default function QuickServerTab({ socket }: Props) {
               </div>
 
               {!useSelfSigned && (
-                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '5px', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '5px', padding: '12px', background: 'var(--hover-overlay)', borderRadius: '8px' }}>
                   <div>
                     <label className="subtext" style={{ display: 'block', marginBottom: '4px', fontSize: '0.8rem' }}>SSL Private Key Path (.key)</label>
                     <input
@@ -526,7 +526,7 @@ export default function QuickServerTab({ socket }: Props) {
                 </div>
               </div>
               
-              <div style={{ padding: '12px', background: 'rgba(0,0,0,0.15)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ padding: '12px', background: 'var(--hover-overlay)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                   Authentication settings (leave empty for anonymous login):
                 </div>
@@ -633,8 +633,9 @@ export default function QuickServerTab({ socket }: Props) {
           padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          background: 'rgba(10, 10, 15, 0.85)',
-          border: '1px solid rgba(255,255,255,0.05)'
+          background: 'var(--card-bg)',
+          borderRadius: '8px',
+          border: '1px solid var(--panel-border)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <h3 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -658,14 +659,14 @@ export default function QuickServerTab({ socket }: Props) {
 
           <div style={{
             flex: 1,
-            background: 'rgba(0,0,0,0.4)',
+            background: 'var(--input-bg)',
+            color: 'var(--text-primary)',
             borderRadius: '6px',
             padding: '12px',
             overflowY: 'auto',
             fontFamily: 'Fira Code, Source Code Pro, monospace',
             fontSize: '0.8rem',
             lineHeight: '1.4',
-            color: '#cdd6f4',
             border: '1px solid rgba(255,255,255,0.03)'
           }}>
             {logs[activeSubTab].length === 0 ? (

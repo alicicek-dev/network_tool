@@ -159,7 +159,7 @@ export default function TerminalConnectionForm({
               disabled={!!activeTerminalTarget}
               title="Refresh COM Ports"
               style={{
-                background: 'rgba(0,0,0,0.3)',
+                background: 'var(--input-bg)',
                 border: '1px solid var(--panel-border)',
                 borderRadius: '8px',
                 color: 'var(--text-primary)',
@@ -175,13 +175,13 @@ export default function TerminalConnectionForm({
               }}
               onMouseEnter={(e) => {
                 if (!activeTerminalTarget) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.background = 'var(--hover-overlay)';
                   e.currentTarget.style.borderColor = 'var(--accent-color)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!activeTerminalTarget) {
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.3)';
+                  e.currentTarget.style.background = 'var(--input-bg)';
                   e.currentTarget.style.borderColor = 'var(--panel-border)';
                 }
               }}
@@ -193,7 +193,7 @@ export default function TerminalConnectionForm({
             <input 
               type="text" 
               placeholder="Baudrate"
-              style={{ width: '100%', padding: '10px', paddingRight: '30px', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} 
+              style={{ width: '100%', padding: '10px', paddingRight: '30px', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'var(--input-bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }} 
               value={baudRate} 
               onChange={e => setBaudRate(e.target.value)} 
               disabled={!!activeTerminalTarget} 
@@ -221,11 +221,11 @@ export default function TerminalConnectionForm({
                   top: 'calc(100% + 6px)',
                   left: 0,
                   right: 0,
-                  background: 'rgba(20, 20, 35, 0.95)',
+                  background: 'var(--card-bg)',
                   backdropFilter: 'blur(16px)',
                   border: '1px solid var(--panel-border)',
                   borderRadius: '8px',
-                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.5)',
+                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
                   zIndex: 9999,
                   padding: '4px',
                   display: 'flex',
@@ -245,13 +245,13 @@ export default function TerminalConnectionForm({
                       fontSize: '0.85rem',
                       borderRadius: '6px',
                       color: baudRate === val ? 'var(--accent-color)' : 'var(--text-primary)',
-                      background: baudRate === val ? 'rgba(137, 180, 250, 0.15)' : 'transparent',
+                      background: baudRate === val ? 'var(--nav-active-bg)' : 'transparent',
                       cursor: 'pointer',
                       transition: 'background-color 150ms cubic-bezier(0.23, 1, 0.32, 1), color 150ms cubic-bezier(0.23, 1, 0.32, 1)',
                     }}
                     onMouseEnter={(e) => {
                       if (baudRate !== val) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.background = 'var(--hover-overlay)';
                       }
                     }}
                     onMouseLeave={(e) => {

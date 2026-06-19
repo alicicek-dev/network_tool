@@ -66,7 +66,7 @@ export default function DashboardTab({
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: isSelected ? 'transparent' : 'rgba(0,0,0,0.2)',
+                        background: isSelected ? 'transparent' : 'var(--hover-overlay)',
                         verticalAlign: 'middle',
                         transition: 'border-color 150ms ease'
                       }}>

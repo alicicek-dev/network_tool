@@ -3,6 +3,7 @@ import { Terminal } from 'xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import 'xterm/css/xterm.css';
 import { io, Socket } from 'socket.io-client';
+import { useTheme } from './context/ThemeContext';
 
 interface TerminalProps {
   action: string;
@@ -17,13 +18,16 @@ export default function TerminalComponent({ action, target, socket: externalSock
   const socketRef = useRef<Socket | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
 
+  const { palette } = useTheme();
+
   useEffect(() => {
     // Initialize xterm.js
     const term = new Terminal({
       theme: {
-        background: '#000000',
-        foreground: '#a6e3a1',
-        cursor: '#a6e3a1'
+        background: palette['--card-bg'] || '#000000',
+        foreground: palette['--text-primary'] || '#a6e3a1',
+        cursor: palette['--text-primary'] || '#a6e3a1',
+        selectionBackground: palette['--nav-active-bg'] || 'rgba(255, 255, 255, 0.3)',
       },
       fontFamily: 'monospace',
       fontSize: 14,
@@ -141,6 +145,17 @@ export default function TerminalComponent({ action, target, socket: externalSock
       term.dispose();
     };
   }, [action, target]);
+
+  useEffect(() => {
+    if (xtermRef.current) {
+      xtermRef.current.options.theme = {
+        background: palette['--card-bg'] || '#000000',
+        foreground: palette['--text-primary'] || '#a6e3a1',
+        cursor: palette['--text-primary'] || '#a6e3a1',
+        selectionBackground: palette['--nav-active-bg'] || 'rgba(255, 255, 255, 0.3)',
+      };
+    }
+  }, [palette]);
 
   useEffect(() => {
     if (isActive && xtermRef.current && fitAddonRef.current) {

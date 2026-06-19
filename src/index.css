@@ -299,7 +299,7 @@ button:active {
 
 .terminal-container {
   flex: 1;
-  background: #000;
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 10px;
   margin-top: 20px;

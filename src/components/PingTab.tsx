@@ -226,7 +226,7 @@ export default function PingTab({ socket }: Props) {
         <h1>Ping & Traceroute</h1>
         
         {/* Segmented Sub-Tab Control */}
-        <div style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '20px', border: '1px solid var(--panel-border)' }}>
+        <div style={{ display: 'flex', gap: '8px', background: 'var(--hover-overlay)', padding: '4px', borderRadius: '20px', border: '1px solid var(--panel-border)' }}>
           <button 
             onClick={() => setSubTab('single')} 
             disabled={isMultiTesting || !!activePing}
@@ -345,7 +345,7 @@ export default function PingTab({ socket }: Props) {
                 style={{
                   width: '100%',
                   height: '75px',
-                  background: 'rgba(0,0,0,0.3)',
+                  background: 'var(--input-bg)',
                   border: '1px solid var(--panel-border)',
                   borderRadius: '8px',
                   color: 'var(--text-primary)',
@@ -373,10 +373,10 @@ export default function PingTab({ socket }: Props) {
             {/* Top Table - Targets list */}
             <div className="glass-panel" style={{ flex: 1.2, display: 'flex', flexDirection: 'column', padding: '15px', minHeight: 0 }}>
               <h3 style={{ marginBottom: '10px', fontSize: '1.1rem' }}>Targets Summary</h3>
-              <div style={{ flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ flex: 1, overflowY: 'auto', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
+                    <tr style={{ background: 'var(--hover-overlay)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
                       <th style={{ padding: '10px 12px', width: '60px', textAlign: 'center' }}>Status</th>
                       <th style={{ padding: '10px 12px' }}>Host Name</th>
                       <th style={{ padding: '10px 12px' }}>IP Address</th>
@@ -407,9 +407,9 @@ export default function PingTab({ socket }: Props) {
                           key={t} 
                           onClick={() => setSelectedTarget(t)}
                           style={{ 
-                            borderBottom: '1px solid rgba(255,255,255,0.03)', 
+                            borderBottom: '1px solid var(--border-subtle)', 
                             cursor: 'pointer',
-                            background: isSelected ? 'rgba(137, 180, 250, 0.12)' : 'transparent',
+                            background: isSelected ? 'var(--nav-active-bg)' : 'transparent',
                             color: isSelected ? 'var(--accent-color)' : 'var(--text-primary)',
                             transition: 'background 0.15s ease'
                           }}
@@ -452,10 +452,10 @@ export default function PingTab({ socket }: Props) {
               <h3 style={{ marginBottom: '10px', fontSize: '1.1rem' }}>
                 Ping History for <span style={{ color: 'var(--accent-color)' }}>{selectedTarget || '-'}</span>
               </h3>
-              <div style={{ flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ flex: 1, overflowY: 'auto', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
+                    <tr style={{ background: 'var(--hover-overlay)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
                       <th style={{ padding: '10px 12px', width: '60px' }}>Seq</th>
                       <th style={{ padding: '10px 12px' }}>Time</th>
                       <th style={{ padding: '10px 12px' }}>Reply IP</th>
@@ -466,7 +466,7 @@ export default function PingTab({ socket }: Props) {
                   </thead>
                   <tbody>
                     {selectedTarget && multiPingStats[selectedTarget]?.history?.map((h, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <td style={{ padding: '8px 12px', color: 'var(--text-secondary)' }}>#{h.seq}</td>
                         <td style={{ padding: '8px 12px' }}>{h.time}</td>
                         <td style={{ padding: '8px 12px' }}>{h.replyIp}</td>

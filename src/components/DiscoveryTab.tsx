@@ -207,7 +207,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
         <h1>Network Discovery</h1>
         
         {/* Segmented Sub-Tab Control */}
-        <div style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '20px', border: '1px solid var(--panel-border)' }}>
+        <div style={{ display: 'flex', gap: '8px', background: 'var(--hover-overlay)', padding: '4px', borderRadius: '20px', border: '1px solid var(--panel-border)' }}>
           <button 
             onClick={() => setActiveSubTab('ip')} 
             disabled={isSweeping || isScanning || isLoadingArp}
@@ -297,10 +297,10 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
           {/* Results Table */}
           <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '15px', minHeight: 0 }}>
             <h3 style={{ marginBottom: '10px' }}>Discovered Devices</h3>
-            <div style={{ flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ flex: 1, overflowY: 'auto', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
+                  <tr style={{ background: 'var(--hover-overlay)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
                     <th style={{ padding: '10px 12px', width: '60px', textAlign: 'center' }}>Status</th>
                     <th style={{ padding: '10px 12px' }}>IP Address</th>
                     <th style={{ padding: '10px 12px' }}>MAC Address</th>
@@ -309,7 +309,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                 </thead>
                 <tbody>
                   {sweepResults.map((res, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                       <td style={{ padding: '8px 12px', textAlign: 'center' }}>
                         <span style={{ 
                           display: 'inline-block', 
@@ -466,7 +466,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                 onClick={() => setScanPorts('21,22,23,25,53,80,110,135,139,143,443,445,3389')}
                 disabled={isScanning}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: 'var(--input-bg)',
                   border: '1px solid var(--panel-border)',
                   borderRadius: '6px',
                   color: 'var(--text-secondary)',
@@ -486,7 +486,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                 onClick={() => setScanPorts('1-1024')}
                 disabled={isScanning}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: 'var(--input-bg)',
                   border: '1px solid var(--panel-border)',
                   borderRadius: '6px',
                   color: 'var(--text-secondary)',
@@ -506,7 +506,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                 onClick={() => setScanPorts('1-65535')}
                 disabled={isScanning}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: 'var(--input-bg)',
                   border: '1px solid var(--panel-border)',
                   borderRadius: '6px',
                   color: 'var(--text-secondary)',
@@ -527,10 +527,10 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
           {/* Results Table */}
           <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '15px', minHeight: 0 }}>
             <h3 style={{ marginBottom: '10px' }}>Port Scan Status</h3>
-            <div style={{ flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ flex: 1, overflowY: 'auto', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
+                  <tr style={{ background: 'var(--hover-overlay)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
                     <th style={{ padding: '10px 12px' }}>Port</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', width: '100px' }}>Status</th>
                   </tr>
@@ -543,7 +543,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                     else if (res.status === 'filtered') statusColor = 'var(--warning)';
 
                     return (
-                      <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <td style={{ padding: '8px 12px', fontWeight: 'bold' }}>Port {res.port}</td>
                         <td style={{ 
                           padding: '8px 12px', 
@@ -593,10 +593,10 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
           {/* Results Table */}
           <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '15px', minHeight: 0 }}>
             <h3 style={{ marginBottom: '10px' }}>ARP Cache Mapping</h3>
-            <div style={{ flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ flex: 1, overflowY: 'auto', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
+                  <tr style={{ background: 'var(--hover-overlay)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--panel-border)' }}>
                     <th style={{ padding: '10px 12px' }}>IP Address</th>
                     <th style={{ padding: '10px 12px' }}>MAC Address</th>
                     <th style={{ padding: '10px 12px', width: '100px' }}>Type</th>
@@ -604,7 +604,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
                 </thead>
                 <tbody>
                   {arpTable.map((res, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                       <td 
                         onClick={() => handleCopyIp(res.ip)}
                         title="Click to copy IP Address"
