@@ -61,7 +61,7 @@ export default function CustomSelect({
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         style={{
-          background: 'rgba(0, 0, 0, 0.4)',
+          background: 'var(--input-bg)',
           border: '1px solid var(--panel-border)',
           borderRadius: '8px',
           color: disabled ? 'var(--text-secondary)' : 'var(--text-primary)',
@@ -115,7 +115,7 @@ export default function CustomSelect({
             top: 'calc(100% + 6px)',
             left: 0,
             right: 0,
-            background: 'rgba(20, 20, 35, 0.95)',
+            background: 'var(--card-bg)',
             backdropFilter: 'blur(16px)',
             border: '1px solid var(--panel-border)',
             borderRadius: '8px',
@@ -145,7 +145,7 @@ export default function CustomSelect({
                     fontSize: '0.85rem',
                     borderRadius: '6px',
                     color: isSelected ? 'var(--accent-color)' : 'var(--text-primary)',
-                    background: isSelected ? 'rgba(137, 180, 250, 0.15)' : 'transparent',
+                    background: isSelected ? 'var(--nav-active-bg)' : 'transparent',
                     cursor: 'pointer',
                     transition: 'background-color 150ms cubic-bezier(0.23, 1, 0.32, 1), color 150ms cubic-bezier(0.23, 1, 0.32, 1)',
                     textOverflow: 'ellipsis',
@@ -154,7 +154,7 @@ export default function CustomSelect({
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.background = 'var(--hover-overlay)';
                     }
                   }}
                   onMouseLeave={(e) => {
