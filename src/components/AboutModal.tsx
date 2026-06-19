@@ -7,28 +7,70 @@ interface AboutModalProps {
   onClose: () => void;
 }
 
+const compareVersions = (v1: string, v2: string): number => {
+  const parts1 = v1.replace(/^v/, '').split('.').map(Number);
+  const parts2 = v2.replace(/^v/, '').split('.').map(Number);
+  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+    const p1 = parts1[i] || 0;
+    const p2 = parts2[i] || 0;
+    if (p1 > p2) return 1;
+    if (p2 > p1) return -1;
+  }
+  return 0;
+};
+
 export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+  const [hasUpdate, setHasUpdate] = useState(false);
+  const [latestReleaseUrl, setLatestReleaseUrl] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
 
   if (!isOpen) return null;
-
-  const handleCheckUpdates = () => {
-    setIsCheckingUpdates(true);
-    setUpdateStatus(null);
-    
-    // Simulate update check
-    setTimeout(() => {
-      setIsCheckingUpdates(false);
-      setUpdateStatus(`Uygulamanız güncel (v${packageJson.version})`);
-    }, 1500);
-  };
 
   const appName = packageJson.build.productName || packageJson.name || 'NetTool';
   const author = typeof packageJson.author === 'object' ? (packageJson.author as any).name : packageJson.author || 'Ali Çiçek';
   const currentYear = new Date().getFullYear();
-
   const githubUrl = 'https://github.com/alicicek-dev/network_tool';
+
+  const handleCheckUpdates = async () => {
+    setIsCheckingUpdates(true);
+    setUpdateStatus(null);
+    setHasUpdate(false);
+    setIsError(false);
+    
+    try {
+      const response = await fetch('https://api.github.com/repos/alicicek-dev/network_tool/releases/latest', {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Github API hatası');
+      }
+      const data = await response.json();
+      const latestVersion = data.tag_name;
+      const releaseUrl = data.html_url || githubUrl + '/releases';
+
+      const currentVersion = packageJson.version;
+      const comparison = compareVersions(latestVersion, currentVersion);
+      
+      if (comparison > 0) {
+        setHasUpdate(true);
+        setLatestReleaseUrl(releaseUrl);
+        setUpdateStatus(`Yeni sürüm mevcut: ${latestVersion}`);
+      } else {
+        setHasUpdate(false);
+        setUpdateStatus(`Uygulamanız güncel (v${currentVersion})`);
+      }
+    } catch (error) {
+      console.error('Update check failed:', error);
+      setIsError(true);
+      setUpdateStatus('Güncelleme kontrolü başarısız oldu. İnternet bağlantısını denetleyin.');
+    } finally {
+      setIsCheckingUpdates(false);
+    }
+  };
 
   return (
     <div 
@@ -151,25 +193,48 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
         {/* Auto-updater Section */}
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
-          <button 
-            onClick={handleCheckUpdates}
-            disabled={isCheckingUpdates}
-            style={{
-              width: '100%',
-              padding: '10px',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              background: isCheckingUpdates ? 'var(--input-bg)' : 'var(--accent-color)',
-              color: isCheckingUpdates ? 'var(--text-secondary)' : 'var(--bg-color)',
-              border: isCheckingUpdates ? '1px solid var(--panel-border)' : 'none',
-              borderRadius: '6px',
-              cursor: isCheckingUpdates ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {isCheckingUpdates ? 'Güncellemeler denetleniyor...' : 'Güncellemeleri Kontrol Et'}
-          </button>
+          {hasUpdate ? (
+            <button 
+              onClick={() => latestReleaseUrl && window.electronAPI?.openExternal(latestReleaseUrl)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                background: 'var(--accent-color)',
+                color: 'var(--bg-color)',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Güncellemeyi İndir (GitHub)
+            </button>
+          ) : (
+            <button 
+              onClick={handleCheckUpdates}
+              disabled={isCheckingUpdates}
+              style={{
+                width: '100%',
+                padding: '10px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                background: isCheckingUpdates ? 'var(--input-bg)' : 'var(--accent-color)',
+                color: isCheckingUpdates ? 'var(--text-secondary)' : 'var(--bg-color)',
+                border: isCheckingUpdates ? '1px solid var(--panel-border)' : 'none',
+                borderRadius: '6px',
+                cursor: isCheckingUpdates ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {isCheckingUpdates ? 'Güncellemeler denetleniyor...' : 'Güncellemeleri Kontrol Et'}
+            </button>
+          )}
           {updateStatus && (
-            <span style={{ fontSize: '0.72rem', color: 'var(--success)', fontWeight: 500 }}>
+            <span style={{ 
+              fontSize: '0.72rem', 
+              color: isError ? 'var(--danger)' : (hasUpdate ? 'var(--accent-color)' : 'var(--success)'), 
+              fontWeight: 500 
+            }}>
               {updateStatus}
             </span>
           )}
@@ -184,7 +249,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             target="_blank" 
             rel="noopener noreferrer"
             style={{ color: 'var(--accent-color)', textDecoration: 'none', fontWeight: 500 }}
-            onClick={(e) => { e.preventDefault(); (window as any).open?.(githubUrl); }}
+            onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal(githubUrl); }}
           >
             GitHub
           </a>

@@ -19,6 +19,7 @@ declare global {
       windowMinimize: () => void;
       windowToggleMaximize: () => void;
       windowClose: () => void;
+      openExternal: (url: string) => void;
     };
   }
 }
