@@ -20,6 +20,9 @@ declare global {
       windowToggleMaximize: () => void;
       windowClose: () => void;
       openExternal: (url: string) => void;
+      checkForUpdates: () => void;
+      restartAndInstall: () => void;
+      onUpdateStatus: (callback: (data: any) => void) => () => void;
     };
   }
 }

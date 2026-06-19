@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import packageJson from '../../package.json';
 import { AppIcon } from './Icons';
 
@@ -7,24 +7,61 @@ interface AboutModalProps {
   onClose: () => void;
 }
 
-const compareVersions = (v1: string, v2: string): number => {
-  const parts1 = v1.replace(/^v/, '').split('.').map(Number);
-  const parts2 = v2.replace(/^v/, '').split('.').map(Number);
-  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-    const p1 = parts1[i] || 0;
-    const p2 = parts2[i] || 0;
-    if (p1 > p2) return 1;
-    if (p2 > p1) return -1;
-  }
-  return 0;
-};
-
 export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
-  const [hasUpdate, setHasUpdate] = useState(false);
-  const [latestReleaseUrl, setLatestReleaseUrl] = useState<string | null>(null);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+  const [downloadPercent, setDownloadPercent] = useState<number | null>(null);
   const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Listen to updater status events from Electron main process
+    const unsubscribe = window.electronAPI?.onUpdateStatus?.((data: any) => {
+      switch (data.status) {
+        case 'checking':
+          setIsCheckingUpdates(true);
+          setUpdateStatus('Güncellemeler denetleniyor...');
+          setIsError(false);
+          break;
+        case 'available':
+          setIsCheckingUpdates(true);
+          setUpdateStatus('Yeni sürüm mevcut. Güncelleme indiriliyor...');
+          setIsError(false);
+          break;
+        case 'not-available':
+          setIsCheckingUpdates(false);
+          setUpdateStatus(`Uygulamanız güncel (v${packageJson.version})`);
+          setIsDownloaded(false);
+          setDownloadPercent(null);
+          break;
+        case 'downloading':
+          setIsCheckingUpdates(true);
+          setDownloadPercent(data.percent);
+          setUpdateStatus(`Güncelleme indiriliyor: %${data.percent}`);
+          break;
+        case 'downloaded':
+          setIsCheckingUpdates(false);
+          setIsDownloaded(true);
+          setDownloadPercent(null);
+          setUpdateStatus('Yeni güncelleme indirildi. Yüklemek için yeniden başlatın.');
+          break;
+        case 'error':
+          setIsCheckingUpdates(false);
+          setIsError(true);
+          setDownloadPercent(null);
+          setUpdateStatus(`Güncelleme hatası: ${data.message || 'Bilinmeyen hata'}`);
+          break;
+        default:
+          break;
+      }
+    });
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -33,43 +70,16 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
   const currentYear = new Date().getFullYear();
   const githubUrl = 'https://github.com/alicicek-dev/network_tool';
 
-  const handleCheckUpdates = async () => {
+  const handleCheckUpdates = () => {
     setIsCheckingUpdates(true);
-    setUpdateStatus(null);
-    setHasUpdate(false);
+    setUpdateStatus('Güncelleme sorgusu gönderiliyor...');
     setIsError(false);
-    
-    try {
-      const response = await fetch('https://api.github.com/repos/alicicek-dev/network_tool/releases/latest', {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Github API hatası');
-      }
-      const data = await response.json();
-      const latestVersion = data.tag_name;
-      const releaseUrl = data.html_url || githubUrl + '/releases';
+    setDownloadPercent(null);
+    window.electronAPI?.checkForUpdates();
+  };
 
-      const currentVersion = packageJson.version;
-      const comparison = compareVersions(latestVersion, currentVersion);
-      
-      if (comparison > 0) {
-        setHasUpdate(true);
-        setLatestReleaseUrl(releaseUrl);
-        setUpdateStatus(`Yeni sürüm mevcut: ${latestVersion}`);
-      } else {
-        setHasUpdate(false);
-        setUpdateStatus(`Uygulamanız güncel (v${currentVersion})`);
-      }
-    } catch (error) {
-      console.error('Update check failed:', error);
-      setIsError(true);
-      setUpdateStatus('Güncelleme kontrolü başarısız oldu. İnternet bağlantısını denetleyin.');
-    } finally {
-      setIsCheckingUpdates(false);
-    }
+  const handleRestartAndInstall = () => {
+    window.electronAPI?.restartAndInstall();
   };
 
   return (
@@ -193,22 +203,22 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
         {/* Auto-updater Section */}
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
-          {hasUpdate ? (
+          {isDownloaded ? (
             <button 
-              onClick={() => latestReleaseUrl && window.electronAPI?.openExternal(latestReleaseUrl)}
+              onClick={handleRestartAndInstall}
               style={{
                 width: '100%',
                 padding: '10px',
                 fontSize: '0.82rem',
                 fontWeight: 600,
-                background: 'var(--accent-color)',
+                background: 'var(--success)',
                 color: 'var(--bg-color)',
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer'
               }}
             >
-              Güncellemeyi İndir (GitHub)
+              Yükle ve Yeniden Başlat
             </button>
           ) : (
             <button 
@@ -229,10 +239,30 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               {isCheckingUpdates ? 'Güncellemeler denetleniyor...' : 'Güncellemeleri Kontrol Et'}
             </button>
           )}
+
+          {/* Progress Bar */}
+          {downloadPercent !== null && (
+            <div style={{ 
+              width: '100%', 
+              height: '4px', 
+              background: 'var(--input-bg)', 
+              borderRadius: '2px',
+              overflow: 'hidden',
+              marginTop: '4px'
+            }}>
+              <div style={{ 
+                width: `${downloadPercent}%`, 
+                height: '100%', 
+                background: 'var(--accent-color)',
+                transition: 'width 0.2s ease-out'
+              }} />
+            </div>
+          )}
+
           {updateStatus && (
             <span style={{ 
               fontSize: '0.72rem', 
-              color: isError ? 'var(--danger)' : (hasUpdate ? 'var(--accent-color)' : 'var(--success)'), 
+              color: isError ? 'var(--danger)' : (isDownloaded ? 'var(--success)' : 'var(--accent-color)'), 
               fontWeight: 500 
             }}>
               {updateStatus}

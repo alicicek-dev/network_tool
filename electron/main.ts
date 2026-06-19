@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
+import { autoUpdater } from 'electron-updater';
 const startBackend = () => {
   try {
     if (app.isPackaged) {
@@ -13,6 +14,38 @@ const startBackend = () => {
 };
 
 let mainWindow: BrowserWindow | null = null;
+
+// Auto-updater integration settings
+autoUpdater.autoDownload = true;
+
+const setupAutoUpdater = (win: BrowserWindow) => {
+  autoUpdater.on('checking-for-update', () => {
+    win.webContents.send('updater-status', { status: 'checking' });
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    win.webContents.send('updater-status', { status: 'available', info });
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    win.webContents.send('updater-status', { status: 'not-available', info });
+  });
+
+  autoUpdater.on('error', (error) => {
+    win.webContents.send('updater-status', { status: 'error', message: error.message });
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    win.webContents.send('updater-status', { 
+      status: 'downloading', 
+      percent: Math.round(progressObj.percent)
+    });
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    win.webContents.send('updater-status', { status: 'downloaded', info });
+  });
+};
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -32,6 +65,9 @@ function createWindow() {
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
+
+  // Setup auto-updater listeners for this window
+  setupAutoUpdater(mainWindow);
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -95,4 +131,13 @@ ipcMain.on('window-close', (event) => {
 
 ipcMain.on('open-external', (event, url) => {
   shell.openExternal(url);
+});
+
+// IPC handlers for auto-updater
+ipcMain.on('updater-check', () => {
+  autoUpdater.checkForUpdatesAndNotify();
+});
+
+ipcMain.on('updater-restart', () => {
+  autoUpdater.quitAndInstall();
 });
