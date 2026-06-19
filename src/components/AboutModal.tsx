@@ -28,9 +28,6 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
   const author = typeof packageJson.author === 'object' ? (packageJson.author as any).name : packageJson.author || 'Ali Çiçek';
   const currentYear = new Date().getFullYear();
 
-  // Placeholders
-  const websiteUrl = 'https://www.example.com';
-  const supportEmail = 'support@example.com';
   const githubUrl = 'https://github.com/alicicek-dev/network_tool';
 
   return (
@@ -183,16 +180,6 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
         
         <div style={{ display: 'flex', gap: '16px', fontSize: '0.78rem', justifyContent: 'center' }}>
           <a 
-            href={websiteUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ color: 'var(--accent-color)', textDecoration: 'none', fontWeight: 500 }}
-            onClick={(e) => { e.preventDefault(); (window as any).open?.(websiteUrl); }}
-          >
-            Web Sitesi
-          </a>
-          <span style={{ color: 'var(--panel-border)' }}>|</span>
-          <a 
             href={githubUrl} 
             target="_blank" 
             rel="noopener noreferrer"
@@ -200,13 +187,6 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             onClick={(e) => { e.preventDefault(); (window as any).open?.(githubUrl); }}
           >
             GitHub
-          </a>
-          <span style={{ color: 'var(--panel-border)' }}>|</span>
-          <a 
-            href={`mailto:${supportEmail}`}
-            style={{ color: 'var(--accent-color)', textDecoration: 'none', fontWeight: 500 }}
-          >
-            Destek
           </a>
         </div>
       </div>
