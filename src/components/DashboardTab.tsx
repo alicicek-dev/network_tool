@@ -92,9 +92,7 @@ export default function DashboardTab({
                       title="Click to copy IP Address"
                       className="copyable-cell"
                       style={{ 
-                        fontFamily: 'monospace',
-                        fontSize: '0.8rem',
-                        letterSpacing: '0.05em',
+                        fontSize: '0.85rem',
                         color: 'var(--text-primary)',
                       }}
                     >
@@ -126,9 +124,7 @@ export default function DashboardTab({
                       title={intf.gateway ? "Click to copy Gateway" : undefined}
                       className={intf.gateway ? "copyable-cell" : ""}
                       style={{ 
-                        fontFamily: 'monospace',
-                        fontSize: '0.8rem',
-                        letterSpacing: '0.05em',
+                        fontSize: '0.85rem',
                         color: hasGateway ? 'var(--text-primary)' : 'var(--text-secondary)',
                         cursor: intf.gateway ? 'pointer' : 'default',
                       }}
@@ -165,9 +161,7 @@ export default function DashboardTab({
                       title="Click to copy MAC Address"
                       className="copyable-cell"
                       style={{ 
-                        fontFamily: 'monospace',
-                        fontSize: '0.8rem',
-                        letterSpacing: '0.05em',
+                        fontSize: '0.85rem',
                         color: 'var(--text-secondary)',
                       }}
                     >
