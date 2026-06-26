@@ -281,14 +281,20 @@ io.on('connection', (socket) => {
 
   // --- PING FEATURE ---
   let pingInterval;
+  let pingActive = false;
   socket.on('start-ping', (target) => {
-    if (pingInterval) clearInterval(pingInterval);
+    pingActive = true;
+    if (pingInterval) clearTimeout(pingInterval);
     socket.emit('terminal-data', `\r\nStarting ping to ${target}...\r\n`);
     let seq = 0;
-    pingInterval = setInterval(async () => {
+
+    const doPing = async () => {
+      if (!pingActive) return;
       seq++;
+      const startTime = Date.now();
       try {
         let res = await ping.promise.probe(target, { timeout: 2 });
+        if (!pingActive) return;
         if (res.alive) {
           socket.emit('terminal-data', `Reply from ${res.numeric_host}: time=${res.time}ms TTL=${res.ttl || 'N/A'}\r\n`);
           socket.emit('ping-stat', { seq, alive: true, time: res.time, host: res.numeric_host });
@@ -297,69 +303,101 @@ io.on('connection', (socket) => {
           socket.emit('ping-stat', { seq, alive: false, time: null });
         }
       } catch (err) {
+        if (!pingActive) return;
         socket.emit('terminal-data', `Ping error: ${err.message}\r\n`);
         socket.emit('ping-stat', { seq, alive: false, time: null });
       }
-    }, 1000);
+
+      const elapsed = Date.now() - startTime;
+      const delay = Math.max(0, 1000 - elapsed);
+      if (pingActive) {
+        pingInterval = setTimeout(doPing, delay);
+      }
+    };
+
+    doPing();
   });
 
   socket.on('stop-ping', () => {
-    if (pingInterval) clearInterval(pingInterval);
+    pingActive = false;
+    if (pingInterval) {
+      clearTimeout(pingInterval);
+      pingInterval = null;
+    }
   });
 
   // --- MULTI-PING FEATURE ---
   let multiPingInterval = null;
+  let multiPingActive = false;
   socket.on('start-multi-ping', (targets) => {
-    if (multiPingInterval) clearInterval(multiPingInterval);
+    multiPingActive = true;
+    if (multiPingInterval) clearTimeout(multiPingInterval);
     
     let seqs = {};
     targets.forEach(t => seqs[t] = 0);
 
-    const runMultiPing = async () => {
-      targets.forEach(async (target) => {
-        seqs[target]++;
-        try {
-          let res = await ping.promise.probe(target, { timeout: 2 });
-          if (res.alive) {
-            socket.emit('multi-ping-stat', {
-              target,
-              seq: seqs[target],
-              alive: true,
-              time: res.time,
-              host: res.numeric_host,
-              ttl: res.ttl || 'N/A'
-            });
-          } else {
+    const doMultiPing = async () => {
+      if (!multiPingActive) return;
+      const startTime = Date.now();
+
+      try {
+        const promises = targets.map(async (target) => {
+          seqs[target]++;
+          try {
+            let res = await ping.promise.probe(target, { timeout: 2 });
+            if (!multiPingActive) return;
+            if (res.alive) {
+              socket.emit('multi-ping-stat', {
+                target,
+                seq: seqs[target],
+                alive: true,
+                time: res.time,
+                host: res.numeric_host,
+                ttl: res.ttl || 'N/A'
+              });
+            } else {
+              socket.emit('multi-ping-stat', {
+                target,
+                seq: seqs[target],
+                alive: false,
+                time: null,
+                host: 'N/A',
+                ttl: 'N/A'
+              });
+            }
+          } catch (err) {
+            if (!multiPingActive) return;
             socket.emit('multi-ping-stat', {
               target,
               seq: seqs[target],
               alive: false,
               time: null,
               host: 'N/A',
-              ttl: 'N/A'
+              ttl: 'N/A',
+              error: err.message
             });
           }
-        } catch (err) {
-          socket.emit('multi-ping-stat', {
-            target,
-            seq: seqs[target],
-            alive: false,
-            time: null,
-            host: 'N/A',
-            ttl: 'N/A',
-            error: err.message
-          });
-        }
-      });
+        });
+
+        await Promise.all(promises);
+      } catch (err) {
+        console.error('Multi-ping execution error:', err);
+      }
+
+      const elapsed = Date.now() - startTime;
+      const delay = Math.max(0, 2000 - elapsed);
+      if (multiPingActive) {
+        multiPingInterval = setTimeout(doMultiPing, delay);
+      }
     };
 
-    runMultiPing();
-    multiPingInterval = setInterval(runMultiPing, 2000);
+    doMultiPing();
   });
 
   socket.on('stop-multi-ping', () => {
+    multiPingActive = false;
     if (multiPingInterval) {
-      clearInterval(multiPingInterval);
+      clearTimeout(multiPingInterval);
       multiPingInterval = null;
     }
   });
@@ -825,8 +863,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    if (pingInterval) clearInterval(pingInterval);
-    if (multiPingInterval) clearInterval(multiPingInterval);
+    pingActive = false;
+    multiPingActive = false;
+    if (pingInterval) clearTimeout(pingInterval);
+    if (multiPingInterval) clearTimeout(multiPingInterval);
     if (currentSerialPort) currentSerialPort.close();
     sshStream = null;
     if (sshClient) sshClient.end();
