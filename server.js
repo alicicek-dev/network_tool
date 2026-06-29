@@ -753,12 +753,7 @@ io.on('connection', (socket) => {
             'aes256-cbc',
             'aes192-cbc',
             'aes128-cbc',
-            '3des-cbc',
-            'blowfish-cbc',
-            'cast128-cbc',
-            'arcfour',
-            'arcfour128',
-            'arcfour256'
+            '3des-cbc'
           ],
           serverHostKey: [
             'ssh-ed25519',
