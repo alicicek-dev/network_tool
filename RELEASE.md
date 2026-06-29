@@ -2,6 +2,35 @@
 
 Bu dosya, NetTool (Network Engineer Toolkit) uygulamasının sürüm geçmişini, yapılan iyileştirmeleri ve eklenen yeni özellikleri belgelendirmektedir. GitHub ve Microsoft Store (Partner Center) güncellemelerinde referans olarak kullanılabilir.
 
+## [v1.0.3] - 2026-06-29
+
+Bu sürüm; ağ protokolleri (SSH, Ping, TFTP, FTP) üzerindeki kritik hata düzeltmelerini, kararlılık iyileştirmelerini ve dosya aktarım süreçlerinin gerçek zamanlı izlenmesini sağlayan ilerleme göstergelerini içerir.
+
+### ✦ Yeni Özellikler (New Features)
+*   **FTP & TFTP Dosya Transferi İlerleme Göstergesi:** FTP ve TFTP dosya gönderme/alma işlemlerinin gerçek zamanlı takibi eklendi. İndirme (Download) işlemlerinde yüzdesel (%) ilerleme gösterilirken, yükleme (Upload) işlemlerinde eğer karşı istemci dosya boyutunu önceden bildirirse (TFTP tsize / FTP STOR stream) yüzdesel ilerleme, bildirilmezse toplam aktarılan dosya boyutu MB cinsinden anlık olarak sunucu loglarında takip edilebilmektedir.
+
+### ◆ Hata Gidermeleri (Bug Fixes)
+*   **TFTP Büyük Dosya (>32MB) Gönderim Hatası Düzeltildi:** TFTP protokolünde kullanılan 16-bitlik sıra numarası (block number) sınırı olan 65535 aşıldığında, `tftp2` kütüphanesi taşma (wrap-around) yapmıyor ve Buffer'a 65536 yazmaya çalışırken `RangeError: The value of "value" is out of range` hatası vererek transferi kesiyordu. `servers-manager.js` başlangıcına eklenen dinamik yama (monkeypatch) sayesinde, paket kodlama ve doğrulama aşamalarındaki blok numaraları `modulo 65536` işlemine tabi tutularak, 32MB'tan büyük dosyaların (örneğin Cisco IOS `.tar` imajları) sorunsuz bir şekilde taşma yaparak aktarılması sağlandı.
+*   **Ping Arayüzü Kilitlenme ve Bağlantı Kopma Hatası Düzeltildi:** Ping ve Multi-ping araçlarında kullanılan asenkron `setInterval` döngüsü, ardışık zaman aşımları (request timeout) sırasında yeni `ping.exe` süreçlerinin birikmesine ve Node.js event loop'unu bloke ederek Socket.IO bağlantısının kopmasına yol açıyordu. Bu döngüler, birbirini bekleyen sıralı `setTimeout` mekanizması ile yeniden yapılandırılarak işlem birikmesi önlendi ve sıra numaralarının (seq) tutarlılığı sağlandı.
+*   **SSH Handshake Hatası Düzeltildi:** SSH bağlantılarında yaşanan `Handshake failed: no matching C->S MAC` hatası giderildi. Bağlantı yöneticisinin algoritma listesine hem modern güvenli varsayılanlar (Encrypt-then-MAC - EtM algoritmaları, SHA-2 tabanlı RSA imzaları vb.) hem de eski ağ cihazlarıyla geriye dönük uyumluluğu korumak için gerekli legacy algoritmalar eklendi. Electron ortamındaki BoringSSL kısıtlamaları nedeniyle desteklenmeyen `chacha20-poly1305@openssh.com` şifreleyicisi listeden hariç tutularak uyumluluk sağlandı.
+*   **Network Overview Tablo Yazı Tipleri Tutarsızlığı Düzeltildi:** Tablodaki karışık yazı tipi kullanımı (monospace ve sans-serif karışımı) giderildi; tablo başlıkları ile IP, Gateway ve MAC adresleri gibi hücrelerdeki tüm veriler uygulamanın genel temasıyla uyumlu olacak şekilde temiz **Inter** (sans-serif) fontu ile birleştirildi.
+
+### ■ Yapısal Doğrulamalar & Derleme
+*   **Tip Güvenliği:** TypeScript derleyici kontrolü (`tsc --noEmit`) sıfır hata ile tamamlandı.
+*   **Paketleme:** Vite üretim derlemesi (`npm run build`) başarıyla tamamlanarak sürüm v1.0.3 kurulum dosyaları oluşturuldu.
+
+### ▲ Açıklama Şablonu (Description Snippet)
+```markdown
+# NetTool v1.0.3
+
+## Yenilikler (What's New)
+- ◆ **Dosya Transferi İlerleme Göstergesi**: FTP ve TFTP üzerinden dosya transfer işlemlerinin yüzdesel ilerleme (%) ve hız bilgilerini anlık olarak izleyin.
+- ◆ **Büyük Dosya Transfer Desteği (TFTP Rollover)**: Cisco switch yazılım paketleri gibi 32 MB'tan büyük dosyaların aktarımındaki limit aşımı hatası giderildi.
+- ◆ ** SSH Uyumluluk ve Ping Kararlılığı**: Eski Cisco cihazları ile SSH bağlantı sorunları ve ping süreçlerinin birikerek bağlantıyı koparma hataları çözüldü.
+```
+
+---
+
 ## [v1.0.2] - 2026-06-17
 
 Bu sürüm; uygulamanın görsel kimliğini jenerik yapay zekâ şablonlarından arındırıp premium, yüksek performanslı bir "koyu teknoloji" (dark tech) temasına ("Sapphire & Steel") kavuşturmak için gerçekleştirilen kapsamlı görsel yeniden tasarım ve arayüz cilalama çalışmasını içerir.
@@ -12,13 +41,9 @@ Bu sürüm; uygulamanın görsel kimliğini jenerik yapay zekâ şablonlarından
 *   **Tipografik Düzenleme:** Başlıklar (`h1`, `h2`) sıkı harf aralığı ve net kalınlık ayarlarıyla optimize edildi. Monospace metinler teknik telemetri verisi görünümünü artırmak için özel boyutlandırma ve harf aralığı ile güncellendi.
 *   **Gelişmiş Telemetri Tabloları:** Donanım arayüz listesi tablosu, gereksiz satır içi stillerden arındırılarak `.telemetry-table` ve `.telemetry-row` yapısına kavuşturuldu; veriler monospace ve kompakt biçimde hizalandı.
 *   **Bento Hızlı İşlem Modülleri:** Sayfa altındaki basit işlem butonları, fareyle üzerine gelindiğinde yukarı doğru kayma ve kenarlık parlaması (glow) efekti sunan, ikonlu ve teknik açıklamalı üç adet Bento Kartından oluşan modern bir ızgara düzenine dönüştürüldü.
+
 ### ✦ Yeni Özellikler (New Features)
 *   **"Hakkında" (About) Modalı:** Uygulamanın genel bilgilerini (geliştirici, lisans, telif hakkı ve sürüm bilgisi) dinamik olarak `package.json` üzerinden okuyup gösteren, güncellemeleri kontrol etme butonu ve GitHub bağlantısı içeren modern bir modal eklendi. Menü çubuğunun en altına entegre edildi.
-*   **FTP & TFTP Dosya Transferi İlerleme Göstergesi:** FTP ve TFTP dosya gönderme/alma işlemlerinin gerçek zamanlı takibi eklendi. İndirme (Download) işlemlerinde yüzdesel (%) ilerleme gösterilirken, yükleme (Upload) işlemlerinde eğer karşı istemci dosya boyutunu önceden bildirirse (TFTP tsize / FTP STOR stream) yüzdesel ilerleme, bildirilmezse toplam aktarılan dosya boyutu MB cinsinden anlık olarak sunucu loglarında takip edilebilmektedir.
-
-### ■ Yapısal Doğrulamalar & Derleme
-*   **Tip Güvenliği:** TypeScript derleyici kontrolü (`tsc --noEmit`) sıfır hata ile tamamlandı.
-*   **Paketleme:** Vite üretim derlemesi (`npm run build`) başarıyla tamamlanarak sürüm v1.0.2 kurulum dosyaları oluşturuldu.
 
 ### ◆ Hata Gidermeleri (Bug Fixes)
 *   **Açık Tema (Light Theme) Hataları Düzeltildi:** Uygulamanın açık (light) temaya geçiş yaptığında karanlık kalması sorunu tamamen giderildi. CSS dosyasındaki hardcoded arka plan, başlık, kenarlık, girdi alanları ve buton renkleri CSS değişkenleriyle değiştirildi.
@@ -28,11 +53,7 @@ Bu sürüm; uygulamanın görsel kimliğini jenerik yapay zekâ şablonlarından
 *   **Özel Tema (Custom Theme) Refaktörü:** Özel temanın renk seçicisi mantıksal gruplara ayrıldı (Paneller, Arka Plan, Kenarlıklar vb.). Eksik olan saydam renkler veya uyumlu arayüz zeminleri kullanıcı renklerinden dinamik olarak türetilerek (derived) arayüzde karanlık kalan parçaların olması engellendi.
 *   **Tema-Duyarlı Durum ve Bildirim Renkleri:** Başarı (success), tehlike (danger) ve uyarı (warning) durum renkleri ile bunlara ait yarı saydam arka plan ve kenarlık stilleri, açık ve koyu temalara dinamik ve kontrastlı uyum sağlayacak şekilde CSS değişkenleri (`--success`, `--success-rgb`, vb.) ile yeniden yapılandırıldı. Özel tema seçeneği içine bu renkler de eklendi.
 *   **Hız Testi ve Ping Statü Renkleri:** Hız testi, ping ve ağ yardımcı araçlarında eksik veya tanımlanmamış olan `var(--primary)` renk değişkeni, uygulamanın dinamik vurgu rengi (`var(--accent-color)`) ile değiştirilerek görsellik onarıldı.
-*   **SSH Handshake Hatası Düzeltildi:** SSH bağlantılarında yaşanan `Handshake failed: no matching C->S MAC` hatası giderildi. Bağlantı yöneticisinin algoritma listesine hem modern güvenli varsayılanlar (Encrypt-then-MAC - EtM algoritmaları, SHA-2 tabanlı RSA imzaları vb.) hem de eski ağ cihazlarıyla geriye dönük uyumluluğu korumak için gerekli legacy algoritmalar eklendi. Electron ortamındaki BoringSSL kısıtlamaları nedeniyle desteklenmeyen `chacha20-poly1305@openssh.com` şifreleyicisi listeden hariç tutularak uyumluluk sağlandı.
 *   **Varsayılan Görünüm Ayarları:** Uygulamanın ilk açılışındaki varsayılan yazı tipi boyutu 14px yerine 16px olarak güncellendi.
-*   **Network Overview Tablo Yazı Tipleri Tutarsızlığı Düzeltildi:** Tablodaki karışık yazı tipi kullanımı (monospace ve sans-serif karışımı) giderildi; tablo başlıkları ile IP, Gateway ve MAC adresleri gibi hücrelerdeki tüm veriler uygulamanın genel temasıyla uyumlu olacak şekilde temiz **Inter** (sans-serif) fontu ile birleştirildi.
-*   **Ping Arayüzü Kilitlenme ve Bağlantı Kopma Hatası Düzeltildi:** Ping ve Multi-ping araçlarında kullanılan asenkron `setInterval` döngüsü, ardışık zaman aşımları (request timeout) sırasında yeni `ping.exe` süreçlerinin birikmesine ve Node.js event loop'unu bloke ederek Socket.IO bağlantısının kopmasına yol açıyordu. Bu döngüler, birbirini bekleyen sıralı `setTimeout` mekanizması ile yeniden yapılandırılarak işlem birikmesi önlendi ve sıra numaralarının (seq) tutarlılığı sağlandı.
-*   **TFTP Büyük Dosya (>32MB) Gönderim Hatası Düzeltildi:** TFTP protokolünde kullanılan 16-bitlik sıra numarası (block number) sınırı olan 65535 aşıldığında, `tftp2` kütüphanesi taşma (wrap-around) yapmıyor ve Buffer'a 65536 yazmaya çalışırken `RangeError: The value of "value" is out of range` hatası vererek transferi kesiyordu. `servers-manager.js` başlangıcına eklenen dinamik yama (monkeypatch) sayesinde, paket kodlama ve doğrulama aşamalarındaki blok numaraları `modulo 65536` işlemine tabi tutularak, 32MB'tan büyük dosyaların (örneğin Cisco IOS `.tar` imajları) sorunsuz bir şekilde taşma yaparak aktarılması sağlandı.
 
 ### ▲ Açıklama Şablonu (Description Snippet)
 ```markdown

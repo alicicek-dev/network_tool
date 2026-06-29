@@ -1,7 +1,7 @@
 {
   "name": "network_tool",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Ali Cicek",
   "description": "Network Engineer Toolkit",
   "license": "MIT",
