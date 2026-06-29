@@ -705,6 +705,16 @@ io.on('connection', (socket) => {
       });
     }).on('error', (err) => {
       socket.emit('terminal-data', `\r\nSSH Error: ${err.message}\r\n`);
+    }).on('keyboard-interactive', (name, instructions, instructionsLang, prompts, finish) => {
+      socket.emit('terminal-data', `\r\n[System] Attempting keyboard-interactive authentication...\r\n`);
+      const answers = prompts.map(p => {
+        const lower = p.prompt.toLowerCase();
+        if (lower.includes('username')) {
+          return username;
+        }
+        return password;
+      });
+      finish(answers);
     });
 
     try {
@@ -713,7 +723,8 @@ io.on('connection', (socket) => {
         port: parseInt(port) || 22,
         username,
         password,
-        readyTimeout: 10000,
+        tryKeyboard: true,
+        readyTimeout: 20000,
         algorithms: {
           kex: [
             'curve25519-sha256',
@@ -742,7 +753,12 @@ io.on('connection', (socket) => {
             'aes256-cbc',
             'aes192-cbc',
             'aes128-cbc',
-            '3des-cbc'
+            '3des-cbc',
+            'blowfish-cbc',
+            'cast128-cbc',
+            'arcfour',
+            'arcfour128',
+            'arcfour256'
           ],
           serverHostKey: [
             'ssh-ed25519',
