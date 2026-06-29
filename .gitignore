@@ -37,3 +37,8 @@ dist-ssr
 
 # Markdown documentation
 *.md
+!README.md
+!RELEASE.md
+!GEMINI.md
+!KNOWLEDGE.md
+!PRIVACY.md

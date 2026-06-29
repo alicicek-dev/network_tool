@@ -6,6 +6,109 @@ const path = require('path');
 const express = require('express');
 const FtpSrv = require('ftp-srv');
 const tftp = require('tftp2');
+// TFTP2 Block Rollover Monkeypatches for Large Files (>32MB)
+// TFTP protocol uses a 16-bit block counter (0-65535). In node-tftp2,
+// it does not handle wrap-around, leading to UInt16 out-of-range errors
+// (65536 is written into a UInt16 buffer). We monkeypatch the Packet
+// and Connection modules to wrap block numbers using modulo 65536.
+try {
+  const Packet = require('tftp2/packet');
+  const Connection = require('tftp2/connection');
+  const TFTPServer = require('tftp2/server');
+
+  // 1. Parse TFTP options (like tsize) from request packets
+  const originalParse = Packet.parse;
+  Packet.parse = msg => {
+    const packet = originalParse(msg);
+    if (packet.opcode === Packet.OPCODE.RRQ || packet.opcode === Packet.OPCODE.WRQ) {
+      packet.options = {};
+      try {
+        let offset = 2 + Buffer.byteLength(packet.filename, 'ascii') + 1 + Buffer.byteLength(packet.mode, 'ascii') + 1;
+        while (offset < msg.length) {
+          let start = offset;
+          while (offset < msg.length && msg[offset] !== 0) {
+            offset++;
+          }
+          const optName = msg.toString('ascii', start, offset).toLowerCase();
+          offset++;
+          if (!optName) break;
+
+          start = offset;
+          while (offset < msg.length && msg[offset] !== 0) {
+            offset++;
+          }
+          const optVal = msg.toString('ascii', start, offset);
+          offset++;
+
+          packet.options[optName] = optVal;
+        }
+      } catch (e) {
+        // Ignore option parsing errors
+      }
+    }
+    return packet;
+  };
+
+  // 2. Attach options to the connection/client context
+  TFTPServer.prototype.handleMessage = function(message, rinfo) {
+    const packet = Packet.parse(message);
+    const client = new Connection(rinfo);
+    this.emit('client', client);
+    client.mode = packet.mode;
+    client.filename = packet.filename;
+    client.options = packet.options;
+    switch (packet.opcode) {
+      case Packet.OPCODE.RRQ: {
+        this.handleReadRequest(client, packet);
+        break;
+      }
+      case Packet.OPCODE.WRQ: {
+        this.handleWriteRequest(client, packet);
+        break;
+      }
+    }
+    return this;
+  };
+
+  // 3. Modulo 65536 block number wrap-around (large files support)
+  const originalCreateAck = Packet.createAck;
+  Packet.createAck = (blockNumber) => {
+    return originalCreateAck(blockNumber % 65536);
+  };
+
+  const originalCreateData = Packet.createData;
+  Packet.createData = (blockNumber, data) => {
+    return originalCreateData(blockNumber % 65536, data);
+  };
+
+  Connection.prototype.waitAck = function(block) {
+    return this.wait(message =>
+      message.opcode === Packet.OPCODE.ACK && message.block === (block % 65536));
+  };
+
+  Connection.prototype.waitBlock = function(block) {
+    return this.wait(message =>
+      message.opcode === Packet.OPCODE.DATA && message.block === (block % 65536));
+  };
+
+  // 4. Track sent block progress for reads
+  const originalSendBlock = Connection.prototype.sendBlock;
+  Connection.prototype.sendBlock = function(block, data) {
+    if (this.totalBytes && this.transferType === 'read') {
+      this.sentBytes += data.length;
+      const percent = Math.floor((this.sentBytes / this.totalBytes) * 100);
+      if (block === 1 || percent >= this.lastLoggedPercent + 10 || this.sentBytes === this.totalBytes) {
+        this.lastLoggedPercent = percent;
+        if (typeof this.onProgress === 'function') {
+          this.onProgress(this.sentBytes, this.totalBytes);
+        }
+      }
+    }
+    return originalSendBlock.call(this, block, data);
+  };
+} catch (e) {
+  console.error('Failed to apply TFTP2 enhancement monkeypatches:', e);
+}
 const selfsigned = require('selfsigned');
 const os = require('os');
 
@@ -49,6 +152,85 @@ function checkIsAdmin() {
       resolve(!err);
     });
   });
+}
+
+const { FileSystem } = FtpSrv;
+
+class ProgressFileSystem extends FileSystem {
+  constructor(connection, options, logFn) {
+    super(connection, options);
+    this.connection = connection;
+    this.logFn = logFn;
+  }
+
+  write(fileName, append) {
+    const stream = super.write(fileName, append);
+    const log = this.logFn;
+    const baseName = path.basename(fileName);
+    let bytesWritten = 0;
+    
+    const originalWrite = stream.write;
+    stream.write = function(chunk, encoding, cb) {
+      bytesWritten += chunk.length;
+      const formattedRecv = (bytesWritten / (1024 * 1024)).toFixed(2);
+      // Log progress on start and every 1MB
+      if (bytesWritten === chunk.length || bytesWritten % (1024 * 1024) === 0) {
+        log(`Receiving '${baseName}': ${formattedRecv}MB received`);
+      }
+      return originalWrite.call(stream, chunk, encoding, cb);
+    };
+
+    const originalEnd = stream.end;
+    stream.end = function(chunk, encoding, cb) {
+      if (chunk) {
+        bytesWritten += chunk.length;
+      }
+      const formattedRecv = (bytesWritten / (1024 * 1024)).toFixed(2);
+      log(`Successfully saved file: ${baseName} (${formattedRecv}MB)`);
+      return originalEnd.call(stream, chunk, encoding, cb);
+    };
+
+    return stream;
+  }
+
+  read(fileName, start) {
+    const stream = super.read(fileName, start);
+    const log = this.logFn;
+    const baseName = path.basename(fileName);
+    
+    let totalBytes = 0;
+    try {
+      const absolutePath = this._resolvePath(fileName).fsPath;
+      totalBytes = fs.statSync(absolutePath).size;
+    } catch (e) {
+      // Ignored
+    }
+
+    let bytesRead = 0;
+    let lastLoggedPercent = -10;
+
+    stream.on('data', (chunk) => {
+      bytesRead += chunk.length;
+      if (totalBytes > 0) {
+        const percent = Math.floor((bytesRead / totalBytes) * 100);
+        if (percent >= lastLoggedPercent + 10 || bytesRead === totalBytes) {
+          lastLoggedPercent = percent;
+          const formattedTotal = (totalBytes / (1024 * 1024)).toFixed(2);
+          const formattedSent = (bytesRead / (1024 * 1024)).toFixed(2);
+          log(`Sending '${baseName}': ${percent}% (${formattedSent}MB / ${formattedTotal}MB)`);
+        }
+      } else {
+        const formattedSent = (bytesRead / (1024 * 1024)).toFixed(2);
+        log(`Sending '${baseName}': ${formattedSent}MB sent`);
+      }
+    });
+
+    stream.on('end', () => {
+      log(`Successfully sent file: ${baseName}`);
+    });
+
+    return stream;
+  }
 }
 
 class ServersManager {
@@ -281,10 +463,16 @@ class ServersManager {
         ftpServer.on('login', ({ connection, username, password }, resolveLogin, rejectLogin) => {
           if (!config.username) {
             this.log('ftp', `Anonymous login from ${connection.ip}`);
-            resolveLogin({ root: rootDir });
+            resolveLogin({ 
+              root: rootDir,
+              fs: new ProgressFileSystem(connection, { root: rootDir }, (msg) => this.log('ftp', msg))
+            });
           } else if (username === config.username && password === config.password) {
             this.log('ftp', `User '${username}' logged in successfully from ${connection.ip}`);
-            resolveLogin({ root: rootDir });
+            resolveLogin({ 
+              root: rootDir,
+              fs: new ProgressFileSystem(connection, { root: rootDir }, (msg) => this.log('ftp', msg))
+            });
           } else {
             this.log('ftp', `Failed login attempt for user '${username}' from ${connection.ip}`);
             rejectLogin(new Error('Invalid username or password'));
@@ -326,6 +514,19 @@ class ServersManager {
               return;
             }
             const data = fs.readFileSync(filename);
+
+            // Set up progress tracking on the connection object
+            req.transferType = 'read';
+            req.totalBytes = data.length;
+            req.sentBytes = 0;
+            req.lastLoggedPercent = -10;
+            req.onProgress = (sentBytes, totalBytes) => {
+              const percent = Math.floor((sentBytes / totalBytes) * 100);
+              const formattedTotal = (totalBytes / (1024 * 1024)).toFixed(2);
+              const formattedSent = (sentBytes / (1024 * 1024)).toFixed(2);
+              this.log('tftp', `Sending '${req.filename}': ${percent}% (${formattedSent}MB / ${formattedTotal}MB)`);
+            };
+
             await send(data);
             this.log('tftp', `Successfully sent file: ${req.filename}`);
           } catch (err) {
@@ -341,8 +542,37 @@ class ServersManager {
 
           try {
             const buffer = [];
+            let receivedBytes = 0;
+            let lastLoggedPercent = -10;
+            
+            // Extract tsize option if present
+            const totalBytes = req.options && req.options.tsize ? parseInt(req.options.tsize, 10) : 0;
+            if (totalBytes > 0) {
+              const formattedTotal = (totalBytes / (1024 * 1024)).toFixed(2);
+              this.log('tftp', `File size negotiated via tsize: ${formattedTotal}MB`);
+            }
+
             readStream(
-              (chunk) => buffer.push(chunk),
+              (chunk) => {
+                buffer.push(chunk);
+                receivedBytes += chunk.length;
+                
+                if (totalBytes > 0) {
+                  const percent = Math.floor((receivedBytes / totalBytes) * 100);
+                  if (percent >= lastLoggedPercent + 10 || receivedBytes === totalBytes) {
+                    lastLoggedPercent = percent;
+                    const formattedTotal = (totalBytes / (1024 * 1024)).toFixed(2);
+                    const formattedRecv = (receivedBytes / (1024 * 1024)).toFixed(2);
+                    this.log('tftp', `Receiving '${req.filename}': ${percent}% (${formattedRecv}MB / ${formattedTotal}MB)`);
+                  }
+                } else {
+                  // If size is unknown, log every 1000 blocks (approx 500KB)
+                  if (buffer.length === 1 || buffer.length % 1000 === 0) {
+                    const formattedRecv = (receivedBytes / (1024 * 1024)).toFixed(2);
+                    this.log('tftp', `Receiving '${req.filename}': ${formattedRecv}MB received`);
+                  }
+                }
+              },
               () => {
                 try {
                   fs.mkdirSync(path.dirname(filename), { recursive: true });

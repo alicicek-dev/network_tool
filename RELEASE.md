@@ -1,0 +1,110 @@
+# NetTool Sürüm Notları / Release Notes
+
+Bu dosya, NetTool (Network Engineer Toolkit) uygulamasının sürüm geçmişini, yapılan iyileştirmeleri ve eklenen yeni özellikleri belgelendirmektedir. GitHub ve Microsoft Store (Partner Center) güncellemelerinde referans olarak kullanılabilir.
+
+## [v1.0.2] - 2026-06-17
+
+Bu sürüm; uygulamanın görsel kimliğini jenerik yapay zekâ şablonlarından arındırıp premium, yüksek performanslı bir "koyu teknoloji" (dark tech) temasına ("Sapphire & Steel") kavuşturmak için gerçekleştirilen kapsamlı görsel yeniden tasarım ve arayüz cilalama çalışmasını içerir.
+
+### ✦ Görsel Yeniden Tasarım & Estetik (Premium Overhaul)
+*   **Koyu Teknoloji Renk Paleti:** Arka plan renkleri derin bir lacivert-siyah tonuna (`#08080d`), panel arka planları ise ince kenarlıklı (`rgba(255, 255, 255, 0.04)`) yarı saydam panellere dönüştürüldü.
+*   **Modern Kenar Çubuğu Navigasyonu:** Sol menüdeki eski kalın ve sol kenara dayalı aktif durum çizgisi yerine, modern ve yüzen safir mavisi (`#74c7ec`) kapsül göstergeleri (`.nav-item.active::before`) uygulandı. Aktif tıklamada mikro ölçek küçülmesi (`scale(0.97)`) ile dokunsal geri bildirim güçlendirildi.
+*   **Tipografik Düzenleme:** Başlıklar (`h1`, `h2`) sıkı harf aralığı ve net kalınlık ayarlarıyla optimize edildi. Monospace metinler teknik telemetri verisi görünümünü artırmak için özel boyutlandırma ve harf aralığı ile güncellendi.
+*   **Gelişmiş Telemetri Tabloları:** Donanım arayüz listesi tablosu, gereksiz satır içi stillerden arındırılarak `.telemetry-table` ve `.telemetry-row` yapısına kavuşturuldu; veriler monospace ve kompakt biçimde hizalandı.
+*   **Bento Hızlı İşlem Modülleri:** Sayfa altındaki basit işlem butonları, fareyle üzerine gelindiğinde yukarı doğru kayma ve kenarlık parlaması (glow) efekti sunan, ikonlu ve teknik açıklamalı üç adet Bento Kartından oluşan modern bir ızgara düzenine dönüştürüldü.
+### ✦ Yeni Özellikler (New Features)
+*   **"Hakkında" (About) Modalı:** Uygulamanın genel bilgilerini (geliştirici, lisans, telif hakkı ve sürüm bilgisi) dinamik olarak `package.json` üzerinden okuyup gösteren, güncellemeleri kontrol etme butonu ve GitHub bağlantısı içeren modern bir modal eklendi. Menü çubuğunun en altına entegre edildi.
+*   **FTP & TFTP Dosya Transferi İlerleme Göstergesi:** FTP ve TFTP dosya gönderme/alma işlemlerinin gerçek zamanlı takibi eklendi. İndirme (Download) işlemlerinde yüzdesel (%) ilerleme gösterilirken, yükleme (Upload) işlemlerinde eğer karşı istemci dosya boyutunu önceden bildirirse (TFTP tsize / FTP STOR stream) yüzdesel ilerleme, bildirilmezse toplam aktarılan dosya boyutu MB cinsinden anlık olarak sunucu loglarında takip edilebilmektedir.
+
+### ■ Yapısal Doğrulamalar & Derleme
+*   **Tip Güvenliği:** TypeScript derleyici kontrolü (`tsc --noEmit`) sıfır hata ile tamamlandı.
+*   **Paketleme:** Vite üretim derlemesi (`npm run build`) başarıyla tamamlanarak sürüm v1.0.2 kurulum dosyaları oluşturuldu.
+
+### ◆ Hata Gidermeleri (Bug Fixes)
+*   **Açık Tema (Light Theme) Hataları Düzeltildi:** Uygulamanın açık (light) temaya geçiş yaptığında karanlık kalması sorunu tamamen giderildi. CSS dosyasındaki hardcoded arka plan, başlık, kenarlık, girdi alanları ve buton renkleri CSS değişkenleriyle değiştirildi.
+*   **Ağ Keşfi, Ping ve Hızlı Sunucular Temalandırması:** Network Discovery, Ping ve Quick Server bileşenlerindeki tüm gömülü/hardcoded `rgba(0,0,0,0.2)` vb. koyu tonlar CSS değişkenleriyle (`var(--hover-overlay)`, `var(--card-bg)`, `var(--input-bg)`) değiştirilerek açık ve özel temaya tam uyum sağlandı.
+*   **Web Terminal Dinamik Temalandırma:** `TerminalComponent` (xterm.js) arkaplan, yazı ve seçim renkleri uygulamanın aktif tema paletine (`palette`) bağlandı. Tema değiştiğinde terminal renkleri dinamik ve anlık olarak güncellenir hale getirildi. Terminal konteyner arkaplanı (`.terminal-container`) sert siyah renk yerine tema bazlı dinamik `var(--card-bg)` olarak ayarlandı.
+*   **Terminal Bağlantı Formu Görsel Düzeltmeleri:** Seri port yenileme butonu, baudrate açılır seçim menüsü ve girdi alanları, açık ve koyu temalarda okunabilirliği bozmayacak şekilde tema değişkenleriyle güncellendi.
+*   **Özel Tema (Custom Theme) Refaktörü:** Özel temanın renk seçicisi mantıksal gruplara ayrıldı (Paneller, Arka Plan, Kenarlıklar vb.). Eksik olan saydam renkler veya uyumlu arayüz zeminleri kullanıcı renklerinden dinamik olarak türetilerek (derived) arayüzde karanlık kalan parçaların olması engellendi.
+*   **Tema-Duyarlı Durum ve Bildirim Renkleri:** Başarı (success), tehlike (danger) ve uyarı (warning) durum renkleri ile bunlara ait yarı saydam arka plan ve kenarlık stilleri, açık ve koyu temalara dinamik ve kontrastlı uyum sağlayacak şekilde CSS değişkenleri (`--success`, `--success-rgb`, vb.) ile yeniden yapılandırıldı. Özel tema seçeneği içine bu renkler de eklendi.
+*   **Hız Testi ve Ping Statü Renkleri:** Hız testi, ping ve ağ yardımcı araçlarında eksik veya tanımlanmamış olan `var(--primary)` renk değişkeni, uygulamanın dinamik vurgu rengi (`var(--accent-color)`) ile değiştirilerek görsellik onarıldı.
+*   **SSH Handshake Hatası Düzeltildi:** SSH bağlantılarında yaşanan `Handshake failed: no matching C->S MAC` hatası giderildi. Bağlantı yöneticisinin algoritma listesine hem modern güvenli varsayılanlar (Encrypt-then-MAC - EtM algoritmaları, SHA-2 tabanlı RSA imzaları vb.) hem de eski ağ cihazlarıyla geriye dönük uyumluluğu korumak için gerekli legacy algoritmalar eklendi. Electron ortamındaki BoringSSL kısıtlamaları nedeniyle desteklenmeyen `chacha20-poly1305@openssh.com` şifreleyicisi listeden hariç tutularak uyumluluk sağlandı.
+*   **Varsayılan Görünüm Ayarları:** Uygulamanın ilk açılışındaki varsayılan yazı tipi boyutu 14px yerine 16px olarak güncellendi.
+*   **Network Overview Tablo Yazı Tipleri Tutarsızlığı Düzeltildi:** Tablodaki karışık yazı tipi kullanımı (monospace ve sans-serif karışımı) giderildi; tablo başlıkları ile IP, Gateway ve MAC adresleri gibi hücrelerdeki tüm veriler uygulamanın genel temasıyla uyumlu olacak şekilde temiz **Inter** (sans-serif) fontu ile birleştirildi.
+*   **Ping Arayüzü Kilitlenme ve Bağlantı Kopma Hatası Düzeltildi:** Ping ve Multi-ping araçlarında kullanılan asenkron `setInterval` döngüsü, ardışık zaman aşımları (request timeout) sırasında yeni `ping.exe` süreçlerinin birikmesine ve Node.js event loop'unu bloke ederek Socket.IO bağlantısının kopmasına yol açıyordu. Bu döngüler, birbirini bekleyen sıralı `setTimeout` mekanizması ile yeniden yapılandırılarak işlem birikmesi önlendi ve sıra numaralarının (seq) tutarlılığı sağlandı.
+*   **TFTP Büyük Dosya (>32MB) Gönderim Hatası Düzeltildi:** TFTP protokolünde kullanılan 16-bitlik sıra numarası (block number) sınırı olan 65535 aşıldığında, `tftp2` kütüphanesi taşma (wrap-around) yapmıyor ve Buffer'a 65536 yazmaya çalışırken `RangeError: The value of "value" is out of range` hatası vererek transferi kesiyordu. `servers-manager.js` başlangıcına eklenen dinamik yama (monkeypatch) sayesinde, paket kodlama ve doğrulama aşamalarındaki blok numaraları `modulo 65536` işlemine tabi tutularak, 32MB'tan büyük dosyaların (örneğin Cisco IOS `.tar` imajları) sorunsuz bir şekilde taşma yaparak aktarılması sağlandı.
+
+### ▲ Açıklama Şablonu (Description Snippet)
+```markdown
+# NetTool v1.0.2
+
+## Yenilikler (What's New)
+- ◆ **"Hakkında" Ekranı**: Sürüm, lisans, telif hakkı ve güncelleme denetimi sunan modern modal entegrasyonu.
+- ◆ **Premium Görsel Kimlik**: "Sapphire & Steel" temalı, yüksek yoğunluklu koyu teknoloji tasarımı.
+- ◆ **Bento Hızlı İşlemler**: Arayüzün altındaki basit butonlar, hover mikro animasyonlu etkileşimli bento kartlarına dönüştürüldü.
+- ◆ **Telemetri Düzeni**: Ağ donanım arayüzleri tablosu, temiz monospace fontlar ve kompakt durum etiketleriyle yeniden tasarlandı.
+- ◆ **GPU Hızlandırmalı Animasyonlar**: Menü geçişleri ve pencereler donanım hızlandırma için özel özellik geçişleriyle optimize edildi.
+```
+
+---
+
+## [v1.0.1] - 2026-06-16
+
+Bu sürüm; uygulamanın modülerliğini artırmak, performans optimizasyonları sağlamak, çoklu oturum desteği sunmak amacıyla gerçekleştirilen büyük bir refaktör çalışmasını ve **emil-design-eng** kurallarına göre gerçekleştirilen kapsamlı bir arayüz/animasyon parlatma çalışmasını içerir.
+
+### ✦ Arayüz ve Animasyon İyileştirmeleri (UI/UX Polish)
+*   **Kayıp Tab Geçişleri (Fade-In Animasyonu)**: React sekmelerinde kullanılan ancak CSS dosyasında eksik olan `.fade-in` sınıfı, özel `cubic-bezier(0.23, 1, 0.32, 1)` yumuşatması ve 220ms geçiş hızıyla yeniden tanımlandı. Sekmeler artık yumuşak bir yükselme ve opaklık animasyonuyla açılmaktadır.
+*   **Köken-Duyarlı Açılır Menü Animasyonları (Origin-Aware Dropdowns)**: Custom select ve baudrate preset menüleri gibi açılır pencerelerin instant (anında çıtlayarak) belirmesi yerine tetikleyici butonun altından aşağı doğru yumuşakça ölçeklenerek (`transform-origin: top` ve `scaleY`) açılması sağlandı.
+*   **Snappy Kart Hover Geçişleri**: Dashboard'daki `.stat-card` bileşenlerindeki aşırı esnek/sekme yapan demode hover eğrisi, modern ve çok daha hızlı (`200ms`) bir `ease-out` eğrisiyle değiştirildi.
+*   **Gereksiz "all" Geçişlerinin Kaldırılması**: Menü ögeleri ve butonlar gibi elemanlarda kullanılan performans düşürücü `transition: all` tanımları yerine, sadece değişen özellikler (`background-color`, `transform` vb.) spesifik olarak tanımlanarak donanım hızlandırma (GPU) optimizasyonu yapıldı.
+*   **Mobil/Touch Hover Koruması**: Dokunmatik ekranlarda buton ve menü ögelerinin üzerine tıklandığında hover durumunun yapışkan kalmasını (sticky hover) önlemek için tüm hover kuralları `@media (hover: hover) and (pointer: fine)` medya sorgusu içerisine alındı.
+*   **Buton Ölçekleme Senkronizasyonu**: Açılarak/kapatılarak durum değiştiren bazı butonların inline geçiş (transition) tanımları güncellenerek hover/click anındaki `scale` dönüşümünün anlık sıçraması engellendi ve akıcılık sağlandı.
+
+### ✦ Yeni Özellikler (New Features)
+*   **Çoklu Terminal Desteği (Tabbed Terminals)**: Web Terminal sekmesinde aynı anda birden fazla SSH, Telnet veya Serial COM Port bağlantısı açma özelliği eklendi.
+    *   Sekmeler arasında geçiş yapılarak bağımsız oturumlar paralel olarak yürütülebilir.
+    *   Her sekme için bağımsız soket izolasyonu (`forceNew: true`) uygulanarak oturumların çakışması önlendi.
+*   **Oturum Koruma (Tab Keep-Alive)**: Uygulamanın ana sekmeleri (Dashboard, Ping, Terminal, Discovery vb.) arasında geçiş yapıldığında, açık olan terminal bağlantılarının kopması ve formlardaki/araçlardaki verilerin kaybolması engellendi. (Conditional rendering yerine CSS display toggle mimarisine geçildi).
+*   **Sekme İçi Dinamik Boyutlandırma**: Saklanan bir terminal sekmesi tekrar etkinleştirildiğinde xterm.js ekranının ve odağının (`focus`) otomatik olarak sığdırılması (`fit()`) sağlandı.
+
+### ◆ Hata Gidermeleri (Bug Fixes)
+*   **Quick Server Durum/Log Çakışması Giderildi**: Backend'de (`servers-manager.js`) durum güncellemelerini ve logları tekil istemci soket referansı (`this.socket`) üzerinden gönderme yapısı kaldırıldı. Sunucu olaylarını tüm bağlı istemcilere eş zamanlı iletmek için global Socket.IO (`io`) nesnesi kullanıldı. Çoklu terminal sekmeleri bağımsız soketler açsa bile, ana uygulama ekranı sunucu durum güncellemelerini ve loglarını anında almaktadır.
+
+### ■ Yapısal ve Performans İyileştirmeleri (Refactoring & Performance)
+*   **Bileşen Ayrıştırma (Decomposition)**: Devasa boyuttaki `App.tsx` bileşeni (678 satır) parçalanarak daha küçük ve modüler alt bileşenlere bölündü:
+    *   `src/components/DashboardTab.tsx` (Dashboard ve Arayüz Listesi)
+    *   `src/components/TerminalConnectionForm.tsx` (Terminal Bağlantı Formu)
+    *   `src/components/TerminalTab.tsx` (Çoklu Oturum ve Sekme Yöneticisi)
+*   **Merkezi Tip Güvenliği**: Projedeki ortak veri tipleri `src/types.ts` dosyasına taşınarak TypeScript tip denetimi (`tsc --noEmit`) standartlaştırıldı.
+*   **Sunucu Sekme Düzenlemesi**: Hızlı dosya sunucusu sekmeleri soldan sağa **FTP, TFTP, HTTP, HTTPS** şeklinde hizalandı ve FTP varsayılan aktif sekme yapıldı.
+*   **Yapay Zekâ Sürüm Yönetim Politikası (`GEMINI.md`)**: Versiyon numaralarının otomatik artırılmasını engelleyen ve yalnızca kullanıcı onayıyla/talebiyle değişmesini sağlayan kural sisteme dahil edildi.
+
+### ▲ Açıklama Şablonu (Description Snippet)
+```markdown
+# NetTool v1.0.1
+
+## Yenilikler (What's New)
+- ◆ **Çoklu Sekmeli Terminal**: Aynı anda birden fazla SSH, Telnet ve Serial console bağlantısı açın ve yönetin.
+- ◆ **Oturum Koruma (Keep-Alive)**: Sekmeler arası geçişlerde terminal bağlantılarınız arka planda canlı kalır, hiçbir veri veya oturum kaybolmaz.
+- ◆ **Modüler Mimari & Stabilite**: Arayüz ve durum yönetimi yenilenerek uygulama performansı ve kararlılığı artırıldı.
+- ◆ **Quick Server Düzenlemesi**: Hızlı FTP, TFTP, HTTP, HTTPS sunucu başlatıcıları yeniden organize edildi.
+- ◆ **Yapay Zekâ Sürüm Politikası**: Otomatik sürüm artışları kısıtlandı, kontrol kullanıcıya bırakıldı.
+```
+
+---
+
+## [v1.0.0] - 2026-06-15
+
+NetTool uygulamasının ilk kararlı sürümüdür. Ağ mühendisleri ve yöneticileri için kapsamlı bir yerel araç seti sunar.
+
+### ✦ Temel Özellikler (Core Features)
+*   **Web Terminal**: Xterm.js emülatörü ile SSH, Telnet (IAC filtreleme destekli) ve Seri Port (COM port) konsol bağlantıları.
+*   **Ping & Traceroute**: Canlı paket kaybı ve gecikme jitter analizleriyle gelişmiş ping aracı ve traceroute rota takibi.
+*   **Ağ Keşfi (Network Discovery)**: Yerel alt ağdaki aktif cihazları ve MAC adreslerini tarayan "Ping Sweep" aracı.
+*   **Hızlı Dosya Sunucuları (Quick Servers)**: Yerel ağda dosya paylaşımı için tek tıkla HTTP, HTTPS (özelleştirilebilir veya dinamik self-signed SSL destekli), FTP (anonim veya şifreli) ve TFTP sunucuları kurma yöneticisi.
+*   **Ağ Yardımcı Araçları (Utilities)**: DNS kaydı çözme (DNS resolver), WHOIS domain sorgulama, Wake-on-LAN sihirbazı ve ARP tablosu tanılama aracı.
+*   **Hız Testi (Speed Test)**: Cloudflare altyapısını kullanarak paralel HTTP akışlarıyla indirme, yükleme ve ping gecikme testi yapan ölçüm motoru.
+
+### ■ Masaüstü Entegrasyonu (Desktop Shell)
+*   Electron çerçevesi kullanılarak frameless (çerçevesiz) modern glassmorphic kullanıcı arayüzü tasarımı.
+*   Windows Store (`.appx`) paketleme yapılandırması ve MSI/NSIS kurulum sihirbazları desteği.
