@@ -163,8 +163,9 @@ class ProgressFileSystem extends FileSystem {
     this.logFn = logFn;
   }
 
-  write(fileName, append) {
-    const stream = super.write(fileName, append);
+  write(fileName, options) {
+    const result = super.write(fileName, options);
+    const { stream, clientPath } = result;
     const log = this.logFn;
     const baseName = path.basename(fileName);
     let bytesWritten = 0;
@@ -190,46 +191,59 @@ class ProgressFileSystem extends FileSystem {
       return originalEnd.call(stream, chunk, encoding, cb);
     };
 
-    return stream;
+    return result;
   }
 
-  read(fileName, start) {
-    const stream = super.read(fileName, start);
+  read(fileName, options) {
     const log = this.logFn;
     const baseName = path.basename(fileName);
     
-    let totalBytes = 0;
-    try {
-      const absolutePath = this._resolvePath(fileName).fsPath;
-      totalBytes = fs.statSync(absolutePath).size;
-    } catch (e) {
-      // Ignored
-    }
+    return super.read(fileName, options)
+    .then((result) => {
+      const { stream, clientPath } = result;
 
-    let bytesRead = 0;
-    let lastLoggedPercent = -10;
-
-    stream.on('data', (chunk) => {
-      bytesRead += chunk.length;
-      if (totalBytes > 0) {
-        const percent = Math.floor((bytesRead / totalBytes) * 100);
-        if (percent >= lastLoggedPercent + 10 || bytesRead === totalBytes) {
-          lastLoggedPercent = percent;
-          const formattedTotal = (totalBytes / (1024 * 1024)).toFixed(2);
-          const formattedSent = (bytesRead / (1024 * 1024)).toFixed(2);
-          log(`Sending '${baseName}': ${percent}% (${formattedSent}MB / ${formattedTotal}MB)`);
-        }
-      } else {
-        const formattedSent = (bytesRead / (1024 * 1024)).toFixed(2);
-        log(`Sending '${baseName}': ${formattedSent}MB sent`);
+      let totalBytes = 0;
+      try {
+        const absolutePath = this._resolvePath(fileName).fsPath;
+        totalBytes = fs.statSync(absolutePath).size;
+      } catch (e) {
+        // Ignored
       }
-    });
 
-    stream.on('end', () => {
-      log(`Successfully sent file: ${baseName}`);
-    });
+      const { PassThrough } = require('stream');
+      const passThrough = new PassThrough();
 
-    return stream;
+      let bytesRead = 0;
+      let lastLoggedPercent = -10;
+
+      passThrough.on('data', (chunk) => {
+        bytesRead += chunk.length;
+        if (totalBytes > 0) {
+          const percent = Math.floor((bytesRead / totalBytes) * 100);
+          if (percent >= lastLoggedPercent + 10 || bytesRead === totalBytes) {
+            lastLoggedPercent = percent;
+            const formattedTotal = (totalBytes / (1024 * 1024)).toFixed(2);
+            const formattedSent = (bytesRead / (1024 * 1024)).toFixed(2);
+            log(`Sending '${baseName}': ${percent}% (${formattedSent}MB / ${formattedTotal}MB)`);
+          }
+        } else {
+          const formattedSent = (bytesRead / (1024 * 1024)).toFixed(2);
+          log(`Sending '${baseName}': ${formattedSent}MB sent`);
+        }
+      });
+
+      passThrough.on('end', () => {
+        log(`Successfully sent file: ${baseName}`);
+      });
+
+      stream.on('error', (err) => passThrough.emit('error', err));
+      stream.pipe(passThrough);
+
+      return {
+        stream: passThrough,
+        clientPath
+      };
+    });
   }
 }
 
@@ -444,12 +458,43 @@ class ServersManager {
       }
     });
   }
-
   _startFtp(port, rootDir, config) {
     return new Promise((resolve, reject) => {
       try {
+        const customLogger = {
+          info: (data, msg) => {
+            const text = msg || (typeof data === 'string' ? data : data.message);
+            if (text && !text.includes('connection') && !text.includes('PASV')) {
+              this.log('ftp', `[Info] ${text}`);
+            }
+          },
+          warn: (data, msg) => {
+            const text = msg || (typeof data === 'string' ? data : data.message);
+            this.log('ftp', `[Warn] ${text}`);
+          },
+          error: (data, msg) => {
+            const text = msg || (typeof data === 'string' ? data : data.message || (data.err && data.err.message));
+            this.log('ftp', `[Error] ${text}`);
+          },
+          debug: (data, msg) => {
+            if (data && data.command) {
+              this.log('ftp', `<- ${data.command} ${data.params || ''}`);
+            } else if (data && data.status) {
+              this.log('ftp', `-> ${data.status} ${data.message || ''}`);
+            } else {
+              const text = msg || (typeof data === 'string' ? data : data.message);
+              if (text && (text.includes('command') || text.includes('response') || text.includes('FTP'))) {
+                this.log('ftp', `[Debug] ${text}`);
+              }
+            }
+          },
+          trace: () => {},
+          child: () => customLogger
+        };
+
         const ftpServer = new FtpSrv({
           url: `ftp://0.0.0.0:${port}`,
+          log: customLogger,
           pasv_url: (remoteAddr) => {
             const resolved = getLocalIpForClient(remoteAddr);
             console.log(`[FTP] PASV requested by ${remoteAddr}. Resolved pasv_url to: ${resolved}`);
