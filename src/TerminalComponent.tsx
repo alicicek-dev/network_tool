@@ -60,14 +60,19 @@ export default function TerminalComponent({ action, target, socket: externalSock
       term.writeln('\x1b[32m[System] Connected to backend service.\x1b[0m');
       term.focus();
       
-      if (action === 'ping' && target) {
+       if (action === 'ping' && target) {
         socket.emit('start-ping', target);
       } else if (action === 'traceroute' && target) {
         socket.emit('start-trace', target);
       } else if (action === 'ssh' && target) {
         // target is a JSON string with SSH details
         try {
-          socket.emit('connect-ssh', JSON.parse(target));
+          const parsed = JSON.parse(target);
+          socket.emit('connect-ssh', {
+            ...parsed,
+            cols: term.cols,
+            rows: term.rows
+          });
         } catch(e) {}
       } else if (action === 'telnet' && target) {
         // target is a JSON string with Telnet details
@@ -130,8 +135,14 @@ export default function TerminalComponent({ action, target, socket: externalSock
       resizeObserver.observe(terminalRef.current);
     }
 
+    // Notify backend on terminal resize
+    const resizeDisposable = term.onResize(({ cols, rows }) => {
+      socket.emit('terminal-resize', { cols, rows });
+    });
+
     return () => {
       resizeObserver.disconnect();
+      resizeDisposable.dispose();
       clearTimeout(resizeTimeout);
       if (action === 'ping') {
         socket.emit('stop-ping');

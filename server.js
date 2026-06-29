@@ -675,7 +675,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('connect-ssh', ({ host, port, username, password }) => {
+  socket.on('connect-ssh', ({ host, port, username, password, cols, rows }) => {
     if (sshClient) sshClient.end();
     
     socket.emit('terminal-data', `\r\nConnecting to ${username}@${host}:${port}...\r\n`);
@@ -686,8 +686,8 @@ io.on('connection', (socket) => {
       socket.emit('terminal-data', `\r\nSSH Connected. Starting shell...\r\n`);
       sshClient.shell({
         term: 'xterm-256color',
-        cols: 100,
-        rows: 30
+        cols: cols || 100,
+        rows: rows || 30
       }, (err, stream) => {
         if (err) {
           socket.emit('terminal-data', `\r\nShell error: ${err.message}\r\n`);
@@ -791,6 +791,16 @@ io.on('connection', (socket) => {
     if (sshClient) {
       sshClient.end();
       sshClient = null;
+    }
+  });
+
+  socket.on('terminal-resize', ({ cols, rows }) => {
+    if (cols > 0 && rows > 0 && sshStream) {
+      try {
+        sshStream.setWindow(rows, cols, 0, 0);
+      } catch (e) {
+        console.error('Failed to resize SSH window:', e);
+      }
     }
   });
 
