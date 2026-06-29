@@ -113,14 +113,26 @@ export default function TerminalComponent({ action, target, socket: externalSock
       }
     });
 
-    // Resize handling
-    const handleResize = () => {
-      fitAddon.fit();
-    };
-    window.addEventListener('resize', handleResize);
+    // Resize handling using ResizeObserver
+    let resizeTimeout: any;
+    const resizeObserver = new ResizeObserver(() => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        try {
+          if (fitAddonRef.current) {
+            fitAddonRef.current.fit();
+          }
+        } catch (e) {}
+      }, 50);
+    });
+
+    if (terminalRef.current) {
+      resizeObserver.observe(terminalRef.current);
+    }
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
+      clearTimeout(resizeTimeout);
       if (action === 'ping') {
         socket.emit('stop-ping');
       } else if (action === 'traceroute') {
