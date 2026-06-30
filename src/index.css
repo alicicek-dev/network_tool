@@ -124,7 +124,7 @@ h2 {
   justify-content: center;
   background: transparent;
   border: none;
-  color: #a6adc8;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 0;
   border-radius: 0;
@@ -135,11 +135,11 @@ h2 {
 @media (hover: hover) and (pointer: fine) {
   .titlebar-btn:hover {
     background: var(--hover-overlay);
-    color: #fff;
+    color: var(--text-primary);
   }
   .titlebar-btn-close:hover {
-    background: #e81123;
-    color: #fff;
+    background: var(--danger);
+    color: #fff; /* Keep white text on red background for contrast */
   }
 }
 

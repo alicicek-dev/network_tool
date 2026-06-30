@@ -252,6 +252,7 @@ app.get('/api/is-admin', async (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
+  let activeTerminal = null;
 
   // --- QUICK FILE SERVERS FEATURE ---
   // Expose current status immediately
@@ -434,7 +435,11 @@ io.on('connection', (socket) => {
   // --- SERIAL FEATURE ---
   let currentSerialPort = null;
   socket.on('connect-serial', ({ path, baudRate }) => {
-    if (currentSerialPort) currentSerialPort.close();
+    activeTerminal = 'serial';
+    if (currentSerialPort) {
+      currentSerialPort.removeAllListeners();
+      if (currentSerialPort.isOpen) currentSerialPort.close((err) => {});
+    }
     socket.emit('terminal-data', `\r\nConnecting to ${path} at ${baudRate} baud...\r\n`);
     
     currentSerialPort = new SerialPort({ path, baudRate: parseInt(baudRate) || 9600 }, (err) => {
@@ -448,11 +453,21 @@ io.on('connection', (socket) => {
     currentSerialPort.on('data', (data) => {
       socket.emit('terminal-data', data.toString());
     });
+    
+    currentSerialPort.on('error', (err) => {
+      socket.emit('terminal-data', `\r\nSerial Error: ${err.message}\r\n`);
+    });
+
+    currentSerialPort.on('close', () => {
+      socket.emit('terminal-data', `\r\nSerial connection closed.\r\n`);
+      currentSerialPort = null;
+    });
   });
 
   socket.on('disconnect-serial', () => {
     if (currentSerialPort) {
-      currentSerialPort.close();
+      currentSerialPort.removeAllListeners();
+      if (currentSerialPort.isOpen) currentSerialPort.close((err) => {});
       currentSerialPort = null;
       socket.emit('terminal-data', `\r\nDisconnected.\r\n`);
     }
@@ -676,6 +691,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('connect-ssh', ({ host, port, username, password, cols, rows }) => {
+    activeTerminal = 'ssh';
     if (sshClient) sshClient.end();
     
     socket.emit('terminal-data', `\r\nConnecting to ${username}@${host}:${port}...\r\n`);
@@ -807,6 +823,7 @@ io.on('connection', (socket) => {
   let telnetSocket = null;
 
   socket.on('connect-telnet', ({ host, port }) => {
+    activeTerminal = 'telnet';
     if (telnetSocket) telnetSocket.destroy();
     
     socket.emit('terminal-data', `\r\nConnecting to Telnet host ${host}:${port}...\r\n`);
@@ -872,13 +889,13 @@ io.on('connection', (socket) => {
 
   // Universal terminal input router
   socket.on('terminal-input', (data) => {
-    if (currentSerialPort && currentSerialPort.isOpen) {
+    if (activeTerminal === 'serial' && currentSerialPort && currentSerialPort.isOpen) {
       currentSerialPort.write(data);
     }
-    if (sshStream) {
+    if (activeTerminal === 'ssh' && sshStream) {
       sshStream.write(data);
     }
-    if (telnetSocket) {
+    if (activeTerminal === 'telnet' && telnetSocket) {
       telnetSocket.write(data);
     }
   });
@@ -888,10 +905,23 @@ io.on('connection', (socket) => {
     multiPingActive = false;
     if (pingInterval) clearTimeout(pingInterval);
     if (multiPingInterval) clearTimeout(multiPingInterval);
-    if (currentSerialPort) currentSerialPort.close();
+    if (currentSerialPort) {
+      currentSerialPort.removeAllListeners();
+      if (currentSerialPort.isOpen) currentSerialPort.close((err) => {});
+    }
     sshStream = null;
     if (sshClient) sshClient.end();
     if (telnetSocket) telnetSocket.destroy();
+    
+    // Cleanup trace process and port scan
+    if (traceProcess) {
+      traceProcess.kill();
+      traceProcess = null;
+    }
+    if (typeof currentPortScanId !== 'undefined') {
+      currentPortScanId++; // Aborts any ongoing port scans for this socket
+    }
+    
     console.log('Client disconnected:', socket.id);
   });
 });

@@ -16,34 +16,40 @@ const startBackend = () => {
 let mainWindow: BrowserWindow | null = null;
 
 // Auto-updater integration settings
-autoUpdater.autoDownload = true;
+autoUpdater.autoDownload = false;
 
 const setupAutoUpdater = (win: BrowserWindow) => {
+  const safeSend = (channel: string, args: any) => {
+    if (!win.isDestroyed()) {
+      win.webContents.send(channel, args);
+    }
+  };
+
   autoUpdater.on('checking-for-update', () => {
-    win.webContents.send('updater-status', { status: 'checking' });
+    safeSend('updater-status', { status: 'checking' });
   });
 
   autoUpdater.on('update-available', (info) => {
-    win.webContents.send('updater-status', { status: 'available', info });
+    safeSend('updater-status', { status: 'available', info });
   });
 
   autoUpdater.on('update-not-available', (info) => {
-    win.webContents.send('updater-status', { status: 'not-available', info });
+    safeSend('updater-status', { status: 'not-available', info });
   });
 
   autoUpdater.on('error', (error) => {
-    win.webContents.send('updater-status', { status: 'error', message: error.message });
+    safeSend('updater-status', { status: 'error', message: error.message });
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
-    win.webContents.send('updater-status', { 
+    safeSend('updater-status', { 
       status: 'downloading', 
       percent: Math.round(progressObj.percent)
     });
   });
 
   autoUpdater.on('update-downloaded', (info) => {
-    win.webContents.send('updater-status', { status: 'downloaded', info });
+    safeSend('updater-status', { status: 'downloaded', info });
   });
 };
 
@@ -53,7 +59,7 @@ function createWindow() {
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
+      nodeIntegration: false,
       contextIsolation: true,
     },
     frame: false,
@@ -130,7 +136,12 @@ ipcMain.on('window-close', (event) => {
 });
 
 ipcMain.on('open-external', (event, url) => {
-  shell.openExternal(url);
+  try {
+    const parsed = new URL(url);
+    if (['https:', 'http:'].includes(parsed.protocol)) {
+      shell.openExternal(url);
+    }
+  } catch { /* invalid URL — ignore */ }
 });
 
 // IPC handlers for auto-updater

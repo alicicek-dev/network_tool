@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { Theme, AccessibilityOptions } from '../types';
 import { generateThemeFromPrimary } from '../utils/themeGenerator';
@@ -165,7 +165,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // Active palette depends on the current theme and accessibility settings
-  const getActivePalette = (): Record<string, string> => {
+  const activePalette = useMemo((): Record<string, string> => {
     if (accessibility.highContrast) {
       return theme === 'light' ? highContrastLightPalette : highContrastDarkPalette;
     }
@@ -240,9 +240,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return derived;
-  };
-
-  const activePalette = getActivePalette();
+  }, [theme, customPalette, accessibility.highContrast]);
 
   // Apply CSS variables and classes
   useEffect(() => {

@@ -51,11 +51,13 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
   };
 
   // Auto create a session on mount if list is empty
+  const isInitialized = React.useRef(false);
   useEffect(() => {
-    if (sessions.length === 0) {
+    if (!isInitialized.current && sessions.length === 0) {
+      isInitialized.current = true;
       createNewSession();
     }
-  }, [sessions]);
+  }, []); // Run only once on mount
 
   const refreshSerialPorts = () => {
     fetch('http://127.0.0.1:3001/api/ports')
@@ -83,7 +85,7 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
     }
   }, [isActive, activeSessionId]);
 
-  const updateActiveSessionConfig = (key: string, value: any) => {
+  const updateActiveSessionConfig = (key: string, value: string) => {
     setSessions(prev => prev.map(s => {
       if (s.id === activeSessionId) {
         return {

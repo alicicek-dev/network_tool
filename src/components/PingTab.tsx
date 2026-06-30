@@ -153,9 +153,10 @@ export default function PingTab({ socket }: Props) {
     };
   }, [socket]);
 
-  // Clean up multi-ping when switching tabs
+  // Clean up ping/multi-ping on unmount
   useEffect(() => {
     return () => {
+      socket.emit('stop-ping');
       socket.emit('stop-multi-ping');
     };
   }, [socket]);

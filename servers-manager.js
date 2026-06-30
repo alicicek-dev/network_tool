@@ -569,7 +569,16 @@ class ServersManager {
         server.on('get', async (req, send) => {
           const relativePath = req.filename.replace(/^\/+/, '');
           const filename = path.join(rootDir, relativePath);
+          const resolvedFilename = path.resolve(filename);
+          const resolvedRootDir = path.resolve(rootDir);
+          
           this.log('tftp', `Read request (RRQ) for file: ${req.filename}`);
+          
+          if (!resolvedFilename.startsWith(resolvedRootDir)) {
+            this.log('tftp', `Error: Path traversal blocked: ${req.filename}`);
+            req.error(2, 'Access denied');
+            return;
+          }
           
           try {
             if (!fs.existsSync(filename)) {
@@ -602,7 +611,16 @@ class ServersManager {
         server.on('put', async (req, readStream) => {
           const relativePath = req.filename.replace(/^\/+/, '');
           const filename = path.join(rootDir, relativePath);
+          const resolvedFilename = path.resolve(filename);
+          const resolvedRootDir = path.resolve(rootDir);
+
           this.log('tftp', `Write request (WRQ) for file: ${req.filename}`);
+
+          if (!resolvedFilename.startsWith(resolvedRootDir)) {
+            this.log('tftp', `Error: Path traversal blocked: ${req.filename}`);
+            req.error(2, 'Access denied');
+            return;
+          }
 
           try {
             const buffer = [];
