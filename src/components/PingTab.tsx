@@ -222,7 +222,7 @@ export default function PingTab({ socket }: Props) {
   const packetLossPercent = summary.sent > 0 ? ((summary.lost / summary.sent) * 100).toFixed(1) : 0;
   
   return (
-    <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%', gap: '15px'}}>
+    <div className="fade-in" style={{display: 'flex', flexDirection: 'column', height: '100%', gap: '12px'}}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Ping & Traceroute</h1>
         
