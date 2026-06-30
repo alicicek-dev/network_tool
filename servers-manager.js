@@ -463,17 +463,36 @@ class ServersManager {
       try {
         const customLogger = {
           info: (data, msg) => {
-            const text = msg || (typeof data === 'string' ? data : data.message);
+            const text = typeof msg === 'string' ? msg : (typeof data === 'string' ? data : (data && data.message ? data.message : ''));
             if (text && !text.includes('connection') && !text.includes('PASV')) {
               this.log('ftp', `[Info] ${text}`);
             }
           },
           warn: (data, msg) => {
-            const text = msg || (typeof data === 'string' ? data : data.message);
+            const text = typeof msg === 'string' ? msg : (typeof data === 'string' ? data : (data && data.message ? data.message : ''));
             this.log('ftp', `[Warn] ${text}`);
           },
           error: (data, msg) => {
-            const text = msg || (typeof data === 'string' ? data : data.message || (data.err && data.err.message));
+            let text = '';
+            if (typeof msg === 'string') {
+              text = msg;
+            } else if (typeof data === 'string') {
+              text = data;
+            } else if (data instanceof Error) {
+              text = data.message;
+            } else if (data && data.err instanceof Error) {
+              text = data.err.message;
+            } else if (data && data.message) {
+              text = typeof data.message === 'string' ? data.message : JSON.stringify(data.message);
+            } else {
+              text = JSON.stringify(data || msg);
+            }
+            
+            // Suppress harmless client disconnect errors
+            if (text.includes('ECONNRESET') || text.includes('socket has been ended') || text.includes('EPIPE')) {
+              return; // Ignore common graceful/ungraceful disconnect errors from Cisco devices
+            }
+            
             this.log('ftp', `[Error] ${text}`);
           },
           debug: (data, msg) => {
@@ -482,7 +501,7 @@ class ServersManager {
             } else if (data && data.status) {
               this.log('ftp', `-> ${data.status} ${data.message || ''}`);
             } else {
-              const text = msg || (typeof data === 'string' ? data : data.message);
+              const text = typeof msg === 'string' ? msg : (typeof data === 'string' ? data : (data && data.message ? data.message : ''));
               if (text && (text.includes('command') || text.includes('response') || text.includes('FTP'))) {
                 this.log('ftp', `[Debug] ${text}`);
               }
