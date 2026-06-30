@@ -2,6 +2,39 @@
 
 Bu dosya, NetTool (Network Engineer Toolkit) uygulamasının sürüm geçmişini, yapılan iyileştirmeleri ve eklenen yeni özellikleri belgelendirmektedir. GitHub ve Microsoft Store (Partner Center) güncellemelerinde referans olarak kullanılabilir.
 
+## [v1.0.4] - 2026-06-30
+
+Bu sürüm; Kapsamlı Kod İnceleme (Code Review) raporu sonucunda tespit edilen güvenlik açıklarının, bellek sızıntılarının (memory leak) ve kararlılık sorunlarının giderilmesini içerir. Ayrıca Ping & Traceroute sekmesindeki UI boşlukları optimize edilmiştir.
+
+### ✦ İyileştirmeler (Improvements)
+*   **UI Boşluk Optimizasyonu:** Ping & Traceroute sekmesindeki bileşenler arasında oluşan aşırı dikey boşluklar (margin stacking) giderildi ve daha kompakt bir düzen sağlandı.
+
+### ◆ Hata Gidermeleri (Bug Fixes)
+*   **Electron Güvenliği Sıkılaştırıldı:** `openExternal` (URL açma) fonksiyonu sadece `http:` ve `https:` protokolleriyle sınırlandırılarak `file://` veya özel URI tabanlı RCE güvenlik açıkları kapatıldı. `nodeIntegration: false` yapıldı ve Content-Security-Policy (CSP) meta etiketi eklendi.
+*   **TFTP Güvenlik Açığı (Path Traversal) Düzeltildi:** Dosya yollarının kök dizinden dışarı çıkmasını sağlayan `../` kullanımı temizlenerek okuma/yazma işlemleri çalışma dizini içine kısıtlandı.
+*   **Ayrık Terminal (Active Terminal) İzolasyonu:** `socket.emit('terminal-input')` olayındaki dinleyici tüm açık terminal oturumlarına yayın yapacak şekilde hatalı yapılandırılmıştı. Etkin sekmeyi belirten `activeTerminal` durumuyla sadece aktif ssh/telnet/serial bağlantılarına veri gönderilmesi sağlandı.
+*   **Bağlantı Kopmalarında Zombi İşlem Temizliği:** İstemci (tarayıcı) bağlantısı koptuğunda veya sekme kapatıldığında arka planda açık unutulan ping/traceroute döngüleri sonlandırılarak bellek/işlemci sızıntıları önlendi.
+*   **SerialPort Hata Denetimi:** Seri port kapanırken veya koptuğunda oluşan Exception hataları giderilerek uygulamadaki çökme (crash) senaryoları önlendi ve bağlantı olay dinleyicileri (event listeners) temizlendi.
+*   **React Sonsuz Döngü Riskleri Giderildi:** `TerminalTab` ve `ThemeContext` bileşenlerindeki bağımlılık (dependency) listeleri `useMemo` ve `useRef` yöntemleriyle refaktör edilerek, lüzumsuz `chroma.js` palet hesaplamaları temizlendi.
+*   **Auto-Updater Çökme Riski:** İnen güncellemeler esnasında pencere kapanırsa referans hatasından kaynaklanan (`win.isDestroyed`) çökme senaryosu engellendi, sessiz indirme (`autoDownload`) devre dışı bırakıldı.
+*   **Hardcoded Renkler Temizlendi:** Tema desteğini (Açık/Koyu) bozan CSS dosyalarındaki sabit renkler, temanın aktif CSS palet değişkenleriyle (örn. `var(--text-primary)`, `var(--danger)`) değiştirildi.
+
+### ■ Yapısal Doğrulamalar & Derleme
+*   **Tip Güvenliği:** TypeScript derleyici kontrolü (`tsc --noEmit`) sıfır hata ile tamamlandı.
+*   **Paketleme:** Vite üretim derlemesi (`npm run build`) başarıyla tamamlanarak sürüm v1.0.4 kurulum dosyaları oluşturuldu.
+
+### ▲ Açıklama Şablonu (Description Snippet)
+```markdown
+# NetTool v1.0.4
+
+## Yenilikler (What's New)
+- ◆ **Güvenlik İyileştirmeleri**: RCE ve Path Traversal risklerine karşı Electron ve TFTP katmanlarında sıkılaştırmalar yapıldı.
+- ◆ **Performans ve Kararlılık**: Zombi işlem temizliği, React re-render optimizasyonları ve seri port çökme korumaları eklendi.
+- ◆ **UI İyileştirmeleri**: Ping & Traceroute araçlarındaki aşırı dikey boşluklar düzeltilerek daha derli toplu bir görünüm elde edildi.
+```
+
+---
+
 ## [v1.0.3] - 2026-06-29
 
 Bu sürüm; ağ protokolleri (SSH, Ping, TFTP, FTP) üzerindeki kritik hata düzeltmelerini, kararlılık iyileştirmelerini ve dosya aktarım süreçlerinin gerçek zamanlı izlenmesini sağlayan ilerleme göstergelerini içerir.
@@ -19,18 +52,6 @@ Bu sürüm; ağ protokolleri (SSH, Ping, TFTP, FTP) üzerindeki kritik hata düz
 *   **FTP Dosya Çekme (Download/RETR) ve İletişim Protokolü Hataları Düzeltildi:** Cisco cihazlarından `copy ftp://...` ile dosya çekmek istenirken yaşanan `Protocol error` hatası giderildi. `ftp-srv` kütüphanesinin Promise dönen `read()` yöntemi ve sarmalanmış nesne dönen `write()` yöntemi `ProgressFileSystem` alt sınıfında yanlış (doğrudan stream objesi olarak) ele alınmasından kaynaklanan TypeError çökmeleri giderildi. Ayrıca, FTP sunucusuna tüm komut alışverişini (`USER`, `PASS`, `PORT`, `PASV`, `RETR`, `STOR` ve sunucu yanıt kodlarını) arayüze anlık yazdıran bir **detaylı log sistemi** eklendi; böylece dosya transferi sırasında yaşanan dosya bulunamadı (550) veya ağ kesintisi gibi durumların tam teşhisi sağlandı.
 *   **SSH Dinamik Terminal Boyutlandırma (Resize) Senkronizasyonu Sağlandı:** SSH bağlantısı etkinken başka bir sekmeye gidip tekrar SSH sayfasına dönüldüğünde veya pencere boyutu değiştiğinde, xterm.js ekranındaki sütun ve satırların daralarak yazıların yarım kalması veya bozulması giderildi. Frontend'deki `onResize` olay dinleyicisi ile xterm.js üzerindeki her boyut değişimi yakalanarak backend'e `terminal-resize` soket sinyaliyle iletildi ve backend üzerindeki aktif SSH pseudo-terminal (pty) penceresi `sshStream.setWindow(rows, cols, 0, 0)` ile anlık olarak güncellendi. Ayrıca bağlantı kurulurken (`connect-ssh`) mevcut terminal satır ve sütun boyutları ilk parametre olarak gönderilerek oturumun doğrudan doğru boyutlarda başlaması sağlandı.
 *   **Cisco Switch FTP Agresif Kopma ve Log Hataları Düzeltildi:** Cisco anahtarlarının dosya aktarımı sırasında veya hemen sonrasında bağlantıyı aniden kesmesi (TCP RST) sebebiyle terminalde oluşan `ECONNRESET`, `socket has been ended by the other party` gibi zararsız kopma uyarılarının loglanması engellendi. Ayrıca sunucunun özel loglama motoru güncellenerek, hata objelerinin ekranda `[object Object]` olarak basılması hatası giderildi ve gerçek hata mesajlarının okunabilir bir formatta yansıtılması sağlandı.
-*   **Electron Güvenliği Sıkılaştırıldı:** `openExternal` (URL açma) fonksiyonu sadece `http:` ve `https:` protokolleriyle sınırlandırılarak `file://` veya özel URI tabanlı RCE güvenlik açıkları kapatıldı. `nodeIntegration: false` yapıldı ve Content-Security-Policy (CSP) meta etiketi eklendi.
-*   **TFTP Güvenlik Açığı (Path Traversal) Düzeltildi:** Dosya yollarının kök dizinden dışarı çıkmasını sağlayan `../` kullanımı temizlenerek okuma/yazma işlemleri çalışma dizini içine kısıtlandı.
-*   **Ayrık Terminal (Active Terminal) İzolasyonu:** `socket.emit('terminal-input')` olayındaki dinleyici tüm açık terminal oturumlarına yayın yapacak şekilde hatalı yapılandırılmıştı. Etkin sekmeyi belirten `activeTerminal` durumuyla sadece aktif ssh/telnet/serial bağlantılarına veri gönderilmesi sağlandı.
-*   **Bağlantı Kopmalarında Zombi İşlem Temizliği:** İstemci (tarayıcı) bağlantısı koptuğunda veya sekme kapatıldığında arka planda açık unutulan ping/traceroute döngüleri sonlandırılarak bellek/işlemci sızıntıları önlendi.
-*   **SerialPort Hata Denetimi:** Seri port kapanırken veya koptuğunda oluşan Exception hataları giderilerek uygulamadaki çökme (crash) senaryoları önlendi ve bağlantı olay dinleyicileri (event listeners) temizlendi.
-*   **React Sonsuz Döngü Riskleri Giderildi:** `TerminalTab` ve `ThemeContext` bileşenlerindeki bağımlılık (dependency) listeleri `useMemo` ve `useRef` yöntemleriyle refaktör edilerek, lüzumsuz `chroma.js` palet hesaplamaları temizlendi.
-*   **Auto-Updater Çökme Riski:** İnen güncellemeler esnasında pencere kapanırsa referans hatasından kaynaklanan (`win.isDestroyed`) çökme senaryosu engellendi, sessiz indirme (`autoDownload`) devre dışı bırakıldı.
-*   **Hardcoded Renkler Temizlendi:** Tema desteğini (Açık/Koyu) bozan CSS dosyalarındaki sabit renkler, temanın aktif CSS palet değişkenleriyle (örn. `var(--text-primary)`, `var(--danger)`) değiştirildi.
-
-### ■ Yapısal Doğrulamalar & Derleme
-*   **Tip Güvenliği:** TypeScript derleyici kontrolü (`tsc --noEmit`) sıfır hata ile tamamlandı.
-*   **Paketleme:** Vite üretim derlemesi (`npm run build`) başarıyla tamamlanarak sürüm v1.0.3 kurulum dosyaları oluşturuldu.
 
 ### ▲ Açıklama Şablonu (Description Snippet)
 ```markdown
