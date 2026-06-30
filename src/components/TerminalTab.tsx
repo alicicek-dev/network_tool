@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../config';
 import TerminalComponent from '../TerminalComponent';
 import TerminalConnectionForm from './TerminalConnectionForm';
 import type { SerialPortInfo } from '../types';
@@ -60,7 +61,7 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
   }, []); // Run only once on mount
 
   const refreshSerialPorts = () => {
-    fetch('http://127.0.0.1:3001/api/ports')
+    fetch(`${API_BASE}/api/ports`)
       .then(res => res.json())
       .then(data => {
          const sorted = [...data].sort((a, b) => {

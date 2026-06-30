@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import { useState, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 
@@ -84,7 +85,7 @@ export default function QuickServerTab({ socket }: Props) {
 
   // Check administrator privileges on load
   useEffect(() => {
-    fetch('http://127.0.0.1:3001/api/is-admin')
+    fetch(`${API_BASE}/api/is-admin`)
       .then((res) => res.json())
       .then((data) => {
         setIsAdmin(data.isAdmin);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { CopyIcon } from './Icons';
+import { API_BASE } from '../config';
 
 interface Props {
   socket: Socket;
@@ -174,7 +175,7 @@ export default function DiscoveryTab({ socket, defaultSubnet }: Props) {
   const handleFetchArp = async () => {
     setIsLoadingArp(true);
     try {
-      const res = await fetch('http://127.0.0.1:3001/api/arp');
+      const res = await fetch(`${API_BASE}/api/arp`);
       const data = await res.json();
       // Sort data by IP address numerically (ascending)
       const sorted = data.sort((a: any, b: any) => ipToInt(a.ip) - ipToInt(b.ip));

@@ -4,7 +4,12 @@ Bu dosya, NetTool (Network Engineer Toolkit) uygulamasının sürüm geçmişini
 
 ## [v1.0.5] - 2026-06-30
 
-Bu sürüm, önceki sürümde (v1.0.3/v1.0.4) tespit edilen kritik bir Otomatik Güncelleme (Auto-Updater) indirme hatasını çözer.
+Bu sürüm, önceki sürümde (v1.0.3/v1.0.4) tespit edilen kritik bir Otomatik Güncelleme (Auto-Updater) indirme hatasını çözer. Ayrıca uygulamanın mimarisindeki büyük darboğazları ve arayüz kilitlenmelerini ortadan kaldıran çekirdek refaktörleri içerir.
+
+### ✦ Mimari ve Kararlılık İyileştirmeleri (Architecture & Stability)
+*   **Dinamik Port ve Arka Plan İzolasyonu (Process Isolation):** Backend Node.js sunucusunun Electron ana sürecini dondurmaması için `child_process.fork()` ile tamamen ayrı bir iş parçacığında çalışması sağlandı. Backend artık çakışma riski taşıyan sabit `3001` yerine dinamik olarak rastgele boş bir porta atanıyor ve bu port URL parametresi (`?port=XXXX`) ile güvenli şekilde Frontend'e besleniyor.
+*   **Arayüz Donmalarının (Event Loop Blocking) Engellenmesi:** Uygulamanın ağ geçidini okurken `execSync` kullanarak tüm arayüzü geçici olarak dondurması (özellikle PowerShell'de yaşanan 1-2 saniyelik takılmalar) tamamen önlendi. Asenkron `util.promisify(exec)` kullanılarak Event Loop'un akıcı çalışması sağlandı.
+*   **Çoklu Terminal İzolasyonu:** Soketlerin `forceNew: true` yapısı sayesinde her bir terminal bağlantısının (`sshClient`, `telnetSocket`, vb.) izole bir scope içinde barındığı, bağlantı kapandığında eksiksiz `disconnect` temizlik rutinlerinin (`.end()`, `.destroy()`) çalıştığı test edilip onaylandı.
 
 ### ◆ Hata Gidermeleri (Bug Fixes)
 *   **Auto-Updater Sessiz İndirme Hatası:** Bir önceki güncellemede çökmeyi engellemek adına devre dışı bırakılan otomatik indirme (`autoDownload: false`) özelliğinin, yeni güncelleme bulunduğunda manuel olarak indirmeyi tetiklemesi gerekiyordu. Eksik olan `autoUpdater.downloadUpdate()` fonksiyonu eklenerek, güncelleme bulundu uyarısından sonra indirme işleminin başarıyla başlaması ve ilerleme çubuğunun (progress) çalışması sağlandı.

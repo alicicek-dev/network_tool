@@ -1,3 +1,4 @@
+import { API_BASE } from './config';
 import { useState, useEffect } from 'react';
 import './index.css';
 import TerminalTab from './components/TerminalTab';
@@ -13,7 +14,7 @@ import { io } from 'socket.io-client';
 import { AppIcon, DashboardIcon, PingIcon, TerminalIcon, DiscoveryIcon, UtilitiesIcon, SpeedTestIcon, ServerIcon, SettingsIcon, InfoIcon } from './components/Icons';
 import type { NetworkInterface } from './types';
 
-const socket = io('http://127.0.0.1:3001', {
+const socket = io(API_BASE, {
   transports: ['websocket']
 });
 
@@ -32,7 +33,7 @@ function App() {
     const maxRetries = 10;
     
     function fetchInterfaces() {
-      fetch('http://127.0.0.1:3001/api/interfaces')
+      fetch(`${API_BASE}/api/interfaces`)
         .then(res => {
           if (!res.ok) throw new Error('Network response was not ok');
           return res.json();

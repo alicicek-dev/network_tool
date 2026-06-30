@@ -123,15 +123,17 @@ const io = new Server(server, {
 });
 serversManager.setIo(io);
 
-app.get('/api/interfaces', (req, res) => {
+app.get('/api/interfaces', async (req, res) => {
   const nets = os.networkInterfaces();
   const results = [];
   
   let gateway = "Unknown";
   try {
     if (process.platform === 'win32') {
-      const out = require('child_process').execSync('powershell.exe -Command "(Get-NetRoute -DestinationPrefix 0.0.0.0/0 -ErrorAction SilentlyContinue | Sort-Object RouteMetric | Select-Object -First 1).NextHop"', {encoding: 'utf8'});
-      gateway = out.trim() || "Unknown";
+      const util = require('util');
+      const exec = util.promisify(require('child_process').exec);
+      const { stdout } = await exec('powershell.exe -Command "(Get-NetRoute -DestinationPrefix 0.0.0.0/0 -ErrorAction SilentlyContinue | Sort-Object RouteMetric | Select-Object -First 1).NextHop"', { encoding: 'utf8' });
+      gateway = stdout.trim() || "Unknown";
     }
   } catch (e) {
     // Ignore error
@@ -926,9 +928,14 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 3001;
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Backend server running on http://127.0.0.1:${PORT}`);
+// Start backend on a dynamic port
+server.listen(0, '127.0.0.1', () => {
+  const address = server.address();
+  const port = typeof address === 'string' ? 0 : address.port;
+  console.log(`Backend server running on http://127.0.0.1:${port}`);
+  if (process.send) {
+    process.send({ type: 'port', port });
+  }
 });
 
 process.on('SIGTERM', () => {

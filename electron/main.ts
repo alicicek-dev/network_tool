@@ -1,16 +1,39 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
-const startBackend = () => {
-  try {
-    if (app.isPackaged) {
-      require(path.join(process.resourcesPath, 'app.asar', 'server.js'));
-    } else {
-      require(path.join(__dirname, '../server.js'));
+import { fork, ChildProcess } from 'child_process';
+
+let backendProcess: ChildProcess | null = null;
+let currentBackendPort: number | null = null;
+
+const startBackend = (): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    try {
+      const serverPath = app.isPackaged 
+        ? path.join(process.resourcesPath, 'app.asar', 'server.js') 
+        : path.join(__dirname, '../server.js');
+      
+      backendProcess = fork(serverPath, [], {
+        env: process.env,
+        stdio: 'inherit'
+      });
+
+      backendProcess.on('message', (msg: any) => {
+        if (msg && msg.type === 'port') {
+          currentBackendPort = msg.port;
+          resolve(msg.port);
+        }
+      });
+
+      backendProcess.on('error', (err) => {
+        console.error('Backend process error:', err);
+        reject(err);
+      });
+    } catch (error) {
+      console.error('Failed to start backend server:', error);
+      reject(error);
     }
-  } catch (error) {
-    console.error('Failed to start backend server:', error);
-  }
+  });
 };
 
 let mainWindow: BrowserWindow | null = null;
@@ -54,7 +77,7 @@ const setupAutoUpdater = (win: BrowserWindow) => {
   });
 };
 
-function createWindow() {
+function createWindow(port: number) {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -68,9 +91,9 @@ function createWindow() {
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
+    mainWindow.loadURL(`${process.env.VITE_DEV_SERVER_URL}?port=${port}`);
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'), { query: { port: port.toString() } });
   }
 
   // Setup auto-updater listeners for this window
@@ -81,20 +104,28 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
-  startBackend();
-  createWindow();
+app.whenReady().then(async () => {
+  try {
+    const port = await startBackend();
+    createWindow(port);
+  } catch (err) {
+    console.error("Could not start backend, exiting.", err);
+    app.quit();
+  }
 });
 
 app.on('window-all-closed', () => {
+  if (backendProcess) {
+    backendProcess.kill();
+  }
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+  if (BrowserWindow.getAllWindows().length === 0 && currentBackendPort) {
+    createWindow(currentBackendPort);
   }
 });
 

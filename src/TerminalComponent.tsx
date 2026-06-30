@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { API_BASE } from './config';
+import React, { useEffect, useRef } from 'react';
 import { Terminal } from 'xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import 'xterm/css/xterm.css';
@@ -50,7 +51,7 @@ export default function TerminalComponent({ action, target, socket: externalSock
     xtermRef.current = term;
 
     // Connect to backend
-    const socket = externalSocket || io('http://127.0.0.1:3001', {
+    const socket = externalSocket || io(API_BASE, {
       transports: ['websocket'],
       forceNew: true
     });
