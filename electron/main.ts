@@ -31,6 +31,7 @@ const setupAutoUpdater = (win: BrowserWindow) => {
 
   autoUpdater.on('update-available', (info) => {
     safeSend('updater-status', { status: 'available', info });
+    autoUpdater.downloadUpdate();
   });
 
   autoUpdater.on('update-not-available', (info) => {

@@ -2,6 +2,15 @@
 
 Bu dosya, NetTool (Network Engineer Toolkit) uygulamasının sürüm geçmişini, yapılan iyileştirmeleri ve eklenen yeni özellikleri belgelendirmektedir. GitHub ve Microsoft Store (Partner Center) güncellemelerinde referans olarak kullanılabilir.
 
+## [v1.0.5] - 2026-06-30
+
+Bu sürüm, önceki sürümde (v1.0.3/v1.0.4) tespit edilen kritik bir Otomatik Güncelleme (Auto-Updater) indirme hatasını çözer.
+
+### ◆ Hata Gidermeleri (Bug Fixes)
+*   **Auto-Updater Sessiz İndirme Hatası:** Bir önceki güncellemede çökmeyi engellemek adına devre dışı bırakılan otomatik indirme (`autoDownload: false`) özelliğinin, yeni güncelleme bulunduğunda manuel olarak indirmeyi tetiklemesi gerekiyordu. Eksik olan `autoUpdater.downloadUpdate()` fonksiyonu eklenerek, güncelleme bulundu uyarısından sonra indirme işleminin başarıyla başlaması ve ilerleme çubuğunun (progress) çalışması sağlandı.
+
+---
+
 ## [v1.0.4] - 2026-06-30
 
 Bu sürüm; Kapsamlı Kod İnceleme (Code Review) raporu sonucunda tespit edilen güvenlik açıklarının, bellek sızıntılarının (memory leak) ve kararlılık sorunlarının giderilmesini içerir. Ayrıca Ping & Traceroute sekmesindeki UI boşlukları optimize edilmiştir.
