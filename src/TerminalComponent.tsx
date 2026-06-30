@@ -10,9 +10,10 @@ interface TerminalProps {
   target: string;
   socket?: Socket;
   isActive?: boolean;
+  onDisconnect?: () => void;
 }
 
-export default function TerminalComponent({ action, target, socket: externalSocket, isActive = true }: TerminalProps) {
+export default function TerminalComponent({ action, target, socket: externalSocket, isActive = true, onDisconnect }: TerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -208,24 +209,46 @@ export default function TerminalComponent({ action, target, socket: externalSock
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <button 
-        onClick={() => xtermRef.current?.clear()}
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '25px', // prevent overlapping with scrollbar
-          zIndex: 10,
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid var(--panel-border)',
-          color: 'var(--text-secondary)',
-          padding: '5px 10px',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: '0.8rem'
-        }}
-      >
-        Clear
-      </button>
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        right: '25px', // prevent overlapping with scrollbar
+        zIndex: 10,
+        display: 'flex',
+        gap: '8px'
+      }}>
+        {onDisconnect && (
+          <button 
+            onClick={onDisconnect}
+            style={{
+              background: 'var(--danger)',
+              border: 'none',
+              color: '#ffffff',
+              padding: '5px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: '500'
+            }}
+          >
+            Disconnect
+          </button>
+        )}
+        <button 
+          onClick={() => xtermRef.current?.clear()}
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid var(--panel-border)',
+            color: 'var(--text-secondary)',
+            padding: '5px 12px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}
+        >
+          Clear
+        </button>
+      </div>
       <div 
         ref={terminalRef} 
         onContextMenu={handleContextMenu}

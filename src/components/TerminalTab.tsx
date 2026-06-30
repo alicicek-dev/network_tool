@@ -273,19 +273,12 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
                 />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-                    <button 
-                      onClick={() => handleDisconnect(s.id)} 
-                      style={{ background: 'var(--danger)', padding: '6px 14px', fontSize: '0.85rem' }}
-                    >
-                      Disconnect
-                    </button>
-                  </div>
                   <div className="terminal-container" style={{ flex: 1, minHeight: 0 }}>
                     <TerminalComponent 
                       action={s.mode} 
                       target={s.target} 
                       isActive={isActive && isSessionActive} 
+                      onDisconnect={() => handleDisconnect(s.id)}
                     />
                   </div>
                 </div>
