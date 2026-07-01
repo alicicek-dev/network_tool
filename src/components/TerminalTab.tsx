@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE } from '../config';
-import TerminalComponent from '../TerminalComponent';
+import TerminalComponent, { TerminalComponentRef } from '../TerminalComponent';
 import TerminalConnectionForm from './TerminalConnectionForm';
+import MacroManager from './MacroManager';
 import type { SerialPortInfo } from '../types';
 
 interface TerminalSession {
@@ -28,6 +29,8 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [serialPorts, setSerialPorts] = useState<SerialPortInfo[]>([]);
+  const [isMacroOpen, setIsMacroOpen] = useState(false);
+  const terminalRefs = useRef<Record<string, TerminalComponentRef | null>>({});
 
   // Create new session in setup state
   const createNewSession = () => {
@@ -177,9 +180,18 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
     }
   };
 
+  const handleExecuteMacro = (commands: string[]) => {
+    if (!activeSessionId) return;
+    const activeTerminal = terminalRefs.current[activeSessionId];
+    if (activeTerminal) {
+      activeTerminal.executeMacro(commands);
+    }
+  };
+
   return (
-    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px', flexWrap: 'wrap' }}>
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'row', height: '100%', minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px', flexWrap: 'wrap' }}>
         {sessions.map(s => {
           const isSelected = s.id === activeSessionId;
           return (
@@ -278,6 +290,7 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
                   <div className="terminal-container" style={{ flex: 1, minHeight: 0 }}>
                     <TerminalComponent 
+                      ref={(el) => { terminalRefs.current[s.id] = el; }}
                       action={s.mode} 
                       target={s.target} 
                       isActive={isActive && isSessionActive} 
@@ -290,6 +303,12 @@ export default function TerminalTab({ isActive }: TerminalTabProps) {
           );
         })}
       </div>
+      </div>
+      <MacroManager 
+        isOpen={isMacroOpen} 
+        onToggle={() => setIsMacroOpen(!isMacroOpen)} 
+        onExecute={handleExecuteMacro}
+      />
     </div>
   );
 }

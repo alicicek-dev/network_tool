@@ -11,7 +11,12 @@ Bu sürüm, önceki sürümde (v1.0.3/v1.0.4) tespit edilen kritik bir Otomatik 
 *   **Arayüz Donmalarının (Event Loop Blocking) Engellenmesi:** Uygulamanın ağ geçidini okurken `execSync` kullanarak tüm arayüzü geçici olarak dondurması (özellikle PowerShell'de yaşanan 1-2 saniyelik takılmalar) tamamen önlendi. Asenkron `util.promisify(exec)` kullanılarak Event Loop'un akıcı çalışması sağlandı.
 *   **Çoklu Terminal İzolasyonu:** Soketlerin `forceNew: true` yapısı sayesinde her bir terminal bağlantısının (`sshClient`, `telnetSocket`, vb.) izole bir scope içinde barındığı, bağlantı kapandığında eksiksiz `disconnect` temizlik rutinlerinin (`.end()`, `.destroy()`) çalıştığı test edilip onaylandı.
 
-### ◆ Hata Gidermeleri (Bug Fixes)
+### ✦ Yeni Özellikler (New Features)
+*   **Oturum ve Cihaz Yöneticisi (Credential Manager):** Sık bağlanılan SSH/Telnet cihazlarının kimlik bilgilerini (şifreler dahil) `safeStorage` (İşletim sistemi seviyesinde AES şifreleme) kullanarak güvenli bir şekilde kaydetme ve yönetme yeteneği eklendi. "Kayıtlı Cihazlar 🔖" butonu ile tek tıkla bağlantı başlatılabilir.
+*   **SNMP Walk ve Performans İzleyici:** `Utilities` sekmesine SNMP Monitor aracı eklendi. Hedef cihazın IP ve Community String'i (örn. public) girilerek SysName, SysDescr, Uptime ve port sayısı gibi verileri 5 saniyede bir (auto-refresh) canlı çekme yeteneği kazandırıldı.
+*   **Sıralı Komut Çalıştırıcı (Macro Manager):** Terminal sekmesinin sağına gizlenebilir "Macros" paneli eklendi. Kullanıcıların sık yazdığı (örn. Cisco konfigürasyon) komut dizilerini blok halinde kaydedip aktif terminal oturumuna tek tıkla arka arkaya (`\r` gecikmeli) gönderebileceği altyapı oluşturuldu.
+
+### ✦ Mimari ve Kararlılık İyileştirmeleri (Architecture & Stability)
 *   **Auto-Updater Sessiz İndirme Hatası:** Bir önceki güncellemede çökmeyi engellemek adına devre dışı bırakılan otomatik indirme (`autoDownload: false`) özelliğinin, yeni güncelleme bulunduğunda manuel olarak indirmeyi tetiklemesi gerekiyordu. Eksik olan `autoUpdater.downloadUpdate()` fonksiyonu eklenerek, güncelleme bulundu uyarısından sonra indirme işleminin başarıyla başlaması ve ilerleme çubuğunun (progress) çalışması sağlandı.
 
 ---

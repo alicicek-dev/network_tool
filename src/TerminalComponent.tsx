@@ -1,5 +1,5 @@
 import { API_BASE } from './config';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Terminal } from 'xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import 'xterm/css/xterm.css';
@@ -14,13 +14,28 @@ interface TerminalProps {
   onDisconnect?: () => void;
 }
 
-export default function TerminalComponent({ action, target, socket: externalSocket, isActive = true, onDisconnect }: TerminalProps) {
+export interface TerminalComponentRef {
+  executeMacro: (commands: string[]) => void;
+}
+
+const TerminalComponent = forwardRef<TerminalComponentRef, TerminalProps>(({ action, target, socket: externalSocket, isActive = true, onDisconnect }, ref) => {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
 
   const { palette } = useTheme();
+
+  useImperativeHandle(ref, () => ({
+    executeMacro: async (commands: string[]) => {
+      const socket = socketRef.current;
+      if (!socket || !socket.connected) return;
+      for (const cmd of commands) {
+        socket.emit('terminal-input', cmd + '\r');
+        await new Promise(r => setTimeout(r, 100)); // Delay between commands
+      }
+    }
+  }));
 
   useEffect(() => {
     // Initialize xterm.js
@@ -257,4 +272,6 @@ export default function TerminalComponent({ action, target, socket: externalSock
       />
     </div>
   );
-}
+});
+
+export default TerminalComponent;
