@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { MoonIcon, SunIcon, PaletteIcon } from './Icons';
+import { MoonIcon, SunIcon } from './Icons';
 import type { Theme } from '../types';
 
 export const ThemeSwitcher: React.FC = () => {
@@ -18,12 +18,6 @@ export const ThemeSwitcher: React.FC = () => {
       name: 'Açık',
       desc: 'Aydınlık ve Net Görünüm',
       icon: <SunIcon width="18" height="18" />,
-    },
-    {
-      id: 'custom',
-      name: 'Özel',
-      desc: 'Kişiselleştirilebilir Temanız',
-      icon: <PaletteIcon width="18" height="18" />,
     },
   ];
 

@@ -12,7 +12,7 @@ export interface SerialPortInfo {
 }
 
 // Theme related types
-export type Theme = "light" | "dark" | "custom";
+export type Theme = "light" | "dark";
 export type AccessibilityOptions = {
   highContrast: boolean;
   fontSize: number; // in px, limited 12-24

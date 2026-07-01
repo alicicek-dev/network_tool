@@ -1,14 +1,106 @@
 :root {
+  /* Light Theme (Default fallback, though app defaults to dark class) */
+  --bg-color: #f4f4f7;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f4f4f7 100%);
+  --panel-bg: rgba(255, 255, 255, 0.7);
+  --panel-border: rgba(0, 0, 0, 0.08);
+  --text-primary: #1e1e2e;
+  --text-secondary: #5c5f77;
+  --accent-color: #2563eb;
+  --accent-hover: #1d4ed8;
+  --sidebar-bg: rgba(240, 240, 245, 0.85);
+  --content-bg: rgba(244, 244, 247, 0.5);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --input-bg: rgba(0, 0, 0, 0.04);
+  --hover-overlay: rgba(0, 0, 0, 0.04);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --button-text: #ffffff;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+  --nav-active-bg: rgba(30, 102, 245, 0.08);
+  --success: #40a02b;
+  --success-rgb: 64, 160, 43;
+  --danger: #d20f39;
+  --warning: #df8e1d;
+  --terminal-selection: rgba(30, 102, 245, 0.3);
+}
+
+:root.dark {
   --bg-color: #08080d;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #161624 0%, #08080d 100%);
   --panel-bg: rgba(17, 17, 27, 0.55);
   --panel-border: rgba(255, 255, 255, 0.04);
   --text-primary: #cdd6f4;
   --text-secondary: #a6adc8;
-  --accent-color: #3b82f6; /* Classic Blue */
-  --accent-hover: #60a5fa; /* Lighter Blue */
-  --danger: #f38ba8;
+  --accent-color: #3b82f6;
+  --accent-hover: #60a5fa;
+  --sidebar-bg: rgba(10, 10, 15, 0.45);
+  --content-bg: rgba(8, 8, 13, 0.2);
+  --card-bg: rgba(17, 17, 27, 0.35);
+  --input-bg: rgba(0, 0, 0, 0.35);
+  --hover-overlay: rgba(255, 255, 255, 0.05);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --button-text: #11111b;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+  --nav-active-bg: rgba(116, 199, 236, 0.08);
   --success: #a6e3a1;
+  --success-rgb: 166, 227, 161;
+  --danger: #f38ba8;
   --warning: #f9e2af;
+  --terminal-selection: rgba(116, 199, 236, 0.3);
+}
+
+:root.high-contrast:not(.dark) {
+  --bg-color: #ffffff;
+  --bg-gradient: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-border: #000000;
+  --text-primary: #000000;
+  --text-secondary: #0000ff;
+  --accent-color: #0000ff;
+  --accent-hover: #0000ff;
+  --sidebar-bg: #ffffff;
+  --content-bg: #ffffff;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --hover-overlay: rgba(0, 0, 0, 0.15);
+  --border-subtle: #000000;
+  --button-text: #ffffff;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.4);
+  --nav-active-bg: rgba(0, 0, 255, 0.1);
+  --success: #008000;
+  --success-rgb: 0, 128, 0;
+  --danger: #ff0000;
+  --warning: #ff8c00;
+  --terminal-selection: rgba(0, 0, 255, 0.3);
+}
+
+:root.dark.high-contrast {
+  --bg-color: #000000;
+  --bg-gradient: #000000;
+  --panel-bg: #000000;
+  --panel-border: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: #ffff00;
+  --accent-color: #ffff00;
+  --accent-hover: #ffff00;
+  --sidebar-bg: #000000;
+  --content-bg: #000000;
+  --card-bg: #000000;
+  --input-bg: #000000;
+  --hover-overlay: rgba(255, 255, 255, 0.25);
+  --border-subtle: #ffffff;
+  --button-text: #000000;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.3);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.5);
+  --nav-active-bg: rgba(255, 255, 0, 0.15);
+  --success: #00ff00;
+  --success-rgb: 0, 255, 0;
+  --danger: #ff0000;
+  --warning: #ffff00;
+  --terminal-selection: rgba(255, 255, 255, 0.4);
 }
 
 * {
