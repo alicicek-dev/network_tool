@@ -24,7 +24,19 @@ const TerminalComponent = forwardRef<TerminalComponentRef, TerminalProps>(({ act
   const socketRef = useRef<Socket | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
 
-  const { palette } = useTheme();
+  const { theme } = useTheme();
+
+  const getComputedColor = (variable: string, fallback: string) => {
+    if (typeof window === 'undefined') return fallback;
+    return getComputedStyle(document.documentElement).getPropertyValue(variable).trim() || fallback;
+  };
+
+  const getTerminalTheme = () => ({
+    background: getComputedColor('--card-bg', '#000000'),
+    foreground: getComputedColor('--text-primary', '#ffffff'),
+    cursor: getComputedColor('--text-primary', '#ffffff'),
+    selectionBackground: getComputedColor('--terminal-selection', 'rgba(116, 199, 236, 0.3)'),
+  });
 
   useImperativeHandle(ref, () => ({
     executeMacro: async (commands: string[]) => {
@@ -40,12 +52,7 @@ const TerminalComponent = forwardRef<TerminalComponentRef, TerminalProps>(({ act
   useEffect(() => {
     // Initialize xterm.js
     const term = new Terminal({
-      theme: {
-        background: palette['--card-bg'] || '#000000',
-        foreground: palette['--text-primary'] || '#a6e3a1',
-        cursor: palette['--text-primary'] || '#a6e3a1',
-        selectionBackground: palette['--terminal-selection'] || 'rgba(116, 199, 236, 0.3)',
-      },
+      theme: getTerminalTheme(),
       fontFamily: 'monospace',
       fontSize: 14,
       cursorBlink: true,
@@ -188,14 +195,9 @@ const TerminalComponent = forwardRef<TerminalComponentRef, TerminalProps>(({ act
 
   useEffect(() => {
     if (xtermRef.current) {
-      xtermRef.current.options.theme = {
-        background: palette['--card-bg'] || '#000000',
-        foreground: palette['--text-primary'] || '#a6e3a1',
-        cursor: palette['--text-primary'] || '#a6e3a1',
-        selectionBackground: palette['--terminal-selection'] || 'rgba(116, 199, 236, 0.3)',
-      };
+      xtermRef.current.options.theme = getTerminalTheme();
     }
-  }, [palette]);
+  }, [theme]);
 
   useEffect(() => {
     if (isActive && xtermRef.current && fitAddonRef.current) {

@@ -1,7 +1,7 @@
 import { API_BASE } from '../config';
 import { useState } from 'react';
 import SnmpMonitor from './SnmpMonitor';
-import { DiscoveryIcon, RefreshIcon } from './Icons'; // using some existing icons or just text
+
 
 export default function UtilitiesTab() {
   const [activeTab, setActiveTab] = useState<'snmp' | 'wol' | 'mac' | 'subnet' | 'dns'>('snmp');
