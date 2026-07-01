@@ -62,6 +62,7 @@
     "electron-updater": "^6.8.9",
     "express": "^5.2.1",
     "ftp-srv": "^4.6.3",
+    "net-snmp": "^3.26.3",
     "ping": "^1.0.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

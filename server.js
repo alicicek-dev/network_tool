@@ -106,8 +106,9 @@ crypto.createDiffieHellmanGroup = crypto.getDiffieHellman;
 const { Client } = require('ssh2');
 const wol = require('wake_on_lan');
 const os = require('os');
-const { spawn } = require('child_process');
+const path = require('path');
 const dns = require('dns');
+const snmp = require('net-snmp');
 const whois = require('whois-json');
 const https = require('https');
 
@@ -187,6 +188,38 @@ app.get('/api/whois/:domain', async (req, res) => {
   try {
     const results = await whois(req.params.domain);
     res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/snmp', async (req, res) => {
+  const { host, community = 'public', oids } = req.body;
+  if (!host || !oids || !oids.length) return res.status(400).json({ error: 'host and oids are required' });
+
+  try {
+    const session = snmp.createSession(host, community);
+    session.get(oids, (error, varbinds) => {
+      if (error) {
+        res.status(500).json({ error: error.message });
+        session.close();
+      } else {
+        const results = {};
+        for (let i = 0; i < varbinds.length; i++) {
+          if (snmp.isVarbindError(varbinds[i])) {
+            results[varbinds[i].oid] = snmp.varbindError(varbinds[i]);
+          } else {
+            let val = varbinds[i].value;
+            if (Buffer.isBuffer(val)) {
+              val = val.toString('utf8');
+            }
+            results[varbinds[i].oid] = val;
+          }
+        }
+        res.json(results);
+        session.close();
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

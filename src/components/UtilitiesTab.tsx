@@ -1,5 +1,6 @@
 import { API_BASE } from '../config';
 import { useState } from 'react';
+import SnmpMonitor from './SnmpMonitor';
 
 export default function UtilitiesTab() {
   // WoL
@@ -94,6 +95,8 @@ export default function UtilitiesTab() {
       <h1>Utilities</h1>
       <div className="dashboard-grid" style={{gridTemplateColumns: '1fr 1fr'}}>
         
+        <SnmpMonitor />
+
         <div className="glass-panel stat-card">
           <h3>Wake on LAN (WoL)</h3>
           <p className="subtext">Enter the MAC address of the device you want to wake.</p>
