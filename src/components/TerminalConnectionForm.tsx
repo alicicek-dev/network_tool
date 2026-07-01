@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import CustomSelect from './CustomSelect';
 import { RefreshIcon, BookmarkIcon } from './Icons';
-import type { SerialPortInfo, DeviceProfile } from '../types';
+import type { SerialPortInfo } from '../types';
 import ProfileManagerModal from './ProfileManagerModal';
 
 interface TerminalConnectionFormProps {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useMacros, Macro } from '../hooks/useMacros';
+import { useMacros } from '../hooks/useMacros';
+import type { Macro } from '../hooks/useMacros';
 import { PlayIcon, CodeIcon, SettingsIcon } from './Icons';
 
 interface MacroManagerProps {

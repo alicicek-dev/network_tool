@@ -12,21 +12,6 @@ interface ServerState {
   rootDir: string | null;
 }
 
-declare global {
-  interface Window {
-    electronAPI: {
-      ping: (host: string) => Promise<{ success: boolean; host: string }>;
-      selectDirectory: () => Promise<string | null>;
-      windowMinimize: () => void;
-      windowToggleMaximize: () => void;
-      windowClose: () => void;
-      openExternal: (url: string) => void;
-      checkForUpdates: () => void;
-      restartAndInstall: () => void;
-      onUpdateStatus: (callback: (data: any) => void) => () => void;
-    };
-  }
-}
 
 export default function QuickServerTab({ socket }: Props) {
   const [activeSubTab, setActiveSubTab] = useState<'ftp' | 'tftp' | 'http' | 'https'>('ftp');

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE } from '../config';
-import TerminalComponent, { TerminalComponentRef } from '../TerminalComponent';
+import TerminalComponent from '../TerminalComponent';
+import type { TerminalComponentRef } from '../TerminalComponent';
 import TerminalConnectionForm from './TerminalConnectionForm';
 import MacroManager from './MacroManager';
 import type { SerialPortInfo } from '../types';
