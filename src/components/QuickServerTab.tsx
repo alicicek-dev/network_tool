@@ -687,7 +687,7 @@ export default function QuickServerTab({ socket }: Props) {
                       ? 'var(--danger)'
                       : log.message.includes('successfully') || log.message.includes('complete') || log.message.includes('logged in')
                       ? 'var(--success)'
-                      : '#cdd6f4'
+                      : 'var(--text-primary)'
                   }}>
                     {log.message}
                   </span>

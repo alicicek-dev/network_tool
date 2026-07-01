@@ -397,7 +397,7 @@ export default function PingTab({ socket }: Props) {
                       const failedPercent = stats.sent > 0 ? ((stats.failed / stats.sent) * 100).toFixed(1) : '0.0';
                       const isSelected = selectedTarget === t;
                       
-                      let statusColor = '#7f8c8d'; // gray
+                      let statusColor = 'var(--text-secondary)'; // gray
                       if (stats.sent > 0) {
                         const lastHistory = stats.history && stats.history[0];
                         statusColor = lastHistory && lastHistory.status === 'Success' ? 'var(--success)' : 'var(--danger)';
