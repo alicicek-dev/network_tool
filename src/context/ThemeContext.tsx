@@ -45,8 +45,8 @@ export const darkPalette: Record<string, string> = {
   '--panel-border': 'rgba(255, 255, 255, 0.04)',
   '--text-primary': '#cdd6f4',
   '--text-secondary': '#a6adc8',
-  '--accent-color': '#74c7ec',
-  '--accent-hover': '#89b4fa',
+  '--accent-color': '#3b82f6',
+  '--accent-hover': '#60a5fa',
   '--sidebar-bg': 'rgba(10, 10, 15, 0.45)',
   '--content-bg': 'rgba(8, 8, 13, 0.2)',
   '--card-bg': 'rgba(17, 17, 27, 0.35)',
@@ -71,8 +71,8 @@ export const lightPalette: Record<string, string> = {
   '--panel-border': 'rgba(0, 0, 0, 0.08)',
   '--text-primary': '#1e1e2e',
   '--text-secondary': '#5c5f77',
-  '--accent-color': '#1e66f5',
-  '--accent-hover': '#209fb5',
+  '--accent-color': '#2563eb',
+  '--accent-hover': '#1d4ed8',
   '--sidebar-bg': 'rgba(240, 240, 245, 0.85)',
   '--content-bg': 'rgba(244, 244, 247, 0.5)',
   '--card-bg': 'rgba(255, 255, 255, 0.8)',
@@ -160,7 +160,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       ? { ...darkPalette, ...defaults, ...saved }
       : { ...darkPalette, ...defaults };
     if (!base['--primary-color']) {
-      base['--primary-color'] = '#74c7ec';
+      base['--primary-color'] = '#3b82f6';
     }
     return base;
   });
@@ -181,7 +181,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }
     
     // Custom theme: derive full palette from user's primary color
-    const primaryColor = customPalette['--primary-color'] || '#74c7ec';
+    const primaryColor = customPalette['--primary-color'] || '#3b82f6';
     const generated = generateThemeFromPrimary(primaryColor);
     const merged: Record<string, string> = { ...generated, '--primary-color': primaryColor };
 
