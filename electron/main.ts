@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, safeStorage } from 'electron';
 import path from 'path';
 import { autoUpdater } from 'electron-updater';
 import { fork, ChildProcess } from 'child_process';
@@ -142,8 +142,35 @@ ipcMain.handle('select-directory', async () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.focus();
   }
-  if (result.canceled) return null;
-  return result.filePaths[0];
+  return result.canceled ? null : result.filePaths[0];
+});
+
+// Credentials Encryption/Decryption Handlers
+ipcMain.handle('encrypt-string', async (event, plainText: string) => {
+  if (safeStorage.isEncryptionAvailable()) {
+    try {
+      const encryptedBuffer = safeStorage.encryptString(plainText);
+      return encryptedBuffer.toString('base64');
+    } catch (e) {
+      console.error('Encryption failed', e);
+      return Buffer.from(plainText).toString('base64'); // Fallback
+    }
+  }
+  return Buffer.from(plainText).toString('base64'); // Fallback if not available
+});
+
+ipcMain.handle('decrypt-string', async (event, encryptedBase64: string) => {
+  if (safeStorage.isEncryptionAvailable()) {
+    try {
+      const encryptedBuffer = Buffer.from(encryptedBase64, 'base64');
+      return safeStorage.decryptString(encryptedBuffer);
+    } catch (e) {
+      // If decryption fails, it might be fallback base64 encoded plain text
+      console.error('Decryption failed, returning as base64 decoded string', e);
+      return Buffer.from(encryptedBase64, 'base64').toString('utf8');
+    }
+  }
+  return Buffer.from(encryptedBase64, 'base64').toString('utf8'); // Fallback if not available
 });
 
 // Window control IPC

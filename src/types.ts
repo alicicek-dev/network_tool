@@ -22,3 +22,19 @@ export interface ThemeDefaults {
   palette: Record<string, string>; // CSS variable name -> value
   accessibility: AccessibilityOptions;
 }
+
+export interface DeviceProfile {
+  id: string;
+  name: string;
+  type: 'ssh' | 'telnet';
+  host: string;
+  port: string;
+  username: string;
+  passwordEncrypted: string;
+}
+
+declare global {
+  interface Window {
+    electronAPI: any;
+  }
+}

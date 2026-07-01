@@ -2,6 +2,8 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   ping: (host: string) => ipcRenderer.invoke('ping', host),
+  encryptString: (plainText: string) => ipcRenderer.invoke('encrypt-string', plainText),
+  decryptString: (encryptedBase64: string) => ipcRenderer.invoke('decrypt-string', encryptedBase64),
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   windowMinimize: () => ipcRenderer.send('window-minimize'),
   windowToggleMaximize: () => ipcRenderer.send('window-toggle-maximize'),

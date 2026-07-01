@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import CustomSelect from './CustomSelect';
-import { RefreshIcon } from './Icons';
-import type { SerialPortInfo } from '../types';
+import { RefreshIcon, BookmarkIcon } from './Icons';
+import type { SerialPortInfo, DeviceProfile } from '../types';
+import ProfileManagerModal from './ProfileManagerModal';
 
 interface TerminalConnectionFormProps {
   terminalMode: string;
@@ -49,6 +50,7 @@ export default function TerminalConnectionForm({
   isParentActive
 }: TerminalConnectionFormProps) {
   const [showBaudratePresets, setShowBaudratePresets] = useState(false);
+  const [showProfilesModal, setShowProfilesModal] = useState(false);
   const baudrateRef = useRef<HTMLDivElement>(null);
   const hostInputRef = useRef<HTMLInputElement>(null);
 
@@ -87,6 +89,7 @@ export default function TerminalConnectionForm({
   };
 
   return (
+    <>
     <div className="glass-panel" style={{ padding: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
       <CustomSelect 
         options={[
@@ -270,10 +273,48 @@ export default function TerminalConnectionForm({
       )}
 
       {!activeTerminalTarget ? (
-        <button onClick={handleConnectTerminal}>Connect</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button 
+            onClick={() => setShowProfilesModal(true)} 
+            style={{ 
+              background: 'var(--input-bg)', 
+              color: 'var(--text-primary)',
+              border: '1px solid var(--panel-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '10px',
+              borderRadius: '8px'
+            }}
+            title="Saved Devices"
+          >
+            <BookmarkIcon width="18" height="18" style={{ color: 'var(--accent-color)' }} />
+          </button>
+          <button onClick={handleConnectTerminal}>Connect</button>
+        </div>
       ) : (
         <button onClick={handleDisconnectTerminal} style={{ background: 'var(--danger)' }}>Disconnect</button>
       )}
     </div>
+
+    {showProfilesModal && (
+      <ProfileManagerModal 
+        onClose={() => setShowProfilesModal(false)}
+        onSelectProfile={(profile, decryptedPass) => {
+          setTerminalMode(profile.type);
+          setHost(profile.host);
+          setPort(profile.port);
+          if (profile.type === 'ssh') {
+            setUsername(profile.username || '');
+            setPassword(decryptedPass || '');
+          }
+          // The form state will update. If you wanted auto-connect, 
+          // we could call handleConnectTerminal here, but we'd need to wait 
+          // for state to update. For safety, let the user click Connect manually 
+          // or we can wrap the state updates in a timeout. Let's just populate the form.
+        }}
+      />
+    )}
+    </>
   );
 }
