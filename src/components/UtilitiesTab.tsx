@@ -45,9 +45,9 @@ export default function UtilitiesTab() {
     try {
       const res = await fetch(`${API_BASE}/api/mac/${vendorMac}`);
       const data = await res.json();
-      setVendorResult(res.ok ? `🏢 ${data.vendor}` : `❌ ${data.error}`);
+      setVendorResult(res.ok ? data.vendor : `Error: ${data.error}`);
     } catch (e) {
-      setVendorResult(`❌ Connection error`);
+      setVendorResult(`Error: Connection error`);
     }
   };
 
@@ -155,7 +155,7 @@ export default function UtilitiesTab() {
             <p className="subtext">Find the manufacturer vendor from the device MAC address.</p>
             <input type="text" placeholder="e.g. B8:27:EB:..." value={vendorMac} onChange={e => setVendorMac(e.target.value)} className="ui-input" style={{marginBottom: '10px'}}/>
             <button onClick={handleVendorLookup} style={{width: '100%', background: 'var(--panel-border)', color: 'var(--text-primary)'}}>Lookup</button>
-            {vendorResult && <div style={{marginTop: '10px', fontSize: '0.9rem', color: vendorResult.includes('❌') ? 'var(--danger)' : 'var(--success)'}}>{vendorResult}</div>}
+            {vendorResult && <div style={{marginTop: '10px', fontSize: '0.9rem', color: vendorResult.startsWith('Error') ? 'var(--danger)' : 'var(--success)'}}>{vendorResult}</div>}
           </div>
         )}
 
