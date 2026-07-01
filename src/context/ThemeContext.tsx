@@ -61,6 +61,7 @@ export const darkPalette: Record<string, string> = {
   '--success-rgb': '166, 227, 161',
   '--danger': '#f38ba8',
   '--warning': '#f9e2af',
+  '--terminal-selection': 'rgba(116, 199, 236, 0.3)',
 };
 
 export const lightPalette: Record<string, string> = {
@@ -86,6 +87,7 @@ export const lightPalette: Record<string, string> = {
   '--success-rgb': '64, 160, 43',
   '--danger': '#d20f39',
   '--warning': '#df8e1d',
+  '--terminal-selection': 'rgba(30, 102, 245, 0.3)',
 };
 
 export const highContrastDarkPalette: Record<string, string> = {
@@ -111,6 +113,7 @@ export const highContrastDarkPalette: Record<string, string> = {
   '--success-rgb': '0, 255, 0',
   '--danger': '#ff0000',
   '--warning': '#ffff00',
+  '--terminal-selection': 'rgba(255, 255, 255, 0.4)',
 };
 
 export const highContrastLightPalette: Record<string, string> = {
@@ -136,6 +139,7 @@ export const highContrastLightPalette: Record<string, string> = {
   '--success-rgb': '0, 128, 0',
   '--danger': '#ff0000',
   '--warning': '#ff8c00',
+  '--terminal-selection': 'rgba(0, 0, 255, 0.3)',
 };
 
 const defaultTheme: Theme = 'dark'; // NetTool's default is dark theme

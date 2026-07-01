@@ -29,7 +29,7 @@ export default function TerminalComponent({ action, target, socket: externalSock
         background: palette['--card-bg'] || '#000000',
         foreground: palette['--text-primary'] || '#a6e3a1',
         cursor: palette['--text-primary'] || '#a6e3a1',
-        selectionBackground: palette['--nav-active-bg'] || 'rgba(255, 255, 255, 0.3)',
+        selectionBackground: palette['--terminal-selection'] || 'rgba(116, 199, 236, 0.3)',
       },
       fontFamily: 'monospace',
       fontSize: 14,
@@ -177,7 +177,7 @@ export default function TerminalComponent({ action, target, socket: externalSock
         background: palette['--card-bg'] || '#000000',
         foreground: palette['--text-primary'] || '#a6e3a1',
         cursor: palette['--text-primary'] || '#a6e3a1',
-        selectionBackground: palette['--nav-active-bg'] || 'rgba(255, 255, 255, 0.3)',
+        selectionBackground: palette['--terminal-selection'] || 'rgba(116, 199, 236, 0.3)',
       };
     }
   }, [palette]);
