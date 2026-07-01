@@ -189,23 +189,23 @@ export default function UtilitiesTab() {
               <button onClick={handleDnsLookup} disabled={isDnsLoading}>{isDnsLoading ? '...' : 'Lookup'}</button>
             </div>
             <div style={{display: 'flex', gap: '15px', flex: 1, minHeight: 0}}>
-              <div className="scroll-box" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+              <div className="scroll-box" style={{flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column'}}>
                 <h4 style={{margin: '0 0 10px 0'}}>DNS Records</h4>
-                <div style={{ flex: 1, overflowY: 'auto' }}>
+                <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                   {dnsResults.length === 0 ? <span className="placeholder-text">No records found...</span> : 
                     dnsResults.map((rec, i) => (
                       <div key={i} className="list-item" style={{display: 'flex', gap: '10px'}}>
-                        <span style={{color: 'var(--accent-color)', width: '40px'}}>{rec.type}</span>
-                        <span>{rec.value || rec.address || rec.exchange || JSON.stringify(rec)}</span>
+                        <span style={{color: 'var(--accent-color)', width: '40px', flexShrink: 0}}>{rec.type}</span>
+                        <span style={{wordBreak: 'break-word'}}>{rec.value || rec.address || rec.exchange || JSON.stringify(rec)}</span>
                       </div>
                     ))
                   }
                 </div>
               </div>
-              <div className="scroll-box" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+              <div className="scroll-box" style={{flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column'}}>
                 <h4 style={{margin: '0 0 10px 0'}}>Whois Data</h4>
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                  <pre style={{fontSize: '0.8rem', whiteSpace: 'pre-wrap', margin: 0}}>
+                <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
+                  <pre style={{fontSize: '0.8rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0}}>
                     {whoisResult ? JSON.stringify(whoisResult, null, 2) : 'No data...'}
                   </pre>
                 </div>
