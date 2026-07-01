@@ -19,6 +19,9 @@ Bu sürüm, önceki sürümde (v1.0.3/v1.0.4) tespit edilen kritik bir Otomatik 
 ### ✦ Mimari ve Kararlılık İyileştirmeleri (Architecture & Stability)
 *   **Auto-Updater Sessiz İndirme Hatası:** Bir önceki güncellemede çökmeyi engellemek adına devre dışı bırakılan otomatik indirme (`autoDownload: false`) özelliğinin, yeni güncelleme bulunduğunda manuel olarak indirmeyi tetiklemesi gerekiyordu. Eksik olan `autoUpdater.downloadUpdate()` fonksiyonu eklenerek, güncelleme bulundu uyarısından sonra indirme işleminin başarıyla başlaması ve ilerleme çubuğunun (progress) çalışması sağlandı.
 
+### ✦ Arayüz Yenilemesi (UI/UX Redesign)
+*   **Windows 11 Fluent Tasarım Dili:** Uygulamanın hem Karanlık (Dark Mode) hem de Aydınlık (Light Mode) temaları baştan aşağıya yenilendi. Artık uygulamanın geneli Windows 11'in meşhur Fluent UI tasarım dilini konuşuyor. "Mica" tarzı yarı saydam (glassmorphism) arka planlar, akıcı pürüzsüz geçişler ve klasik "Windows Mavisi" vurgu renkleri ile çok daha premium bir hissiyata kavuştu.
+*   **Sabit Renklerin (Hardcoded) Temizlenmesi:** Projedeki 30'dan fazla dosyada eski tasarımdan arta kalan tüm sabit renk tanımları temizlendi. Tüm renkler CSS değişkenleri (`var(--bg-color)`, vb.) üzerinden merkezi olarak yönetilecek şekilde yeniden yapılandırıldı.
 ---
 
 ## [v1.0.4] - 2026-06-30
